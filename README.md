@@ -1,4 +1,4 @@
-# FEG Platform — Federación de Golf
+# FEG Platform — Federación Entrerriana de Golf
 
 PWA para torneos, rankings, resultados y gestión administrativa.
 
@@ -31,8 +31,7 @@ PWA para torneos, rankings, resultados y gestión administrativa.
 
 - **PUBLIC** — Sin acceso a dashboards
 - **CLUB** — Cargar scores, subir fotos, enviar gastos
-- **PRESS** — Aprobar fotos, publicar noticias
-- **DIRECTOR** — Ver estado general
+- **PRESS** — Aprobar fotos, publicar noticias}
 - **TREASURER** — Aprobar/rechazar gastos
 - **ADMIN** — Acceso total
 
