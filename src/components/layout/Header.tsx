@@ -17,7 +17,7 @@ export async function Header() {
 
   return (
     <div>
-      <header className="fixed left-0 right-0 top-0 z-50 border-b border-[#123c15]/10 bg-white/90 pt-4 shadow-[0_6px_28px_rgba(0,36,3,0.07)] backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
+      <header className="fixed left-0 right-0 top-0 z-50 bg-transparent pt-4">
       <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
         <Link
           href="/"
