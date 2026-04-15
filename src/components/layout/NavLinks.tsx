@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { smoothScrollToElementId } from "@/lib/smoothScroll";
 
 type NavLink = { href: string; label: string };
 
@@ -25,7 +26,7 @@ function handleAnchorClick(
   const id = href.slice(2);
   if (pathname === "/") {
     e.preventDefault();
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    smoothScrollToElementId(id);
   }
 }
 
