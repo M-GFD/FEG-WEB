@@ -20,9 +20,7 @@ const CALENDARIO_2026 = [
 export default function CalendarioPage() {
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
-      <div className="pt-4">
-        <Header />
-      </div>
+      <Header />
       <main className="mx-auto max-w-5xl px-6 pb-16 pt-8 lg:px-8">
         <BackToHome />
         <header className="mb-10">

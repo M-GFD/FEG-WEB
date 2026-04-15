@@ -15,9 +15,7 @@ export default async function PlayerPage({
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
-      <div className="pt-4">
-        <Header />
-      </div>
+      <Header />
       <main className="mx-auto max-w-7xl px-6 pb-16 pt-8 lg:px-8">
         <BackToHome />
         <header className="mb-10 rounded-3xl border border-[var(--feg-green)]/12 bg-white p-6 shadow-[0_14px_40px_rgba(0,36,3,0.08)] sm:p-8">

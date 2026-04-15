@@ -21,9 +21,7 @@ export default async function NoticiaPage({
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
-      <div className="pt-4">
-        <Header />
-      </div>
+      <Header />
       <main className="mx-auto max-w-4xl px-6 pb-20 pt-8 lg:px-8">
         <BackToHome />
         <Link

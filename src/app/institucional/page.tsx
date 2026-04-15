@@ -4,9 +4,7 @@ import { BackToHome } from "@/components/layout/BackToHome";
 export default function InstitucionalPage() {
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
-      <div className="pt-4">
-        <Header />
-      </div>
+      <Header />
       <main className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <BackToHome />
         <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
