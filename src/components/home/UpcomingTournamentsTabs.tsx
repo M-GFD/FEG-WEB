@@ -87,10 +87,9 @@ export function UpcomingTournamentsTabs() {
 
   return (
     <section className="bg-[#0b0f0b]">
-      <div className="mx-auto max-w-7xl px-0 lg:px-0">
-        <div className="grid gap-0 lg:grid-cols-12">
-          {/* Lista lateral */}
-          <div className="bg-[#0b2b12] px-6 py-10 text-white lg:col-span-4 lg:rounded-tr-[22px] lg:rounded-br-[22px] lg:px-8">
+      <div className="grid gap-0 lg:grid-cols-12">
+        {/* Lista lateral — pegada al margen izquierdo */}
+        <div className="bg-[#0b2b12] px-6 py-10 text-white lg:col-span-4 lg:px-8">
             <h3 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
               PRÓXIMOS TORNEOS
             </h3>
@@ -145,30 +144,29 @@ export function UpcomingTournamentsTabs() {
             </Link>
           </div>
 
-          {/* Imagen + detalle */}
-          <div className="relative lg:col-span-8">
-            <div className="relative min-h-[400px] overflow-hidden lg:min-h-[560px]">
-              <Image
-                key={activeIdx}
-                src={imageUrl}
-                alt={`${selected.sede} — ${selected.fecha}`}
-                fill
-                className="object-cover transition-opacity duration-500"
-                sizes="(max-width: 1024px) 100vw, 66vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        {/* Imagen + detalle — hasta el margen derecho */}
+        <div className="relative lg:col-span-8">
+          <div className="relative min-h-[400px] overflow-hidden lg:min-h-[560px]">
+            <Image
+              key={activeIdx}
+              src={imageUrl}
+              alt={`${selected.sede} — ${selected.fecha}`}
+              fill
+              className="object-cover transition-opacity duration-500"
+              sizes="(max-width: 1024px) 100vw, 66vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
-                <span className="inline-flex rounded-full bg-[var(--feg-yellow)] px-4 py-1.5 font-heading text-xs font-semibold text-[#193f2b] shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
-                  {selected.modalidad}
-                </span>
-                <h4 className="mt-3 font-heading text-3xl font-semibold leading-tight text-white sm:text-4xl">
-                  {selected.sede}
-                </h4>
-                <p className="mt-2 text-lg font-medium text-white/85">
-                  {selected.fecha} · 2026
-                </p>
-              </div>
+            <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
+              <span className="inline-flex rounded-full bg-[var(--feg-yellow)] px-4 py-1.5 font-heading text-xs font-semibold text-[#193f2b] shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
+                {selected.modalidad}
+              </span>
+              <h4 className="mt-3 font-heading text-3xl font-semibold leading-tight text-white sm:text-4xl">
+                {selected.sede}
+              </h4>
+              <p className="mt-2 text-lg font-medium text-white/85">
+                {selected.fecha} · 2026
+              </p>
             </div>
           </div>
         </div>
