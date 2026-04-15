@@ -4,12 +4,15 @@ import { Header } from "@/components/layout/Header";
 import { getNews } from "@/lib/data";
 import { getGolfPlaceholder } from "@/lib/placeholders";
 import { UpcomingTournamentsTabs } from "@/components/home/UpcomingTournamentsTabs";
+import { HomeScrollHash } from "@/components/home/HomeScrollHash";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 export default async function HomePage() {
   const news = await getNews();
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
+      <HomeScrollHash />
       {/* Hero */}
       <div className="relative">
         <div className="absolute inset-0">
@@ -30,23 +33,34 @@ export default async function HomePage() {
 
         <div className="relative mx-auto max-w-7xl px-6 pb-12 pt-12 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <div className="inline-flex items-center justify-center rounded-full bg-white/70 px-4 py-1.5 text-xs font-semibold text-[#123c15] shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-              Federación Entrerriana de Golf
-            </div>
-            <h1 className="mt-6 font-heading text-[32px] font-semibold leading-[1.05] text-[#002403] sm:text-[44px] md:text-[52px]">
-              TODO EL GOLF DE ENTRE RÍOS,
-              <br />
-              EN UN SOLO LUGAR.
-            </h1>
-            <p className="mx-auto mt-4 max-w-xl text-base font-medium text-[#123c15] sm:text-lg">
-              Una plataforma diseñada para jugadores, clubes y competencias de
-              toda la provincia.
-            </p>
+            <RevealOnScroll
+              revealIndex={0}
+              yOffset={14}
+              className="flex w-full justify-center"
+            >
+              <div className="inline-flex items-center justify-center rounded-full bg-white/70 px-4 py-1.5 text-xs font-semibold text-[#123c15] shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+                Federación Entrerriana de Golf
+              </div>
+            </RevealOnScroll>
+            <RevealOnScroll revealIndex={1} yOffset={24} className="block w-full">
+              <h1 className="mt-6 font-heading text-[32px] font-semibold leading-[1.05] text-[#002403] sm:text-[44px] md:text-[52px]">
+                TODO EL GOLF DE ENTRE RÍOS,
+                <br />
+                EN UN SOLO LUGAR.
+              </h1>
+            </RevealOnScroll>
+            <RevealOnScroll revealIndex={2} yOffset={18} className="block w-full">
+              <p className="mx-auto mt-4 max-w-xl text-base font-medium text-[#123c15] sm:text-lg">
+                Una plataforma diseñada para jugadores, clubes y competencias de
+                toda la provincia.
+              </p>
+            </RevealOnScroll>
           </div>
         </div>
 
         <div className="relative mx-auto max-w-7xl px-6 pb-12 lg:px-8">
-          <div className="ml-auto w-full max-w-sm overflow-hidden rounded-2xl bg-white/45 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+          <RevealOnScroll revealIndex={3} yOffset={32} className="ml-auto w-full max-w-sm">
+          <div className="overflow-hidden rounded-2xl bg-white/45 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
             <div className="p-5">
               <div className="inline-flex rounded-full bg-[#7c1b1b] px-3 py-1.5 text-[10px] font-semibold text-white">
                 Próximo torneo
@@ -70,10 +84,12 @@ export default async function HomePage() {
               </div>
             </div>
           </div>
+          </RevealOnScroll>
         </div>
 
         <div className="relative bg-[#7b2b2b]">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4 text-white lg:px-8">
+          <RevealOnScroll revealIndex={4} yOffset={16} className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
+          <div className="flex items-center justify-between gap-4 text-white">
             <p className="font-heading text-sm font-semibold sm:text-lg">
               RESULTADOS DISPONIBLES
             </p>
@@ -84,40 +100,55 @@ export default async function HomePage() {
               Ranking →
             </Link>
           </div>
+          </RevealOnScroll>
         </div>
       </div>
 
       {/* Noticias */}
-      <section id="noticias" className="bg-[var(--feg-bg)]">
+      <section
+        id="noticias"
+        className="scroll-mt-28 bg-[var(--feg-bg)] lg:scroll-mt-24"
+      >
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
           <div className="grid gap-6 lg:grid-cols-12 lg:items-start">
             <div className="lg:col-span-7">
-              <h2 className="font-heading text-[28px] font-semibold leading-[1.1] text-[var(--feg-ink)] sm:text-[36px]">
-                CONOCÉ LA ACTUALIDAD
-                <br />
-                DEL CIRCUITO
-              </h2>
+              <RevealOnScroll revealIndex={0} yOffset={22}>
+                <h2 className="font-heading text-[28px] font-semibold leading-[1.1] text-[var(--feg-ink)] sm:text-[36px]">
+                  CONOCÉ LA ACTUALIDAD
+                  <br />
+                  DEL CIRCUITO
+                </h2>
+              </RevealOnScroll>
             </div>
             <div className="lg:col-span-5 lg:pt-4">
-              <p className="text-right text-base font-medium text-[var(--feg-green)] sm:text-lg">
-                Resultados, momentos y protagonistas
-                <br />
-                que definen la competencia
-              </p>
+              <RevealOnScroll revealIndex={2} yOffset={20}>
+                <p className="text-right text-base font-medium text-[var(--feg-green)] sm:text-lg">
+                  Resultados, momentos y protagonistas
+                  <br />
+                  que definen la competencia
+                </p>
+              </RevealOnScroll>
             </div>
           </div>
 
           <div className="mt-8 grid gap-5 lg:grid-cols-3">
             {news.length === 0 ? (
-              <p className="col-span-full rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-8 text-center text-[var(--feg-green)]">
-                Aún no hay noticias publicadas.
-              </p>
+              <RevealOnScroll revealIndex={1} className="col-span-full">
+                <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-8 text-center text-[var(--feg-green)]">
+                  Aún no hay noticias publicadas.
+                </p>
+              </RevealOnScroll>
             ) : (
               news.slice(0, 6).map((n, i) => (
-                <Link
+                <RevealOnScroll
                   key={n.id}
+                  revealIndex={i}
+                  yOffset={18 + (i % 3) * 6}
+                  className="min-w-0"
+                >
+                <Link
                   href={`/noticias/${n.slug}`}
-                  className="group relative overflow-hidden rounded-[18px] bg-white shadow-[0_14px_40px_rgba(0,0,0,0.1)] transition hover:-translate-y-0.5"
+                  className="group relative block overflow-hidden rounded-[18px] bg-white shadow-[0_14px_40px_rgba(0,0,0,0.1)] transition hover:-translate-y-0.5"
                 >
                   <div className="relative h-[200px]">
                     <Image
@@ -158,19 +189,20 @@ export default async function HomePage() {
                     </div>
                   </div>
                 </Link>
+                </RevealOnScroll>
               ))
             )}
           </div>
 
           {news.length > 0 && (
-            <div className="mt-8 flex justify-center">
+            <RevealOnScroll revealIndex={5} yOffset={14} className="mt-8 flex justify-center">
               <Link
                 href="/noticias"
                 className="rounded-full bg-[var(--feg-ink)] px-8 py-3 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.15)] transition hover:brightness-110"
               >
                 Ver todas las noticias →
               </Link>
-            </div>
+            </RevealOnScroll>
           )}
         </div>
       </section>
