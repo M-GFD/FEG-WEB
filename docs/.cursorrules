@@ -1,0 +1,25 @@
+# Directivas Estrictas de Seguridad y Prevención de Errores
+
+## 1. Autenticación y Autorización
+* **Validación en Backend:** Nunca confíes en la validación del frontend para proteger rutas o acciones. Toda verificación de roles (usuario/admin) debe ocurrir en el servidor.
+* **Cero Exposición de Secretos:** Nunca incluyas, hardcodees o expongas claves de API, tokens, contraseñas o variables `.env` en el código fuente, respuestas de red o en el lado del cliente.
+* **Principio de Mínimo Privilegio:** Asigna únicamente los permisos estrictamente necesarios para cada acción. Si el código altera privilegios de administrador, detente y pide confirmación explícita.
+
+## 2. Sanitización y Manejo de Datos
+* **Sanitización de Entradas:** Valida y sanitiza absolutamente todos los datos ingresados por el usuario antes de procesarlos o guardarlos en la base de datos para prevenir inyecciones (SQL/NoSQL) y XSS.
+* **Respuestas de API:** Nunca devuelvas el objeto completo del usuario desde la base de datos. Filtra siempre datos sensibles (como hashes de contraseñas, tokens de sesión o datos personales innecesarios) antes de enviar la respuesta al cliente.
+
+## 3. Manejo de Errores y Excepciones
+* **Fallos Silenciosos:** Nunca expongas `stack traces` o detalles técnicos de la infraestructura en los mensajes de error del cliente. Los errores del servidor deben registrarse internamente y devolver mensajes genéricos al usuario.
+* **Bloques de Seguridad:** Usa siempre `try/catch` (o el equivalente del framework) en mutaciones de base de datos, llamadas a APIs externas y flujos de autenticación.
+
+## 4. Modificaciones Críticas
+* **Confirmación Requerida:** No modifiques archivos de configuración de despliegue, middlewares de autenticación, o flujos de login/registro sin solicitar confirmación previa.
+* **Alertas Visibles:** Si el código afecta la seguridad, añade el comentario: `// SECURITY WARNING: Revisa esta lógica antes de desplegar.`
+
+## 5. Seguridad a Nivel de Filas (RLS - Base de Datos)
+* **Activación Obligatoria:** Siempre habilita RLS (`ENABLE ROW LEVEL SECURITY`) inmediatamente después de crear cualquier tabla nueva. Nunca asumas que una tabla debe ser pública.
+* **Denegación por Defecto:** Trata toda tabla sin políticas como inaccesible. Genera políticas explícitas, restrictivas y separadas para cada operación del CRUD (SELECT, INSERT, UPDATE, DELETE).
+* **Validación de Identidad (auth.uid):** Al escribir políticas, enlaza siempre el acceso a los registros con el ID del usuario autenticado de forma nativa por el motor de base de datos (por ejemplo, `auth.uid() == user_id`).
+* **Verificación de Administradores:** Las políticas para administradores deben validarse mediante claims seguros en el token JWT del usuario o consultando una tabla de roles interna protegida. Nunca confíes en un flag booleano enviado en la petición.
+* **Restricción de Service Role Keys:** Prohíbe estrictamente el uso de claves que salten el RLS (como Service Role Keys) en rutas expuestas o del cliente. Su uso queda relegado exclusivamente a webhooks seguros o funciones internas aisladas.

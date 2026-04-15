@@ -1,0 +1,293 @@
+// FEG Platform - Prisma schema for Supabase/PostgreSQL
+// Compatible with Supabase: use connection string from Supabase dashboard
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============ AUTH & USERS ============
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  password          String    // Hash bcrypt (solo Credentials, sin OAuth)
+  mustChangePassword Boolean  @default(false)
+  emailVerified     DateTime?
+  name              String?
+  image             String?
+  role              Role      @default(PUBLIC)
+  clubId            String?
+  club              Club?     @relation(fields: [clubId], references: [id])
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Role {
+  PUBLIC
+  CLUB
+  PRESS
+  DIRECTOR
+  TREASURER
+  ADMIN
+}
+
+// ============ CORE ENTITIES ============
+model Club {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logoUrl   String?
+  address   String?
+  phone     String?
+  users     User[]
+  players   Player[]
+  tournaments Tournament[]
+  expenses  Expense[]
+  teamEntries TeamEntry[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Player {
+  id             String          @id @default(cuid())
+  firstName      String
+  lastName       String
+  handicap       Int             @default(0)
+  birthYear      Int             @default(1900)  // 1900 = desconocido
+  gender         Gender
+  clubId         String
+  club           Club            @relation(fields: [clubId], references: [id])
+  entries        TournamentEntry[]
+  teamEntries    TeamPlayer[]
+  rankingEntries RankingEntry[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([firstName, lastName, clubId])
+}
+
+enum Gender {
+  M
+  F
+}
+
+model Tournament {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  date        DateTime
+  clubId      String
+  club        Club     @relation(fields: [clubId], references: [id])
+  isTeamEvent Boolean  @default(false)
+  multiplier  Float    @default(1)
+  status      TournamentStatus @default(DRAFT)
+  entries     TournamentEntry[]
+  teamEntries TeamEntry[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum TournamentStatus {
+  DRAFT
+  OPEN
+  IN_PROGRESS
+  PUBLISHED
+  CLOSED
+}
+
+model TournamentEntry {
+  id           String       @id @default(cuid())
+  tournamentId String
+  tournament   Tournament   @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  playerId     String
+  player       Player       @relation(fields: [playerId], references: [id])
+  category     Category
+  scorecard    Scorecard?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@unique([tournamentId, playerId])
+}
+
+enum Category {
+  DAMAS_SCRATCH
+  DAMAS_HASTA_30
+  DAMAS_31_59
+  SENIOR_DAMAS_50
+  CABALLEROS_SCRATCH
+  CABALLEROS_HASTA_9
+  CABALLEROS_10_16
+  CABALLEROS_17_24
+  CABALLEROS_25_54
+  SENIOR_CABALLEROS_55
+}
+
+model Scorecard {
+  id             String         @id @default(cuid())
+  entryId        String         @unique
+  entry          TournamentEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  status         ScorecardStatus @default(PENDING)
+  h1             Int?
+  h2             Int?
+  h3             Int?
+  h4             Int?
+  h5             Int?
+  h6             Int?
+  h7             Int?
+  h8             Int?
+  h9             Int?
+  h10            Int?
+  h11            Int?
+  h12            Int?
+  h13            Int?
+  h14            Int?
+  h15            Int?
+  h16            Int?
+  h17            Int?
+  h18            Int?
+  gross          Int?
+  net            Int?
+  position       Int?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+enum ScorecardStatus {
+  PENDING
+  DRAFT
+  COMPLETE
+  PUBLISHED
+  DISQUALIFIED
+}
+
+// ============ TEAM EVENTS ============
+model TeamEntry {
+  id           String     @id @default(cuid())
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  clubId       String
+  club         Club       @relation(fields: [clubId], references: [id])
+  players      TeamPlayer[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([tournamentId, clubId])
+}
+
+model TeamPlayer {
+  id          String     @id @default(cuid())
+  teamEntryId String
+  teamEntry   TeamEntry  @relation(fields: [teamEntryId], references: [id], onDelete: Cascade)
+  playerId    String
+  player      Player     @relation(fields: [playerId], references: [id])
+  order       Int
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([teamEntryId, playerId])
+}
+
+// ============ PRESS / MEDIA ============
+model Photo {
+  id        String      @id @default(cuid())
+  url       String
+  caption   String?
+  status    PhotoStatus @default(PENDING)
+  featured  Boolean     @default(false)
+  uploadedBy String
+  approvedBy String?
+  tournamentId String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+enum PhotoStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model News {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  content     String    // HTML (TipTap / prensa)
+  excerpt     String?
+  imageUrl    String?   // Portada (listados y cabecera)
+  galleryUrls Json?     // string[] URLs imágenes adicionales (galería al pie)
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  authorId    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  title     String
+  imageUrl  String
+  linkUrl   String?
+  active    Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============ TREASURY ============
+model Expense {
+  id          String        @id @default(cuid())
+  clubId      String
+  club        Club          @relation(fields: [clubId], references: [id])
+  amount      Float
+  description String
+  receiptUrl  String?
+  status      ExpenseStatus @default(PENDING)
+  submittedBy String
+  approvedBy  String?
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum ExpenseStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+// ============ RANKING ============
+model RankingEntry {
+  id        String   @id @default(cuid())
+  playerId  String
+  player    Player   @relation(fields: [playerId], references: [id])
+  year      Int
+  points    Float
+  bestDates Json     // Array of { tournamentId, points, position }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([playerId, year])
+}
+
+// ============ PUSH NOTIFICATIONS ============
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  keys      Json     // { p256dh, auth }
+  userId    String?
+  createdAt DateTime @default(now())
+}
