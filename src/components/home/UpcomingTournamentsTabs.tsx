@@ -1,25 +1,73 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 
-type Tournament = {
-  id: string;
-  name: string;
-  slug: string;
-  date: string;
-  club: { name: string };
-  status: string;
+type CalendarEntry = {
+  fecha: string;
+  sede: string;
+  modalidad: string;
 };
 
-export function UpcomingTournamentsTabs({
-  tournaments,
-}: {
-  tournaments: Tournament[];
-}) {
-  const [activeIdx, setActiveIdx] = useState(0);
-  const selected = tournaments[activeIdx] ?? tournaments[0];
+const CALENDARIO_2026: CalendarEntry[] = [
+  { fecha: "28 de marzo", sede: "Villa Elisa", modalidad: "18H Mayores" },
+  { fecha: "25 de abril", sede: "Club Social La Paz", modalidad: "18H Mayores" },
+  { fecha: "9 de mayo", sede: "Los Bretes", modalidad: "18H Mayores" },
+  { fecha: "15/16 de mayo", sede: "Interfederativo (cancha a des.)", modalidad: "36H Mayores" },
+  { fecha: "30 de mayo", sede: "Villa Libertador", modalidad: "18H Mayores" },
+  { fecha: "13 de junio", sede: "Las Colinas", modalidad: "18H Mayores" },
+  { fecha: "4 de julio", sede: "CUCU", modalidad: "18H Mayores" },
+  { fecha: "15 de agosto", sede: "Aero Club Villaguay", modalidad: "18H Mayores" },
+  { fecha: "22 de agosto", sede: "Concordia Golf Club", modalidad: "18H Mayores" },
+  { fecha: "5 de setiembre", sede: "Gualeguaychú", modalidad: "18H Mayores" },
+  { fecha: "26 de setiembre", sede: "Santa Elena", modalidad: "18H Mayores" },
+  { fecha: "24 de octubre", sede: "Colón Golf Club", modalidad: "18H Mayores" },
+  { fecha: "14 de noviembre", sede: "CAE", modalidad: "18H Mayores" },
+];
 
-  if (tournaments.length === 0) {
+const PLACEHOLDER_IMAGES = [
+  "/feg image (1).jpeg",
+  "/feg image (2).jpeg",
+  "/feg image (3).jpeg",
+  "/feg image (4).jpeg",
+  "/feg image (5).jpeg",
+];
+
+function getNextDates(count: number): CalendarEntry[] {
+  const now = new Date();
+  const currentYear = 2026;
+
+  const MONTH_MAP: Record<string, number> = {
+    enero: 0, febrero: 1, marzo: 2, abril: 3, mayo: 4, junio: 5,
+    julio: 6, agosto: 7, setiembre: 8, septiembre: 8, octubre: 9,
+    noviembre: 10, diciembre: 11,
+  };
+
+  const withParsedDate = CALENDARIO_2026.map((entry) => {
+    const parts = entry.fecha.split(" de ");
+    const dayStr = parts[0]?.split("/")[0]?.trim();
+    const monthStr = parts[1]?.trim().toLowerCase();
+    const day = parseInt(dayStr ?? "1", 10);
+    const month = MONTH_MAP[monthStr ?? ""] ?? 0;
+    return { ...entry, _parsed: new Date(currentYear, month, day) };
+  });
+
+  const upcoming = withParsedDate
+    .filter((e) => e._parsed >= now)
+    .slice(0, count);
+
+  if (upcoming.length >= count) return upcoming;
+
+  return withParsedDate.slice(0, count);
+}
+
+export function UpcomingTournamentsTabs() {
+  const dates = getNextDates(4);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const selected = dates[activeIdx] ?? dates[0];
+
+  if (dates.length === 0) {
     return (
       <section className="bg-[#0b0f0b]">
         <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
@@ -34,21 +82,25 @@ export function UpcomingTournamentsTabs({
     );
   }
 
+  const imageUrl =
+    PLACEHOLDER_IMAGES[activeIdx % PLACEHOLDER_IMAGES.length];
+
   return (
     <section className="bg-[#0b0f0b]">
       <div className="mx-auto max-w-7xl px-0 lg:px-0">
         <div className="grid gap-0 lg:grid-cols-12">
+          {/* Lista lateral */}
           <div className="bg-[#0b2b12] px-6 py-10 text-white lg:col-span-4 lg:rounded-tr-[22px] lg:rounded-br-[22px] lg:px-8">
             <h3 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
               PRÓXIMOS TORNEOS
             </h3>
 
             <div className="mt-8 space-y-1">
-              {tournaments.map((t, i) => {
+              {dates.map((entry, i) => {
                 const active = i === activeIdx;
                 return (
                   <button
-                    key={t.id}
+                    key={`${entry.fecha}-${entry.sede}`}
                     type="button"
                     onClick={() => setActiveIdx(i)}
                     className={`w-full rounded-xl px-4 py-4 text-left transition ${
@@ -58,65 +110,66 @@ export function UpcomingTournamentsTabs({
                     }`}
                   >
                     <p
-                      className={`font-heading text-lg font-semibold ${
+                      className={`font-heading text-lg font-semibold leading-tight ${
                         active ? "text-[#dbf3db]" : "text-white/70"
                       }`}
                     >
-                      {new Date(t.date).toLocaleDateString("es-AR", {
-                        day: "numeric",
-                        month: "long",
-                      })}{" "}
-                      — {t.club.name}
+                      {entry.fecha}
                     </p>
                     <p
                       className={`mt-1 text-sm font-medium ${
-                        active ? "text-[var(--feg-yellow)]" : "text-white/40"
+                        active ? "text-white" : "text-white/50"
                       }`}
                     >
-                      {t.name}
+                      {entry.sede}
                     </p>
+                    <span
+                      className={`mt-2 inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                        active
+                          ? "bg-[var(--feg-yellow)] text-[#193f2b]"
+                          : "bg-white/10 text-white/60"
+                      }`}
+                    >
+                      {entry.modalidad}
+                    </span>
                   </button>
                 );
               })}
             </div>
+
+            <Link
+              href="/calendario"
+              className="mt-6 inline-flex text-sm font-semibold text-[var(--feg-yellow)] underline-offset-2 hover:underline"
+            >
+              Ver calendario completo →
+            </Link>
           </div>
 
-          <div className="flex items-center justify-center bg-[#0b0f0b] px-6 py-10 lg:col-span-8 lg:px-12 lg:py-14">
-            {selected && (
-              <div className="w-full max-w-lg space-y-6 text-center">
-                <div className="inline-flex rounded-full bg-[var(--feg-yellow)] px-5 py-2 font-heading text-sm font-semibold text-[#193f2b] shadow-[0_10px_30px_rgba(0,0,0,0.22)]">
-                  {selected.name}
-                </div>
-                <div className="space-y-2">
-                  <p className="font-heading text-3xl font-semibold text-white sm:text-4xl">
-                    {new Date(selected.date).toLocaleDateString("es-AR", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
-                  <p className="text-lg font-medium text-[#dbf3db]">
-                    {selected.club.name}
-                  </p>
-                </div>
-                <p className="text-sm text-white/50">
-                  Estado:{" "}
-                  <span className="text-white/80">
-                    {selected.status === "PUBLISHED"
-                      ? "Publicado"
-                      : selected.status === "DRAFT"
-                        ? "Borrador"
-                        : "Pendiente"}
-                  </span>
+          {/* Imagen + detalle */}
+          <div className="relative lg:col-span-8">
+            <div className="relative min-h-[400px] overflow-hidden lg:min-h-[560px]">
+              <Image
+                key={activeIdx}
+                src={imageUrl}
+                alt={`${selected.sede} — ${selected.fecha}`}
+                fill
+                className="object-cover transition-opacity duration-500"
+                sizes="(max-width: 1024px) 100vw, 66vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
+                <span className="inline-flex rounded-full bg-[var(--feg-yellow)] px-4 py-1.5 font-heading text-xs font-semibold text-[#193f2b] shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
+                  {selected.modalidad}
+                </span>
+                <h4 className="mt-3 font-heading text-3xl font-semibold leading-tight text-white sm:text-4xl">
+                  {selected.sede}
+                </h4>
+                <p className="mt-2 text-lg font-medium text-white/85">
+                  {selected.fecha} · 2026
                 </p>
-                <a
-                  href={`/torneos/${selected.slug}`}
-                  className="mt-2 inline-flex rounded-full bg-[#e7f4e7] px-6 py-2.5 text-sm font-semibold text-[var(--feg-green-2)] transition hover:brightness-95"
-                >
-                  Ver torneo →
-                </a>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
