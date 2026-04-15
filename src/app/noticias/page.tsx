@@ -11,9 +11,7 @@ export default async function NoticiasPage() {
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
-      <div className="pt-4">
-        <Header />
-      </div>
+      <Header />
       <main className="mx-auto max-w-7xl px-6 pb-16 pt-8 lg:px-8">
         <BackToHome />
         <header className="mb-10">

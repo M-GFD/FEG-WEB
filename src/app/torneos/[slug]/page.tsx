@@ -20,9 +20,7 @@ export default async function TournamentPage({
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
-      <div className="pt-4">
-        <Header />
-      </div>
+      <Header />
       <main className="mx-auto max-w-7xl px-6 pb-16 pt-8 lg:px-8">
         <div className="flex flex-wrap items-center gap-3">
           <BackToHome />

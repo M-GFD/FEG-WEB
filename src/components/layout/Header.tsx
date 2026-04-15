@@ -16,7 +16,8 @@ export async function Header() {
   const navLinks = [...NAV_ITEMS];
 
   return (
-    <header className="sticky top-0 z-50 bg-transparent">
+    <div>
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-[#123c15]/10 bg-white/90 pt-4 shadow-[0_6px_28px_rgba(0,36,3,0.07)] backdrop-blur-md supports-[backdrop-filter]:bg-white/80">
       <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
         <Link
           href="/"
@@ -64,5 +65,11 @@ export async function Header() {
         </nav>
       </div>
     </header>
+      {/* Altura equivalente al header fijo (pt-4 + fila + nav móvil) para no tapar el contenido */}
+      <div
+        aria-hidden
+        className="pointer-events-none h-[calc(1rem+4rem+4.25rem)] shrink-0 select-none md:h-[calc(1rem+4rem)]"
+      />
+    </div>
   );
 }

@@ -27,9 +27,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-white/40" />
         </div>
 
-        <div className="relative pt-4">
-          <Header />
-        </div>
+        <Header />
 
         <div className="relative mx-auto max-w-7xl px-6 pb-12 pt-12 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
