@@ -1,15 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
-import { getNews, getUpcomingTournaments } from "@/lib/data";
+import { getNews } from "@/lib/data";
 import { getGolfPlaceholder } from "@/lib/placeholders";
 import { UpcomingTournamentsTabs } from "@/components/home/UpcomingTournamentsTabs";
 
 export default async function HomePage() {
-  const [news, upcoming] = await Promise.all([
-    getNews(),
-    getUpcomingTournaments(6),
-  ]);
+  const news = await getNews();
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
@@ -54,34 +51,23 @@ export default async function HomePage() {
               <div className="inline-flex rounded-full bg-[#7c1b1b] px-3 py-1.5 text-[10px] font-semibold text-white">
                 Próximo torneo
               </div>
-              {upcoming.length > 0 ? (
-                <>
-                  <div className="mt-3 text-xl font-semibold text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
-                    {upcoming[0].club.name}
-                  </div>
-                  <div className="mt-1 text-xl font-bold text-[#f3e12b]">
-                    {new Date(upcoming[0].date).toLocaleDateString("es-AR", {
-                      day: "numeric",
-                      month: "long",
-                    })}
-                  </div>
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="rounded-full border border-white/40 px-3 py-1.5 text-xs font-semibold text-white">
-                      {upcoming[0].name}
-                    </div>
-                    <Link
-                      href={`/torneos/${upcoming[0].slug}`}
-                      className="ml-auto inline-flex items-center justify-center rounded-full bg-[#e7f4e7] px-3 py-1.5 text-xs font-semibold text-[#146638] hover:brightness-95"
-                    >
-                      Ver torneo →
-                    </Link>
-                  </div>
-                </>
-              ) : (
-                <p className="mt-3 text-sm text-white/70">
-                  Sin torneos próximos
-                </p>
-              )}
+              <div className="mt-3 text-xl font-semibold text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
+                Los Bretes — Colón
+              </div>
+              <div className="mt-1 text-xl font-bold text-[#f3e12b]">
+                9 de Mayo
+              </div>
+              <div className="mt-3 flex items-center gap-2">
+                <div className="rounded-full border border-white/40 px-3 py-1.5 text-xs font-semibold text-white">
+                  18H Mayores
+                </div>
+                <Link
+                  href="/calendario"
+                  className="ml-auto inline-flex items-center justify-center rounded-full bg-[#e7f4e7] px-3 py-1.5 text-xs font-semibold text-[#146638] hover:brightness-95"
+                >
+                  Calendario →
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -190,7 +176,7 @@ export default async function HomePage() {
       </section>
 
       {/* Próximos torneos */}
-      <UpcomingTournamentsTabs tournaments={upcoming} />
+      <UpcomingTournamentsTabs />
     </div>
   );
 }
