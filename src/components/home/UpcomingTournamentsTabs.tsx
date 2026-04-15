@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 type CalendarEntry = {
   fecha: string;
@@ -69,7 +70,10 @@ export function UpcomingTournamentsTabs() {
 
   if (dates.length === 0) {
     return (
-      <section className="bg-[#0b0f0b]">
+      <section
+        id="proximos-torneos"
+        className="scroll-mt-28 bg-[#0b0f0b] lg:scroll-mt-24"
+      >
         <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
           <h3 className="font-heading text-3xl font-semibold tracking-tight text-white">
             PRÓXIMOS TORNEOS
@@ -86,10 +90,18 @@ export function UpcomingTournamentsTabs() {
     PLACEHOLDER_IMAGES[activeIdx % PLACEHOLDER_IMAGES.length];
 
   return (
-    <section className="bg-[#0b0f0b]">
+    <section
+      id="proximos-torneos"
+      className="scroll-mt-28 bg-[#0b0f0b] lg:scroll-mt-24"
+    >
       <div className="grid gap-0 lg:grid-cols-12 lg:items-stretch">
         {/* Lista lateral — pegada al margen izquierdo */}
-        <div className="bg-[#0b2b12] px-6 py-10 text-white lg:col-span-4 lg:px-8">
+        <RevealOnScroll
+          revealIndex={0}
+          yOffset={18}
+          className="bg-[#0b2b12] lg:col-span-4 lg:h-full"
+        >
+          <div className="h-full px-6 py-10 text-white lg:px-8">
             <h3 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
               PRÓXIMOS TORNEOS
             </h3>
@@ -143,10 +155,15 @@ export function UpcomingTournamentsTabs() {
               Ver calendario completo →
             </Link>
           </div>
+        </RevealOnScroll>
 
         {/* Imagen + detalle — hasta el margen derecho, misma altura que la lista */}
-        <div className="relative lg:col-span-8">
-          <div className="relative min-h-[400px] overflow-hidden lg:h-full">
+        <RevealOnScroll
+          revealIndex={2}
+          yOffset={28}
+          className="relative min-h-[400px] lg:col-span-8 lg:h-full lg:min-h-0"
+        >
+          <div className="relative h-full min-h-[400px] overflow-hidden lg:min-h-0 lg:h-full">
             <Image
               key={activeIdx}
               src={imageUrl}
@@ -169,7 +186,7 @@ export function UpcomingTournamentsTabs() {
               </p>
             </div>
           </div>
-        </div>
+        </RevealOnScroll>
       </div>
     </section>
   );
