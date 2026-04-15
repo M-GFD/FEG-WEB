@@ -87,7 +87,7 @@ export function UpcomingTournamentsTabs() {
 
   return (
     <section className="bg-[#0b0f0b]">
-      <div className="grid gap-0 lg:grid-cols-12">
+      <div className="grid gap-0 lg:grid-cols-12 lg:items-stretch">
         {/* Lista lateral — pegada al margen izquierdo */}
         <div className="bg-[#0b2b12] px-6 py-10 text-white lg:col-span-4 lg:px-8">
             <h3 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -144,9 +144,9 @@ export function UpcomingTournamentsTabs() {
             </Link>
           </div>
 
-        {/* Imagen + detalle — hasta el margen derecho */}
+        {/* Imagen + detalle — hasta el margen derecho, misma altura que la lista */}
         <div className="relative lg:col-span-8">
-          <div className="relative min-h-[400px] overflow-hidden lg:min-h-[560px]">
+          <div className="relative min-h-[400px] overflow-hidden lg:h-full">
             <Image
               key={activeIdx}
               src={imageUrl}
