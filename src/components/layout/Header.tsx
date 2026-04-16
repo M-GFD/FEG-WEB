@@ -18,17 +18,7 @@ export async function Header() {
 
   return (
     <div>
-      <header className="fixed left-0 right-0 top-0 z-50 isolate bg-transparent pt-4">
-        {/* Blanco sólido 0–50%; de 50% a 100% gradiente hasta transparente */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.9) 58%, rgba(255,255,255,0.65) 68%, rgba(255,255,255,0.4) 78%, rgba(255,255,255,0.18) 88%, rgba(255,255,255,0.05) 96%, transparent 100%)",
-          }}
-        />
-        <div className="relative z-[1]">
+      <header className="fixed left-0 right-0 top-0 z-50 bg-transparent pt-4">
       <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
         <FegLogoLink size="nav" />
 
@@ -70,7 +60,6 @@ export async function Header() {
           <NavLinksMobile links={navLinks} variant="light" />
         </nav>
       </div>
-        </div>
     </header>
       {/* Altura equivalente al header fijo (pt-4 + fila + nav móvil) para no tapar el contenido */}
       <div
