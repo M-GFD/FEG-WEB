@@ -6,13 +6,13 @@ import { cn } from "@/lib/utils";
 type FegLogoSize = "nav" | "footer";
 
 const heightClass: Record<FegLogoSize, string> = {
-  nav: "h-10",
-  footer: "h-14",
+  nav: "h-14",
+  footer: "h-20",
 };
 
 const sizesAttr: Record<FegLogoSize, string> = {
-  nav: "40px",
-  footer: "56px",
+  nav: "56px",
+  footer: "80px",
 };
 
 type FegLogoProps = {
@@ -26,8 +26,8 @@ export function FegLogo({ size = "nav", className }: FegLogoProps) {
     <Image
       src={FEG_LOGO_PUBLIC_PATH}
       alt="Federación Entrerriana de Golf"
-      width={150}
-      height={200}
+      width={180}
+      height={240}
       sizes={sizesAttr[size]}
       priority={size === "nav"}
       unoptimized
