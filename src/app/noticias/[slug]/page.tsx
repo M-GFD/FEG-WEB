@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { getNewsBySlug } from "@/lib/data";
+import { formatNewsDateParts } from "@/lib/news-dates";
 import { parseNewsGalleryUrls } from "@/lib/news-gallery";
 import { getGolfPlaceholder } from "@/lib/placeholders";
 
@@ -18,6 +19,11 @@ export default async function NoticiaPage({
   if (!news) notFound();
 
   const gallery = parseNewsGalleryUrls(news.galleryUrls);
+  const when = formatNewsDateParts(news.publishedAt, news.createdAt, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
@@ -42,14 +48,10 @@ export default async function NoticiaPage({
             />
           </div>
           <time
-            dateTime={new Date(news.publishedAt || news.createdAt).toISOString()}
+            dateTime={when.dateTime}
             className="mt-8 block text-xs font-semibold uppercase tracking-[0.15em] text-[var(--feg-green-2)]"
           >
-            {new Date(news.publishedAt || news.createdAt).toLocaleDateString("es-AR", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
+            {when.label}
           </time>
           <h1 className="mt-3 font-heading text-3xl font-semibold uppercase leading-tight tracking-tight md:text-4xl">
             {news.title}
