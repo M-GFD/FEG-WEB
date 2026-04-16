@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { parseApiJson } from "@/lib/parse-api-response";
 import { slugifyTitle } from "@/lib/slugify";
 import { NewsRichEditor } from "./NewsRichEditor";
 
@@ -32,8 +33,12 @@ export function NewsPublishForm() {
   async function uploadOne(file: File): Promise<string> {
     const fd = new FormData();
     fd.append("file", file);
-    const res = await fetch("/api/news/upload-image", { method: "POST", body: fd });
-    const data = (await res.json()) as { ok: boolean; url?: string; error?: string };
+    const res = await fetch("/api/news/upload-image", {
+      method: "POST",
+      body: fd,
+      credentials: "same-origin",
+    });
+    const data = await parseApiJson<{ ok: boolean; url?: string; error?: string }>(res);
     if (!data.ok || !data.url) {
       throw new Error(data.error ?? "Error al subir imagen");
     }
@@ -80,12 +85,12 @@ export function NewsPublishForm() {
         }),
       });
 
-      const data = (await res.json()) as {
+      const data = await parseApiJson<{
         ok: boolean;
         slug?: string;
         error?: string;
         code?: string;
-      };
+      }>(res);
 
       if (!data.ok || !data.slug) {
         const msg = [data.error, data.code ? `(${data.code})` : ""]
