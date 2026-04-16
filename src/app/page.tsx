@@ -18,7 +18,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
           {/* object-cover: rellena todo el ancho/alto; recorte suave sin bandas laterales */}
           <Image
-            src="/feg%20image%20(6).jpg"
+            src="/feg%20image%20(4).jpeg"
             alt="Cancha de golf"
             fill
             priority
