@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
+import { FegLogoLink } from "@/components/layout/FegLogo";
 import { NavLinks, NavLinksMobile } from "./NavLinks";
 
 const NAV_ITEMS = [
@@ -19,12 +20,7 @@ export async function Header() {
     <div>
       <header className="fixed left-0 right-0 top-0 z-50 bg-transparent pt-4">
       <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
-        <Link
-          href="/"
-          className="relative z-10 font-heading text-xl font-semibold tracking-tight text-[#123c15]"
-        >
-          FEG
-        </Link>
+        <FegLogoLink size="nav" />
 
         <div className="pointer-events-none absolute inset-0 hidden items-center justify-center md:flex">
           <nav className="pointer-events-auto flex items-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
