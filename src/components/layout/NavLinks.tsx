@@ -6,12 +6,6 @@ import { smoothScrollToElementId } from "@/lib/smoothScroll";
 
 type NavLink = { href: string; label: string };
 
-function isActive(pathname: string, href: string): boolean {
-  if (href === "/") return pathname === "/";
-  if (href.startsWith("/#")) return pathname === "/";
-  return pathname === href || pathname.startsWith(href + "/");
-}
-
 type NavLinksProps = {
   links: NavLink[];
   variant?: "dark" | "light";
@@ -30,33 +24,36 @@ function handleAnchorClick(
   }
 }
 
+/** Glow suave, misma intensidad para todos los ítems (sin estado activo). */
+const NAV_LINK_LIGHT =
+  "rounded-full bg-white/55 px-4 py-2 text-sm font-semibold text-[#24321c] shadow-[0_0_10px_rgba(255,255,255,0.35),0_0_20px_rgba(255,255,255,0.18)] transition hover:bg-white/70 hover:text-[#123c15]";
+
+const NAV_LINK_DARK =
+  "rounded-full bg-white/8 px-4 py-2 text-sm font-semibold text-white/90 shadow-[0_0_10px_rgba(255,255,255,0.22),0_0_22px_rgba(255,255,255,0.12)] transition hover:bg-white/12 hover:text-white";
+
+const NAV_LINK_MOBILE_LIGHT =
+  "shrink-0 rounded-full bg-white/50 px-3 py-1.5 text-xs font-semibold text-[#24321c] shadow-[0_0_8px_rgba(255,255,255,0.35),0_0_16px_rgba(255,255,255,0.18)] transition hover:bg-white/70";
+
+const NAV_LINK_MOBILE_DARK =
+  "shrink-0 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white shadow-[0_0_8px_rgba(255,255,255,0.22),0_0_16px_rgba(255,255,255,0.12)] transition hover:bg-white/15";
+
 export function NavLinks({ links, variant = "dark" }: NavLinksProps) {
   const pathname = usePathname();
   const isLight = variant === "light";
+  const base = isLight ? NAV_LINK_LIGHT : NAV_LINK_DARK;
 
   return (
     <>
-      {links.map(({ href, label }) => {
-        const active = isActive(pathname ?? "", href);
-        return (
-          <Link
-            key={href}
-            href={href}
-            onClick={(e) => handleAnchorClick(e, href, pathname ?? "")}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-              isLight
-                ? active
-                  ? "bg-white/80 text-[#123c15] shadow-[0_0_18px_rgba(255,255,255,0.85),0_0_36px_rgba(255,255,255,0.45)]"
-                  : "bg-white/55 text-[#24321c] shadow-[0_0_18px_rgba(255,255,255,0.85),0_0_36px_rgba(255,255,255,0.45)] hover:bg-white/70 hover:text-[#123c15]"
-                : active
-                  ? "bg-white/15 text-white shadow-[0_0_20px_rgba(255,255,255,0.5),0_0_40px_rgba(255,255,255,0.25)]"
-                  : "bg-white/8 text-white/90 shadow-[0_0_20px_rgba(255,255,255,0.5),0_0_40px_rgba(255,255,255,0.25)] hover:bg-white/12 hover:text-white"
-            }`}
-          >
-            {label}
-          </Link>
-        );
-      })}
+      {links.map(({ href, label }) => (
+        <Link
+          key={href}
+          href={href}
+          onClick={(e) => handleAnchorClick(e, href, pathname ?? "")}
+          className={base}
+        >
+          {label}
+        </Link>
+      ))}
     </>
   );
 }
@@ -64,30 +61,20 @@ export function NavLinks({ links, variant = "dark" }: NavLinksProps) {
 export function NavLinksMobile({ links, variant = "dark" }: NavLinksProps) {
   const pathname = usePathname();
   const isLight = variant === "light";
+  const base = isLight ? NAV_LINK_MOBILE_LIGHT : NAV_LINK_MOBILE_DARK;
 
   return (
     <>
-      {links.map(({ href, label }) => {
-        const active = isActive(pathname ?? "", href);
-        return (
-          <Link
-            key={href}
-            href={href}
-            onClick={(e) => handleAnchorClick(e, href, pathname ?? "")}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-              isLight
-                ? active
-                  ? "bg-white/85 text-[#123c15] shadow-[0_0_14px_rgba(255,255,255,0.9),0_0_28px_rgba(255,255,255,0.45)]"
-                  : "bg-white/50 text-[#24321c] shadow-[0_0_14px_rgba(255,255,255,0.9),0_0_28px_rgba(255,255,255,0.45)] hover:bg-white/70"
-                : active
-                  ? "bg-white/20 text-white shadow-[0_0_12px_rgba(255,255,255,0.45),0_0_24px_rgba(255,255,255,0.2)]"
-                  : "bg-white/10 text-white shadow-[0_0_12px_rgba(255,255,255,0.45),0_0_24px_rgba(255,255,255,0.2)] hover:bg-white/15"
-            }`}
-          >
-            {label}
-          </Link>
-        );
-      })}
+      {links.map(({ href, label }) => (
+        <Link
+          key={href}
+          href={href}
+          onClick={(e) => handleAnchorClick(e, href, pathname ?? "")}
+          className={base}
+        >
+          {label}
+        </Link>
+      ))}
     </>
   );
 }
