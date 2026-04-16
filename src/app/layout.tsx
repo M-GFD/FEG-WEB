@@ -3,6 +3,7 @@ import { Oswald, Urbanist } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Footer } from "@/components/layout/Footer";
+import { FEG_LOGO_MIME, FEG_LOGO_PUBLIC_PATH } from "@/lib/feegBrand";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -21,8 +22,8 @@ export const metadata: Metadata = {
   description: "Plataforma de torneos, rankings y gestión",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: [{ url: "/LOGO_FEG.png", type: "image/png" }],
-    apple: [{ url: "/LOGO_FEG.png", type: "image/png" }],
+    icon: [{ url: FEG_LOGO_PUBLIC_PATH, type: FEG_LOGO_MIME }],
+    apple: [{ url: FEG_LOGO_PUBLIC_PATH, type: FEG_LOGO_MIME }],
   },
 };
 
