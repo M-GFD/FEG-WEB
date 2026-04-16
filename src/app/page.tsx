@@ -88,8 +88,8 @@ export default async function HomePage() {
         <div className="relative bg-[#7b2b2b]">
           <RevealOnScroll revealIndex={4} yOffset={16} className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
           <div className="flex items-center justify-between gap-4 text-white">
-            <p className="font-heading text-sm font-semibold sm:text-lg">
-              RESULTADOS DISPONIBLES
+            <p className="min-w-0 flex-1 pr-2 font-heading text-xs font-semibold leading-snug sm:text-sm md:text-base lg:text-lg">
+              RESULTADOS DISPONIBLES-VILLA ELISA - SENIOR CABALLEROS
             </p>
             <Link
               href="/ranking"
