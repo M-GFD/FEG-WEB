@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { auth } from "@/lib/auth";
 import { FegLogoLink } from "@/components/layout/FegLogo";
 import { NavLinks, NavLinksMobile } from "./NavLinks";
 
@@ -12,8 +10,7 @@ const NAV_ITEMS = [
   { href: "/institucional", label: "Institucional" },
 ] as const;
 
-export async function Header() {
-  const session = await auth();
+export function Header() {
   const navLinks = [...NAV_ITEMS];
 
   return (
@@ -28,31 +25,6 @@ export async function Header() {
           </nav>
         </div>
 
-        <div className="relative z-10 flex items-center gap-4">
-          {session?.user ? (
-            <Link
-              href="/gestion"
-              className="rounded-full bg-[#f3e12b] px-5 py-2.5 font-sans text-sm font-semibold text-[#002403] transition hover:brightness-95"
-            >
-              Gestión
-            </Link>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/auth/signup"
-                className="rounded-full border border-[#123c15]/20 bg-white/60 px-4 py-2 text-sm font-medium text-[#123c15] transition hover:bg-white/80"
-              >
-                Registrarse
-              </Link>
-              <Link
-                href="/auth/signin"
-                className="rounded-full bg-[#f3e12b] px-5 py-2.5 font-heading text-sm font-semibold text-[#002403] transition hover:brightness-95"
-              >
-                Entrar
-              </Link>
-            </div>
-          )}
-        </div>
       </div>
 
       <div className="md:hidden px-4 pb-2">
