@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { FEG_LOGO_PUBLIC_PATH } from "@/lib/feegBrand";
 import { cn } from "@/lib/utils";
 
 type FegLogoSize = "nav" | "footer";
@@ -19,16 +20,17 @@ type FegLogoProps = {
   className?: string;
 };
 
-/** Logo oficial FEG (`/LOGO_FEG.png`). Mantiene proporción del escudo. */
+/** Logo oficial FEG (SVG en `public`). Mantiene proporción del escudo. */
 export function FegLogo({ size = "nav", className }: FegLogoProps) {
   return (
     <Image
-      src="/LOGO_FEG.png"
+      src={FEG_LOGO_PUBLIC_PATH}
       alt="Federación Entrerriana de Golf"
       width={150}
       height={200}
       sizes={sizesAttr[size]}
       priority={size === "nav"}
+      unoptimized
       className={cn(heightClass[size], "w-auto object-contain object-left", className)}
     />
   );

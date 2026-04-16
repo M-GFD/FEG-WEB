@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { FEG_LOGO_MIME, FEG_LOGO_PUBLIC_PATH } from "@/lib/feegBrand";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -11,15 +12,9 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#166534",
     icons: [
       {
-        src: "/LOGO_FEG.png",
-        sizes: "192x192",
-        type: "image/png",
-        purpose: "any",
-      },
-      {
-        src: "/LOGO_FEG.png",
-        sizes: "512x512",
-        type: "image/png",
+        src: FEG_LOGO_PUBLIC_PATH,
+        sizes: "any",
+        type: FEG_LOGO_MIME,
         purpose: "any",
       },
     ],
