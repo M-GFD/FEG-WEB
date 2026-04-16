@@ -16,13 +16,13 @@ export default async function HomePage() {
       {/* Hero */}
       <div className="relative">
         <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
-          {/* object-contain: imagen completa visible, sin recorte tipo “zoom” (bandas si la relación de aspecto no coincide) */}
+          {/* object-cover: rellena todo el ancho/alto; recorte suave sin bandas laterales */}
           <Image
-            src="/feg%20image%20(4).png"
+            src="/feg%20image%20(6).jpg"
             alt="Cancha de golf"
             fill
             priority
-            className="object-contain object-center"
+            className="object-cover object-center"
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-white/40" />
