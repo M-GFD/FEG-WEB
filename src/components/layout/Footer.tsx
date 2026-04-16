@@ -1,25 +1,7 @@
 import { FegLogoLink } from "@/components/layout/FegLogo";
-import { auth } from "@/lib/auth";
+import { FooterGestionLink } from "@/components/layout/FooterGestionLink";
 
-const FEG_PUBLIC_ORIGIN =
-  (process.env.NEXT_PUBLIC_FEG_PUBLIC_URL ?? "https://www.feg.ar").replace(
-    /\/$/,
-    ""
-  );
-
-export async function Footer() {
-  const session = await auth();
-  const gestionAbs = `${FEG_PUBLIC_ORIGIN}/gestion`;
-  const hasUser =
-    session != null && "user" in session && session.user != null;
-
-  let gestionHref = gestionAbs;
-  if (!hasUser) {
-    const signIn = new URL(`${FEG_PUBLIC_ORIGIN}/auth/signin`);
-    signIn.searchParams.set("callbackUrl", "/gestion");
-    gestionHref = signIn.toString();
-  }
-
+export function Footer() {
   return (
     <footer className="mt-auto border-t border-[var(--feg-green)]/15 bg-white text-[var(--feg-ink)]">
       <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
@@ -30,16 +12,11 @@ export async function Footer() {
             aria-label="Información de contacto"
           />
         </div>
-        <div className="mt-8 flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
-          <p className="text-center text-xs text-[var(--feg-green)]/60 sm:text-left">
+        <div className="mt-8 flex w-full flex-row flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <p className="text-xs text-[var(--feg-green)]/60">
             © {new Date().getFullYear()} Federación Entrerriana de Golf
           </p>
-          <a
-            href={gestionHref}
-            className="self-end text-sm font-semibold text-[var(--feg-ink)] underline-offset-4 transition hover:text-[var(--feg-green-2)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--feg-green)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:self-auto"
-          >
-            Gestión
-          </a>
+          <FooterGestionLink />
         </div>
       </div>
     </footer>
