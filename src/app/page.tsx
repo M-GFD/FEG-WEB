@@ -18,8 +18,8 @@ export default async function HomePage() {
         <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
           {/* object-contain: imagen completa visible, sin recorte tipo “zoom” (bandas si la relación de aspecto no coincide) */}
           <Image
-            src="https://www.figma.com/api/mcp/asset/eaa42ca8-27d4-45cf-bef7-843269aa2359"
-            alt=""
+            src="/feg%20image%20(4).png"
+            alt="Cancha de golf"
             fill
             priority
             className="object-contain object-center"
