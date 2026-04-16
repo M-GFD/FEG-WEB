@@ -22,7 +22,7 @@ export async function Header() {
         {/* Sombra en gradiente: más intensa arriba, transparente al borde inferior del header */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-[rgba(0,36,3,0.14)] from-0% via-[rgba(0,36,3,0.05)] via-50% to-transparent to-100%"
+          className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-[rgba(0,36,3,0.20)] from-0% via-[rgba(0,36,3,0.07)] via-50% to-transparent to-100%"
         />
         <div className="relative z-[1]">
       <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
