@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseApiJson } from "@/lib/parse-api-response";
 import { slugifyTitle } from "@/lib/slugify";
+import { publishNewsFromGestion } from "./actions";
 import { NewsRichEditor } from "./NewsRichEditor";
 
 const MAX_GALLERY = 15;
@@ -71,31 +72,17 @@ export function NewsPublishForm() {
         galleryUrls.push(await uploadOne(f));
       }
 
-      const res = await fetch("/api/news", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title.trim(),
-          slug: slug.trim() || undefined,
-          excerpt: excerpt.trim() || null,
-          content: contentHtml,
-          imageUrl: imageUrl ?? "",
-          galleryUrls,
-        }),
+      const data = await publishNewsFromGestion({
+        title: title.trim(),
+        slug: slug.trim() || undefined,
+        excerpt: excerpt.trim() || null,
+        content: contentHtml,
+        imageUrl: imageUrl ?? "",
+        galleryUrls,
       });
 
-      const data = await parseApiJson<{
-        ok: boolean;
-        slug?: string;
-        error?: string;
-        code?: string;
-      }>(res);
-
-      if (!data.ok || !data.slug) {
-        const msg = [data.error, data.code ? `(${data.code})` : ""]
-          .filter(Boolean)
-          .join(" ");
+      if (!data.ok) {
+        const msg = [data.error, data.code ? `(${data.code})` : ""].filter(Boolean).join(" ");
         setError(msg || "No se pudo publicar");
         return;
       }
