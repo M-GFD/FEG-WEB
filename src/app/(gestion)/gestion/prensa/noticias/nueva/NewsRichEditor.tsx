@@ -1,5 +1,6 @@
 "use client";
 
+import { parseApiJson } from "@/lib/parse-api-response";
 import { useCallback, useRef } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -61,14 +62,22 @@ export function NewsRichEditor({ onChange }: Props) {
       const file = e.target.files?.[0];
       e.target.value = "";
       if (!file || !editor) return;
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/news/upload-image", { method: "POST", body: fd });
-      const data = (await res.json()) as { ok: boolean; url?: string; error?: string };
-      if (data.ok && data.url) {
-        editor.chain().focus().setImage({ src: data.url }).run();
-      } else {
-        window.alert(data.error ?? "No se pudo subir la imagen");
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/news/upload-image", {
+          method: "POST",
+          body: fd,
+          credentials: "same-origin",
+        });
+        const data = await parseApiJson<{ ok: boolean; url?: string; error?: string }>(res);
+        if (data.ok && data.url) {
+          editor.chain().focus().setImage({ src: data.url }).run();
+        } else {
+          window.alert(data.error ?? "No se pudo subir la imagen");
+        }
+      } catch (err) {
+        window.alert(err instanceof Error ? err.message : "No se pudo subir la imagen");
       }
     },
     [editor]
