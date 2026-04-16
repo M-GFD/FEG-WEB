@@ -15,15 +15,18 @@ export default async function HomePage() {
       <HomeScrollHash />
       {/* Hero */}
       <div className="relative">
-        <div className="absolute inset-0">
-          <Image
-            src="https://www.figma.com/api/mcp/asset/eaa42ca8-27d4-45cf-bef7-843269aa2359"
-            alt=""
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Marco ~14% más grande que el hero: object-cover recorta menos (menos “zoom”) */}
+          <div className="absolute -inset-[14%] min-h-0 min-w-0">
+            <Image
+              src="https://www.figma.com/api/mcp/asset/eaa42ca8-27d4-45cf-bef7-843269aa2359"
+              alt=""
+              fill
+              priority
+              className="object-cover object-center"
+              sizes="100vw"
+            />
+          </div>
           <div className="absolute inset-0 bg-white/40" />
         </div>
 
