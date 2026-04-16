@@ -47,10 +47,10 @@ export function NavLinks({ links, variant = "dark" }: NavLinksProps) {
               isLight
                 ? active
                   ? "bg-white/80 text-[#123c15] shadow-[0_0_18px_rgba(255,255,255,0.85),0_0_36px_rgba(255,255,255,0.45)]"
-                  : "text-[#24321c] hover:bg-white/60 hover:text-[#123c15]"
+                  : "bg-white/55 text-[#24321c] shadow-[0_0_18px_rgba(255,255,255,0.85),0_0_36px_rgba(255,255,255,0.45)] hover:bg-white/70 hover:text-[#123c15]"
                 : active
                   ? "bg-white/15 text-white shadow-[0_0_20px_rgba(255,255,255,0.5),0_0_40px_rgba(255,255,255,0.25)]"
-                  : "text-white/90 hover:bg-white/10 hover:text-white"
+                  : "bg-white/8 text-white/90 shadow-[0_0_20px_rgba(255,255,255,0.5),0_0_40px_rgba(255,255,255,0.25)] hover:bg-white/12 hover:text-white"
             }`}
           >
             {label}
@@ -78,10 +78,10 @@ export function NavLinksMobile({ links, variant = "dark" }: NavLinksProps) {
               isLight
                 ? active
                   ? "bg-white/85 text-[#123c15] shadow-[0_0_14px_rgba(255,255,255,0.9),0_0_28px_rgba(255,255,255,0.45)]"
-                  : "bg-white/50 text-[#24321c] hover:bg-white/70"
+                  : "bg-white/50 text-[#24321c] shadow-[0_0_14px_rgba(255,255,255,0.9),0_0_28px_rgba(255,255,255,0.45)] hover:bg-white/70"
                 : active
                   ? "bg-white/20 text-white shadow-[0_0_12px_rgba(255,255,255,0.45),0_0_24px_rgba(255,255,255,0.2)]"
-                  : "bg-white/10 text-white hover:bg-white/15"
+                  : "bg-white/10 text-white shadow-[0_0_12px_rgba(255,255,255,0.45),0_0_24px_rgba(255,255,255,0.2)] hover:bg-white/15"
             }`}
           >
             {label}
