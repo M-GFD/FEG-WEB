@@ -1,4 +1,5 @@
 import { FegLogoLink } from "@/components/layout/FegLogo";
+import { auth } from "@/lib/auth";
 
 const FEG_PUBLIC_ORIGIN =
   (process.env.NEXT_PUBLIC_FEG_PUBLIC_URL ?? "https://www.feg.ar").replace(
@@ -6,8 +7,18 @@ const FEG_PUBLIC_ORIGIN =
     ""
   );
 
-export function Footer() {
-  const gestionHref = `${FEG_PUBLIC_ORIGIN}/gestion`;
+/** Misma lógica que los CTAs del header: sesión → gestión; sin sesión → iniciar sesión con vuelta a /gestion */
+function gestionEntryHref(session: Awaited<ReturnType<typeof auth>>) {
+  const gestionAbs = `${FEG_PUBLIC_ORIGIN}/gestion`;
+  if (session?.user) return gestionAbs;
+  const signIn = new URL(`${FEG_PUBLIC_ORIGIN}/auth/signin`);
+  signIn.searchParams.set("callbackUrl", "/gestion");
+  return signIn.toString();
+}
+
+export async function Footer() {
+  const session = await auth();
+  const gestionHref = gestionEntryHref(session);
 
   return (
     <footer className="mt-auto border-t border-[var(--feg-green)]/15 bg-white text-[var(--feg-ink)]">
