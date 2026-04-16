@@ -19,10 +19,14 @@ export async function Header() {
   return (
     <div>
       <header className="fixed left-0 right-0 top-0 z-50 isolate bg-transparent pt-4">
-        {/* Sombra en gradiente (blanco): más intensa arriba, transparente al borde inferior */}
+        {/* Sombra en gradiente (blanco): muchas paradas para caída de opacidad progresiva */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-b from-[rgba(255,255,255,0.9)] from-0% via-[rgba(255,255,255,0.26)] via-50% to-transparent to-100%"
+          className="pointer-events-none absolute inset-0 z-0"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.76) 9%, rgba(255,255,255,0.62) 19%, rgba(255,255,255,0.5) 30%, rgba(255,255,255,0.38) 41%, rgba(255,255,255,0.28) 52%, rgba(255,255,255,0.19) 63%, rgba(255,255,255,0.12) 74%, rgba(255,255,255,0.06) 85%, rgba(255,255,255,0.02) 94%, transparent 100%)",
+          }}
         />
         <div className="relative z-[1]">
       <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
