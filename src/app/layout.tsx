@@ -20,6 +20,10 @@ export const metadata: Metadata = {
   title: "FEG - Federación Entrerriana de Golf",
   description: "Plataforma de torneos, rankings y gestión",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [{ url: "/LOGO_FEG.png", type: "image/png" }],
+    apple: [{ url: "/LOGO_FEG.png", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({
