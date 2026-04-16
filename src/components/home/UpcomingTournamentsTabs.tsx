@@ -74,7 +74,7 @@ export function UpcomingTournamentsTabs() {
         id="proximos-torneos"
         className="scroll-mt-28 bg-[#0b0f0b] lg:scroll-mt-24"
       >
-        <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
+        <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
           <h3 className="font-heading text-3xl font-semibold tracking-tight text-white">
             PRÓXIMOS TORNEOS
           </h3>
@@ -101,7 +101,7 @@ export function UpcomingTournamentsTabs() {
           yOffset={18}
           className="bg-[#0b2b12] lg:col-span-4 lg:h-full"
         >
-          <div className="h-full px-6 py-10 text-white lg:px-8">
+          <div className="h-full px-6 py-12 text-white lg:px-8">
             <h3 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
               PRÓXIMOS TORNEOS
             </h3>
