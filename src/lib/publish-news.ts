@@ -56,7 +56,7 @@ export async function publishNewsArticle(
 
   let sanitized: string;
   try {
-    sanitized = await sanitizeNewsContent(content);
+    sanitized = sanitizeNewsContent(content);
   } catch (e) {
     return {
       ok: false,
