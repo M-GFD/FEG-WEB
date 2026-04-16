@@ -9,12 +9,17 @@ export async function resolveUniqueNewsSlug(base: string): Promise<string> {
   const root = base.trim() || "noticia";
   for (let n = 0; n < 200; n++) {
     const candidate = n === 0 ? root : `${root}-${n}`;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("News")
       .select("id")
       .eq("slug", candidate)
-      .maybeSingle();
-    if (!data) return candidate;
+      .limit(1);
+    if (error) {
+      throw new Error(
+        `Slug: ${error.message}${error.hint ? ` (${error.hint})` : ""}`
+      );
+    }
+    if (!data?.length) return candidate;
   }
   throw new Error("No se pudo generar un slug único");
 }

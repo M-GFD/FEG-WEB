@@ -85,36 +85,64 @@ export async function POST(request: Request) {
       ? imageUrl.trim()
       : null;
   const gallery = (galleryUrls ?? []).filter(Boolean);
+  /** JSON nullable: null evita posibles fricciones con array vacío en algunas instancias de Postgres/PostgREST */
+  const galleryJson = gallery.length > 0 ? gallery : null;
   const now = new Date().toISOString();
 
-  const { data: row, error } = await supabase
-    .from("News")
-    .insert({
-      id: crypto.randomUUID(),
-      title: title.trim(),
-      slug: finalSlug,
-      content: sanitized,
-      excerpt: excerpt?.trim() ? excerpt.trim() : null,
-      imageUrl: cover,
-      galleryUrls: gallery,
-      published: true,
-      publishedAt: now,
-      authorId: session.user.id,
-      createdAt: now,
-      updatedAt: now,
-    })
-    .select("slug")
-    .single();
+  try {
+    const { data: row, error } = await supabase
+      .from("News")
+      .insert({
+        id: crypto.randomUUID(),
+        title: title.trim(),
+        slug: finalSlug,
+        content: sanitized,
+        excerpt: excerpt?.trim() ? excerpt.trim() : null,
+        imageUrl: cover,
+        galleryUrls: galleryJson,
+        published: true,
+        publishedAt: now,
+        authorId: session.user.id,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .select("slug")
+      .single();
 
-  if (error) {
+    if (error) {
+      const detail = [error.message, error.hint, (error as { details?: string }).details]
+        .filter(Boolean)
+        .join(" — ");
+      console.error("[api/news POST]", error);
+      return Response.json(
+        {
+          ok: false,
+          error: detail || "No se pudo guardar la noticia",
+          code: (error as { code?: string }).code,
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!row?.slug) {
+      return Response.json(
+        { ok: false, error: "La noticia no devolvió slug." },
+        { status: 500 }
+      );
+    }
+
+    revalidatePath("/noticias");
+    revalidatePath(`/noticias/${row.slug}`);
+
+    return Response.json({ ok: true, slug: row.slug });
+  } catch (e) {
+    console.error("[api/news POST] unexpected", e);
     return Response.json(
-      { ok: false, error: error.message || "No se pudo guardar la noticia" },
+      {
+        ok: false,
+        error: e instanceof Error ? e.message : "Error interno al publicar",
+      },
       { status: 500 }
     );
   }
-
-  revalidatePath("/noticias");
-  revalidatePath(`/noticias/${row.slug}`);
-
-  return Response.json({ ok: true, slug: row.slug });
 }
