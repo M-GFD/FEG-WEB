@@ -7,18 +7,18 @@ const FEG_PUBLIC_ORIGIN =
     ""
   );
 
-/** Misma lógica que los CTAs del header: sesión → gestión; sin sesión → iniciar sesión con vuelta a /gestion */
-function gestionEntryHref(session: Awaited<ReturnType<typeof auth>>) {
-  const gestionAbs = `${FEG_PUBLIC_ORIGIN}/gestion`;
-  if (session?.user) return gestionAbs;
-  const signIn = new URL(`${FEG_PUBLIC_ORIGIN}/auth/signin`);
-  signIn.searchParams.set("callbackUrl", "/gestion");
-  return signIn.toString();
-}
-
 export async function Footer() {
   const session = await auth();
-  const gestionHref = gestionEntryHref(session);
+  const gestionAbs = `${FEG_PUBLIC_ORIGIN}/gestion`;
+  const hasUser =
+    session != null && "user" in session && session.user != null;
+
+  let gestionHref = gestionAbs;
+  if (!hasUser) {
+    const signIn = new URL(`${FEG_PUBLIC_ORIGIN}/auth/signin`);
+    signIn.searchParams.set("callbackUrl", "/gestion");
+    gestionHref = signIn.toString();
+  }
 
   return (
     <footer className="mt-auto border-t border-[var(--feg-green)]/15 bg-white text-[var(--feg-ink)]">
