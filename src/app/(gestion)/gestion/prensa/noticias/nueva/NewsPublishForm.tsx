@@ -68,6 +68,7 @@ export function NewsPublishForm() {
 
       const res = await fetch("/api/news", {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: title.trim(),
@@ -83,10 +84,14 @@ export function NewsPublishForm() {
         ok: boolean;
         slug?: string;
         error?: string;
+        code?: string;
       };
 
       if (!data.ok || !data.slug) {
-        setError(data.error ?? "No se pudo publicar");
+        const msg = [data.error, data.code ? `(${data.code})` : ""]
+          .filter(Boolean)
+          .join(" ");
+        setError(msg || "No se pudo publicar");
         return;
       }
 
