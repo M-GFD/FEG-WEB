@@ -32,7 +32,7 @@ export async function Header() {
           {session?.user ? (
             <Link
               href="/gestion"
-              className="rounded-full bg-[#f3e12b] px-5 py-2.5 font-heading text-sm font-semibold text-[#002403] transition hover:brightness-95"
+              className="rounded-full bg-[#f3e12b] px-5 py-2.5 font-sans text-sm font-semibold text-[#002403] transition hover:brightness-95"
             >
               Gestión
             </Link>
