@@ -101,7 +101,8 @@ export function UpcomingTournamentsTabs() {
           yOffset={18}
           className="bg-[#0b2b12] lg:col-span-4 lg:h-full"
         >
-          <div className="h-full px-6 py-12 text-white lg:px-8">
+          {/* pl en lg alinea con max-w-7xl + lg:px-8 de Noticias (80rem = max-w-7xl) */}
+          <div className="h-full px-6 py-12 text-white lg:pr-8 lg:pl-[calc((100vw-min(100vw,80rem))/2+2rem)]">
             <h3 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
               PRÓXIMOS TORNEOS
             </h3>
