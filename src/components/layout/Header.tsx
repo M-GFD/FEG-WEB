@@ -18,7 +18,7 @@ export async function Header() {
 
   return (
     <div>
-      <header className="fixed left-0 right-0 top-0 z-50 bg-transparent pt-4">
+      <header className="fixed left-0 right-0 top-0 z-50 bg-transparent pt-4 shadow-[0_1px_0_rgba(0,36,3,0.06),0_10px_40px_-10px_rgba(0,36,3,0.12),0_18px_48px_-14px_rgba(0,0,0,0.06)]">
       <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
         <FegLogoLink size="nav" />
 
