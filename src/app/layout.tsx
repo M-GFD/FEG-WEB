@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Oswald, Urbanist } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import { Footer } from "@/components/layout/Footer";
+import { FooterPublicOnly } from "@/components/layout/FooterPublicOnly";
 import { FEG_LOGO_MIME, FEG_LOGO_PUBLIC_PATH } from "@/lib/feegBrand";
 
 const oswald = Oswald({
@@ -39,7 +39,7 @@ export default function RootLayout({
       >
         <Providers>
           <div className="flex flex-1 flex-col">{children}</div>
-          <Footer />
+          <FooterPublicOnly />
         </Providers>
       </body>
     </html>
