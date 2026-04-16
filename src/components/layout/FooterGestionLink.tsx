@@ -8,17 +8,16 @@ const GESTION_CALLBACK = encodeURIComponent("/gestion");
 export function FooterGestionLink() {
   const { data: session, status } = useSession();
 
-  const href =
-    status === "authenticated" && session?.user
-      ? "/gestion"
-      : `/auth/signin?callbackUrl=${GESTION_CALLBACK}`;
+  const isAuthed = status === "authenticated" && session?.user;
+  const href = isAuthed ? "/gestion" : `/auth/signin?callbackUrl=${GESTION_CALLBACK}`;
+  const label = isAuthed ? "Gestión" : "Acceder";
 
   return (
     <Link
       href={href}
-      className="shrink-0 text-[11px] font-medium tracking-wide text-[var(--feg-green)]/45 underline-offset-4 transition hover:text-[var(--feg-green)]/80 hover:underline"
+      className="inline-flex shrink-0 items-center justify-center rounded-full bg-[var(--feg-yellow)] px-8 py-3.5 font-heading text-base font-semibold uppercase tracking-wide text-[var(--feg-ink)] shadow-sm transition hover:brightness-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--feg-green)]"
     >
-      Gestion
+      {label}
     </Link>
   );
 }
