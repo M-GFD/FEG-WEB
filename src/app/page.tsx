@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { getNews } from "@/lib/data";
+import { formatNewsDateParts } from "@/lib/news-dates";
 import { getGolfPlaceholder } from "@/lib/placeholders";
 import { UpcomingTournamentsTabs } from "@/components/home/UpcomingTournamentsTabs";
 import { HomeScrollHash } from "@/components/home/HomeScrollHash";
@@ -138,7 +139,13 @@ export default async function HomePage() {
                 </p>
               </RevealOnScroll>
             ) : (
-              news.slice(0, 6).map((n, i) => (
+              news.slice(0, 6).map((n, i) => {
+                const cardWhen = formatNewsDateParts(n.publishedAt, n.createdAt, {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                });
+                return (
                 <RevealOnScroll
                   key={n.id}
                   revealIndex={i}
@@ -160,18 +167,10 @@ export default async function HomePage() {
                   </div>
                   <div className="p-4">
                     <time
-                      dateTime={new Date(
-                        n.publishedAt || n.createdAt
-                      ).toISOString()}
+                      dateTime={cardWhen.dateTime}
                       className="text-[11px] font-semibold uppercase tracking-wide text-[var(--feg-green-2)]/80"
                     >
-                      {new Date(
-                        n.publishedAt || n.createdAt
-                      ).toLocaleDateString("es-AR", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
+                      {cardWhen.label}
                     </time>
                     <h3 className="mt-2 font-heading text-lg font-semibold leading-snug text-[var(--feg-ink)] line-clamp-2">
                       {n.title}
@@ -189,7 +188,8 @@ export default async function HomePage() {
                   </div>
                 </Link>
                 </RevealOnScroll>
-              ))
+                );
+              })
             )}
           </div>
 

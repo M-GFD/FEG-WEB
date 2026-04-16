@@ -1,7 +1,7 @@
 "use client";
 
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { parseApiJson } from "@/lib/parse-api-response";
 import { slugifyTitle } from "@/lib/slugify";
 import { publishNewsFromGestion } from "./actions";
@@ -14,7 +14,6 @@ function stripHtmlToText(html: string): string {
 }
 
 export function NewsPublishForm() {
-  const router = useRouter();
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
@@ -86,10 +85,10 @@ export function NewsPublishForm() {
         setError(msg || "No se pudo publicar");
         return;
       }
-
-      router.push(`/noticias/${data.slug}`);
-      router.refresh();
     } catch (err) {
+      if (isRedirectError(err)) {
+        throw err;
+      }
       setError(err instanceof Error ? err.message : "Error inesperado");
     } finally {
       setSubmitting(false);

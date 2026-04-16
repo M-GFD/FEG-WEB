@@ -3,11 +3,17 @@ import Image from "next/image";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { getNews } from "@/lib/data";
+import { formatNewsDateParts } from "@/lib/news-dates";
 import { getGolfPlaceholder } from "@/lib/placeholders";
+
+const longDate = { day: "numeric" as const, month: "long" as const, year: "numeric" as const };
 
 export default async function NoticiasPage() {
   const news = await getNews();
   const [featured, ...rest] = news;
+  const featuredWhen = featured
+    ? formatNewsDateParts(featured.publishedAt, featured.createdAt, longDate)
+    : null;
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
@@ -30,7 +36,7 @@ export default async function NoticiasPage() {
         ) : (
           <div className="space-y-10">
             {/* Card principal: noticia más importante */}
-            {featured && (
+            {featured && featuredWhen && (
               <article className="overflow-hidden rounded-3xl border border-[var(--feg-green)]/12 bg-white shadow-[0_20px_60px_rgba(0,36,3,0.12)] transition hover:shadow-[0_24px_70px_rgba(0,36,3,0.16)]">
                 <Link href={`/noticias/${featured.slug}`} className="block">
                   <div className="relative h-64 w-full md:h-80">
@@ -45,14 +51,10 @@ export default async function NoticiasPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-[var(--feg-ink)]/85 via-[var(--feg-ink)]/20 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-6 text-white md:p-8">
                       <time
-                        dateTime={new Date(featured.publishedAt || featured.createdAt).toISOString()}
+                        dateTime={featuredWhen.dateTime}
                         className="text-xs font-semibold uppercase tracking-[0.15em] text-white/85"
                       >
-                        {new Date(featured.publishedAt || featured.createdAt).toLocaleDateString("es-AR", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                        {featuredWhen.label}
                       </time>
                       <h2 className="mt-2 font-heading text-2xl font-semibold uppercase leading-tight tracking-tight md:text-3xl">
                         {featured.title}
@@ -71,7 +73,9 @@ export default async function NoticiasPage() {
             {/* Cards secundarias: noticias menos importantes */}
             {rest.length > 0 && (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {rest.map((n, i) => (
+                {rest.map((n, i) => {
+                  const rowWhen = formatNewsDateParts(n.publishedAt, n.createdAt);
+                  return (
                   <article
                     key={n.id}
                     className="overflow-hidden rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.08)] transition hover:border-[var(--feg-green-2)]/30 hover:shadow-[0_18px_48px_rgba(0,36,3,0.12)]"
@@ -88,10 +92,10 @@ export default async function NoticiasPage() {
                       </div>
                       <div className="p-5">
                         <time
-                          dateTime={new Date(n.publishedAt || n.createdAt).toISOString()}
+                          dateTime={rowWhen.dateTime}
                           className="text-xs font-semibold uppercase tracking-wide text-[var(--feg-green-2)]/80"
                         >
-                          {new Date(n.publishedAt || n.createdAt).toLocaleDateString("es-AR")}
+                          {rowWhen.label}
                         </time>
                         <h3 className="mt-2 font-heading text-lg font-semibold uppercase leading-snug tracking-tight text-[var(--feg-ink)] line-clamp-2">
                           {n.title}
@@ -104,7 +108,8 @@ export default async function NoticiasPage() {
                       </div>
                     </Link>
                   </article>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

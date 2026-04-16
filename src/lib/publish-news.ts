@@ -133,9 +133,14 @@ export async function publishNewsArticle(
       return { ok: false, error: "La noticia no devolvió slug.", status: 500 };
     }
 
-    revalidatePath("/");
-    revalidatePath("/noticias");
-    revalidatePath(`/noticias/${row.slug}`);
+    try {
+      revalidatePath("/");
+      revalidatePath("/noticias");
+      revalidatePath(`/noticias/${row.slug}`);
+    } catch (revErr) {
+      /** La noticia ya está guardada; no fallar el publish si la caché no revalida en este runtime. */
+      console.error("[publishNewsArticle] revalidatePath", revErr);
+    }
 
     return { ok: true, slug: row.slug };
   } catch (e) {

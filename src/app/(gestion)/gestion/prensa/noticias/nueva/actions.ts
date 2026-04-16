@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { canModeratePress } from "@/lib/rbac";
 import {
@@ -24,8 +25,9 @@ export async function publishNewsFromGestion(
     return { ok: false, error: "No autorizado", status: 401 };
   }
 
+  let result: PublishNewsArticleResult;
   try {
-    return await publishNewsArticle(session.user.id, {
+    result = await publishNewsArticle(session.user.id, {
       title: input.title,
       slug: input.slug,
       excerpt: input.excerpt,
@@ -41,4 +43,9 @@ export async function publishNewsFromGestion(
       status: 500,
     };
   }
+
+  if (result.ok) {
+    redirect(`/noticias/${result.slug}`);
+  }
+  return result;
 }
