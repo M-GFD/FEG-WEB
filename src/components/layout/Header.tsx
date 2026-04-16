@@ -19,13 +19,13 @@ export async function Header() {
   return (
     <div>
       <header className="fixed left-0 right-0 top-0 z-50 isolate bg-transparent pt-4">
-        {/* Sombra en gradiente (blanco): sin velado ~0–25%; misma curva suave en el 75% inferior */}
+        {/* Blanco sólido ~0–75%; solo el último 25% de altura funde a transparente */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 z-0"
           style={{
             background:
-              "linear-gradient(to bottom, transparent 0%, transparent 25%, rgba(255,255,255,0.9) 25%, rgba(255,255,255,0.76) 31.75%, rgba(255,255,255,0.62) 39.25%, rgba(255,255,255,0.5) 47.5%, rgba(255,255,255,0.38) 55.75%, rgba(255,255,255,0.28) 64%, rgba(255,255,255,0.19) 72.25%, rgba(255,255,255,0.12) 80.5%, rgba(255,255,255,0.06) 88.75%, rgba(255,255,255,0.02) 95.5%, transparent 100%)",
+              "linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,1) 75%, rgba(255,255,255,0.88) 80%, rgba(255,255,255,0.62) 85%, rgba(255,255,255,0.38) 90%, rgba(255,255,255,0.18) 94%, rgba(255,255,255,0.06) 97.5%, transparent 100%)",
           }}
         />
         <div className="relative z-[1]">
