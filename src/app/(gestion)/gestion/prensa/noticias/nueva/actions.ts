@@ -19,14 +19,17 @@ export type PublishNewsFormInput = {
 export async function publishNewsFromGestion(
   input: PublishNewsFormInput
 ): Promise<PublishNewsArticleResult> {
-  const session = await auth();
-  if (!session?.user || !canModeratePress(session.user.role)) {
-    return { ok: false, error: "No autorizado", status: 401 };
-  }
-
-  let result: PublishNewsArticleResult;
   try {
-    result = await publishNewsArticle(session.user.id, {
+    const session = await auth();
+    if (!session?.user || !canModeratePress(session.user.role)) {
+      return { ok: false, error: "No autorizado", status: 401 };
+    }
+    const userId = session.user.id;
+    if (!userId) {
+      return { ok: false, error: "Sesión inválida.", status: 401 };
+    }
+
+    return await publishNewsArticle(userId, {
       title: input.title,
       slug: input.slug,
       excerpt: input.excerpt,
@@ -35,13 +38,11 @@ export async function publishNewsFromGestion(
       galleryUrls: input.galleryUrls,
     });
   } catch (e) {
-    console.error("[publishNewsFromGestion] fatal", e);
+    console.error("[publishNewsFromGestion]", e);
     return {
       ok: false,
       error: e instanceof Error ? e.message : "Error interno del servidor",
       status: 500,
     };
   }
-
-  return result;
 }
