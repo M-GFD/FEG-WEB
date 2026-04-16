@@ -1,6 +1,6 @@
 "use client";
 
-import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { parseApiJson } from "@/lib/parse-api-response";
 import { slugifyTitle } from "@/lib/slugify";
@@ -14,6 +14,8 @@ function stripHtmlToText(html: string): string {
 }
 
 export function NewsPublishForm() {
+  const router = useRouter();
+  const [formResetKey, setFormResetKey] = useState(0);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [slugTouched, setSlugTouched] = useState(false);
@@ -22,6 +24,7 @@ export function NewsPublishForm() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -48,6 +51,7 @@ export function NewsPublishForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
 
     const bodyText = stripHtmlToText(contentHtml);
     if (!title.trim()) {
@@ -85,10 +89,18 @@ export function NewsPublishForm() {
         setError(msg || "No se pudo publicar");
         return;
       }
+
+      setTitle("");
+      setSlug("");
+      setSlugTouched(false);
+      setExcerpt("");
+      setContentHtml("<p></p>");
+      setCoverFile(null);
+      setGalleryFiles([]);
+      setFormResetKey((k) => k + 1);
+      setSuccess("Noticia publicada. El formulario quedó listo para otra.");
+      router.refresh();
     } catch (err) {
-      if (isRedirectError(err)) {
-        throw err;
-      }
       setError(err instanceof Error ? err.message : "Error inesperado");
     } finally {
       setSubmitting(false);
@@ -160,6 +172,7 @@ export function NewsPublishForm() {
       <div className="space-y-2">
         <span className="text-sm font-medium text-[var(--feg-green)]">Portada (opcional)</span>
         <input
+          key={`cover-${formResetKey}`}
           type="file"
           accept="image/png,image/jpeg,image/webp"
           onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
@@ -173,6 +186,7 @@ export function NewsPublishForm() {
           Galería al pie (opcional)
         </span>
         <input
+          key={`gallery-${formResetKey}`}
           type="file"
           accept="image/png,image/jpeg,image/webp"
           multiple
@@ -207,8 +221,17 @@ export function NewsPublishForm() {
 
       <div className="space-y-2">
         <span className="text-sm font-medium text-[var(--feg-green)]">Cuerpo de la noticia</span>
-        <NewsRichEditor onChange={setContentHtml} />
+        <NewsRichEditor key={`editor-${formResetKey}`} onChange={setContentHtml} />
       </div>
+
+      {success && (
+        <p
+          className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-900"
+          role="status"
+        >
+          {success}
+        </p>
+      )}
 
       {error && (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">

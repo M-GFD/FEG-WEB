@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { canModeratePress } from "@/lib/rbac";
 import {
@@ -44,8 +43,5 @@ export async function publishNewsFromGestion(
     };
   }
 
-  if (result.ok) {
-    redirect(`/noticias/${result.slug}`);
-  }
   return result;
 }
