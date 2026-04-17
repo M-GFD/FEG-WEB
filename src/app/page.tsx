@@ -22,7 +22,7 @@ export default async function HomePage() {
             alt="Cancha de golf"
             fill
             priority
-            className="object-cover object-[50%_38%] max-md:object-left"
+            className="object-cover object-[50%_38%] max-md:object-[40%_50%]"
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-white/40" />
@@ -42,12 +42,12 @@ export default async function HomePage() {
               </div>
             </RevealOnScroll>
             <RevealOnScroll revealIndex={1} yOffset={24} className="block w-full">
-              <h1 className="mt-6 font-heading font-semibold leading-[1.1] text-[#002403] max-md:px-0 sm:leading-[1.08] md:text-balance md:text-[52px] md:leading-[1.05]">
+              <h1 className="mt-6 font-heading font-semibold leading-[1.08] text-[#002403] max-md:px-0 sm:leading-[1.06] md:text-balance md:text-[52px] md:leading-[1.05]">
                 <span className="md:hidden">
-                  <span className="block max-md:text-[clamp(1.05rem,4.9vw,1.4rem)] max-[380px]:text-[1.05rem] sm:text-[1.65rem]">
+                  <span className="block max-md:text-[clamp(1.84rem,8.58vw,2.9rem)] max-[380px]:text-[1.75rem]">
                     TODO EL GOLF DE ENTRE RÍOS,
                   </span>
-                  <span className="block max-md:text-[clamp(1.05rem,4.9vw,1.4rem)] max-[380px]:text-[1.05rem] sm:text-[1.65rem]">
+                  <span className="block max-md:text-[clamp(1.84rem,8.58vw,2.9rem)] max-[380px]:text-[1.75rem]">
                     EN UN SOLO LUGAR.
                   </span>
                 </span>
