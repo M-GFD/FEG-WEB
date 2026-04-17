@@ -17,7 +17,7 @@ export default async function HomePage() {
       {/* Hero: min-h asegura área visible; object-cover usa el menor zoom que cubre (recorte mínimo matemático) */}
       <div className="relative flex min-h-[100svh] flex-col">
         {/* Imagen solo hasta arriba de la franja de resultados (no detrás del bar rojo) */}
-        <div className="relative flex min-h-0 flex-1 flex-col">
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
             <Image
               src="/feg%20image%20(4).jpeg"
@@ -32,71 +32,77 @@ export default async function HomePage() {
 
           <Header />
 
-          <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-12 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <RevealOnScroll
-              revealIndex={0}
-              yOffset={14}
-              className="flex w-full justify-center"
-            >
-              <div className="inline-flex items-center justify-center rounded-full bg-white/70 px-4 py-1.5 text-xs font-semibold text-[#123c15] shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-                Federación Entrerriana de Golf
-              </div>
-            </RevealOnScroll>
-            <RevealOnScroll revealIndex={1} yOffset={24} className="block w-full">
-              <h1 className="mt-6 font-heading font-semibold leading-[1.08] text-[#002403] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[52px] md:leading-[1.05]">
-                <span className="md:hidden">
-                  <span className="block max-md:text-[clamp(1.56rem,7.3vw,2.46rem)] max-[380px]:text-[1.5rem]">
-                    TODO EL GOLF DE ENTRE RÍOS,
-                  </span>
-                  <span className="block max-md:text-[clamp(1.56rem,7.3vw,2.46rem)] max-[380px]:text-[1.5rem]">
-                    EN UN SOLO LUGAR.
-                  </span>
-                </span>
-                <span className="hidden md:inline md:text-[52px]">
-                  TODO EL GOLF DE ENTRE RÍOS,
-                  <br />
-                  EN UN SOLO LUGAR.
-                </span>
-              </h1>
-            </RevealOnScroll>
-            <RevealOnScroll revealIndex={2} yOffset={18} className="block w-full">
-              <p className="mx-auto mt-4 max-w-xl text-[0.95rem] font-medium leading-relaxed text-[#123c15] sm:text-base sm:leading-normal md:text-lg">
-                Una plataforma diseñada para jugadores, clubes y competencias de
-                toda la provincia.
-              </p>
-            </RevealOnScroll>
-          </div>
-        </div>
-
-        <div className="relative mx-auto max-w-7xl px-6 pb-12 lg:px-8">
-          <RevealOnScroll revealIndex={3} yOffset={32} className="ml-auto w-full max-w-sm">
-          <div className="overflow-hidden rounded-2xl bg-gradient-to-b from-white/45 to-[var(--feg-green)] backdrop-blur-md shadow-[0_20px_60px_rgba(0,36,3,0.22)]">
-            <div className="p-5">
-              <div className="inline-flex rounded-full bg-[#7c1b1b] px-3 py-1.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-black/10">
-                Próximo torneo
-              </div>
-              <div className="mt-3 text-xl font-semibold leading-snug text-white [text-shadow:0_2px_12px_rgba(0,36,3,0.55),0_1px_3px_rgba(0,36,3,0.85)]">
-                Los Bretes — Colón
-              </div>
-              <div className="mt-1 text-xl font-bold text-[var(--feg-yellow)] [text-shadow:0_2px_10px_rgba(0,36,3,0.5),0_1px_2px_rgba(0,36,3,0.75)]">
-                9 de Mayo
-              </div>
-              <div className="mt-3 flex items-center gap-2">
-                <div className="rounded-full border border-white/35 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
-                  18H Mayores
-                </div>
-                <Link
-                  href="/calendario"
-                  className="ml-auto inline-flex items-center justify-center rounded-full bg-[#f3e12b] px-3 py-1.5 text-xs font-semibold text-[#146638] transition hover:brightness-95"
+          <div className="relative z-10 flex min-h-0 min-w-0 w-full flex-1 flex-col justify-between">
+            <div className="mx-auto w-full max-w-7xl shrink-0 px-4 pb-6 pt-12 sm:px-6 lg:px-8">
+              <div className="mx-auto max-w-2xl text-center">
+                <RevealOnScroll
+                  revealIndex={0}
+                  yOffset={14}
+                  className="flex w-full justify-center"
                 >
-                  Calendario →
-                </Link>
+                  <div className="inline-flex items-center justify-center rounded-full bg-white/70 px-4 py-1.5 text-xs font-semibold text-[#123c15] shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+                    Federación Entrerriana de Golf
+                  </div>
+                </RevealOnScroll>
+                <RevealOnScroll revealIndex={1} yOffset={24} className="block w-full">
+                  <h1 className="mt-6 font-heading font-semibold leading-[1.08] text-[#002403] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[52px] md:leading-[1.05]">
+                    <span className="md:hidden">
+                      <span className="block max-md:text-[clamp(1.56rem,7.3vw,2.46rem)] max-[380px]:text-[1.5rem]">
+                        TODO EL GOLF DE ENTRE RÍOS,
+                      </span>
+                      <span className="block max-md:text-[clamp(1.56rem,7.3vw,2.46rem)] max-[380px]:text-[1.5rem]">
+                        EN UN SOLO LUGAR.
+                      </span>
+                    </span>
+                    <span className="hidden md:inline md:text-[52px]">
+                      TODO EL GOLF DE ENTRE RÍOS,
+                      <br />
+                      EN UN SOLO LUGAR.
+                    </span>
+                  </h1>
+                </RevealOnScroll>
+                <RevealOnScroll revealIndex={2} yOffset={18} className="block w-full">
+                  <p className="mx-auto mt-4 max-w-xl text-[0.95rem] font-medium leading-relaxed text-[#123c15] sm:text-base sm:leading-normal md:text-lg">
+                    Una plataforma diseñada para jugadores, clubes y competencias de
+                    toda la provincia.
+                  </p>
+                </RevealOnScroll>
               </div>
             </div>
+
+            <div className="mx-auto w-full max-w-7xl shrink-0 px-4 pb-12 pt-4 sm:px-6 lg:px-8">
+              <RevealOnScroll
+                revealIndex={3}
+                yOffset={32}
+                className="ml-auto w-full max-w-sm shrink-0"
+              >
+                <div className="w-full overflow-hidden rounded-2xl bg-gradient-to-b from-white/45 to-[var(--feg-green)] backdrop-blur-md shadow-[0_20px_60px_rgba(0,36,3,0.22)]">
+                  <div className="p-5">
+                    <div className="inline-flex rounded-full bg-[#7c1b1b] px-3 py-1.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-black/10">
+                      Próximo torneo
+                    </div>
+                    <div className="mt-3 text-xl font-semibold leading-snug text-white [text-shadow:0_2px_12px_rgba(0,36,3,0.55),0_1px_3px_rgba(0,36,3,0.85)]">
+                      Los Bretes — Colón
+                    </div>
+                    <div className="mt-1 text-xl font-bold text-[var(--feg-yellow)] [text-shadow:0_2px_10px_rgba(0,36,3,0.5),0_1px_2px_rgba(0,36,3,0.75)]">
+                      9 de Mayo
+                    </div>
+                    <div className="mt-3 flex items-center gap-2">
+                      <div className="rounded-full border border-white/35 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
+                        18H Mayores
+                      </div>
+                      <Link
+                        href="/calendario"
+                        className="ml-auto inline-flex items-center justify-center rounded-full bg-[#f3e12b] px-3 py-1.5 text-xs font-semibold text-[#146638] transition hover:brightness-95"
+                      >
+                        Calendario →
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </RevealOnScroll>
+            </div>
           </div>
-          </RevealOnScroll>
-        </div>
         </div>
 
         <div className="relative z-10 bg-[#7b2b2b]">
