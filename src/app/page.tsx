@@ -30,7 +30,7 @@ export default async function HomePage() {
 
         <Header />
 
-        <div className="relative mx-auto max-w-7xl px-6 pb-12 pt-12 lg:px-8">
+        <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-12 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <RevealOnScroll
               revealIndex={0}
@@ -42,12 +42,12 @@ export default async function HomePage() {
               </div>
             </RevealOnScroll>
             <RevealOnScroll revealIndex={1} yOffset={24} className="block w-full">
-              <h1 className="mt-6 font-heading font-semibold leading-[1.08] text-[#002403] max-md:px-0 sm:leading-[1.06] md:text-balance md:text-[52px] md:leading-[1.05]">
+              <h1 className="mt-6 font-heading font-semibold leading-[1.08] text-[#002403] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[52px] md:leading-[1.05]">
                 <span className="md:hidden">
-                  <span className="block max-md:text-[clamp(1.84rem,8.58vw,2.9rem)] max-[380px]:text-[1.75rem]">
+                  <span className="block max-md:text-[clamp(1.56rem,7.3vw,2.46rem)] max-[380px]:text-[1.5rem]">
                     TODO EL GOLF DE ENTRE RÍOS,
                   </span>
-                  <span className="block max-md:text-[clamp(1.84rem,8.58vw,2.9rem)] max-[380px]:text-[1.75rem]">
+                  <span className="block max-md:text-[clamp(1.56rem,7.3vw,2.46rem)] max-[380px]:text-[1.5rem]">
                     EN UN SOLO LUGAR.
                   </span>
                 </span>
@@ -81,12 +81,12 @@ export default async function HomePage() {
                 9 de Mayo
               </div>
               <div className="mt-3 flex items-center gap-2">
-                <div className="rounded-full border border-[var(--feg-green)]/25 bg-white/55 px-3 py-1.5 text-xs font-semibold text-[var(--feg-ink)] backdrop-blur-sm">
+                <div className="rounded-full border border-white/35 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
                   18H Mayores
                 </div>
                 <Link
                   href="/calendario"
-                  className="ml-auto inline-flex items-center justify-center rounded-full bg-[var(--feg-yellow)] px-3 py-1.5 text-xs font-semibold text-[var(--feg-ink)] shadow-sm ring-1 ring-[var(--feg-green)]/15 transition hover:brightness-95"
+                  className="ml-auto inline-flex items-center justify-center rounded-full bg-[#f3e12b] px-3 py-1.5 text-xs font-semibold text-[#146638] transition hover:brightness-95"
                 >
                   Calendario →
                 </Link>
