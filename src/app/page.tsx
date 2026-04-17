@@ -22,7 +22,7 @@ export default async function HomePage() {
             alt="Cancha de golf"
             fill
             priority
-            className="object-cover object-center"
+            className="object-cover object-[50%_38%] max-md:object-center"
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-white/40" />
@@ -42,14 +42,21 @@ export default async function HomePage() {
               </div>
             </RevealOnScroll>
             <RevealOnScroll revealIndex={1} yOffset={24} className="block w-full">
-              <h1 className="mt-6 font-heading text-[32px] font-semibold leading-[1.05] text-[#002403] sm:text-[44px] md:text-[52px]">
-                TODO EL GOLF DE ENTRE RÍOS,
-                <br />
-                EN UN SOLO LUGAR.
+              <h1 className="mt-6 text-balance font-heading text-[30px] font-semibold leading-[1.12] text-[#002403] sm:text-[40px] sm:leading-[1.08] md:text-[52px] md:leading-[1.05]">
+                <span className="md:hidden">
+                  TODO EL GOLF DE ENTRE RÍOS
+                  <br />
+                  EN UN SOLO LUGAR
+                </span>
+                <span className="hidden md:inline">
+                  TODO EL GOLF DE ENTRE RÍOS,
+                  <br />
+                  EN UN SOLO LUGAR.
+                </span>
               </h1>
             </RevealOnScroll>
             <RevealOnScroll revealIndex={2} yOffset={18} className="block w-full">
-              <p className="mx-auto mt-4 max-w-xl text-base font-medium text-[#123c15] sm:text-lg">
+              <p className="mx-auto mt-4 max-w-xl text-[0.95rem] font-medium leading-relaxed text-[#123c15] sm:text-base sm:leading-normal md:text-lg">
                 Una plataforma diseñada para jugadores, clubes y competencias de
                 toda la provincia.
               </p>
