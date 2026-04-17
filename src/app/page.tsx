@@ -14,10 +14,9 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
       <HomeScrollHash />
-      {/* Hero */}
-      <div className="relative">
+      {/* Hero: min-h asegura área visible; object-cover usa el menor zoom que cubre (recorte mínimo matemático) */}
+      <div className="relative min-h-[100svh]">
         <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
-          {/* object-cover: rellena todo el ancho/alto; recorte suave sin bandas laterales */}
           <Image
             src="/feg%20image%20(4).jpeg"
             alt="Cancha de golf"
