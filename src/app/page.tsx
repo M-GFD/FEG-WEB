@@ -15,22 +15,24 @@ export default async function HomePage() {
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
       <HomeScrollHash />
       {/* Hero: min-h asegura área visible; object-cover usa el menor zoom que cubre (recorte mínimo matemático) */}
-      <div className="relative min-h-[100svh]">
-        <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
-          <Image
-            src="/feg%20image%20(4).jpeg"
-            alt="Cancha de golf"
-            fill
-            priority
-            className="object-cover object-[50%_38%] max-md:object-[40%_50%]"
-            sizes="100vw"
-          />
-          <div className="absolute inset-0 bg-white/40" />
-        </div>
+      <div className="relative flex min-h-[100svh] flex-col">
+        {/* Imagen solo hasta arriba de la franja de resultados (no detrás del bar rojo) */}
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
+            <Image
+              src="/feg%20image%20(4).jpeg"
+              alt="Cancha de golf"
+              fill
+              priority
+              className="object-cover object-[50%_38%] max-md:object-[40%_50%]"
+              sizes="100vw"
+            />
+            <div className="absolute inset-0 bg-white/40" />
+          </div>
 
-        <Header />
+          <Header />
 
-        <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-12 sm:px-6 lg:px-8">
+          <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-12 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <RevealOnScroll
               revealIndex={0}
@@ -95,8 +97,9 @@ export default async function HomePage() {
           </div>
           </RevealOnScroll>
         </div>
+        </div>
 
-        <div className="relative bg-[#7b2b2b]">
+        <div className="relative z-10 bg-[#7b2b2b]">
           <RevealOnScroll revealIndex={4} yOffset={16} className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
           <div className="flex items-center justify-between gap-4 text-white">
             <p className="min-w-0 flex-1 pr-2 font-heading text-xs font-semibold leading-snug sm:text-sm md:text-base lg:text-lg">
