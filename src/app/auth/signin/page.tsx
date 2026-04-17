@@ -5,6 +5,8 @@ import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
+import { FegLogo } from "@/components/layout/FegLogo";
+
 function SignInForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/gestion";
@@ -49,9 +51,12 @@ function SignInForm() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--feg-bg)] px-4 py-10">
       <div className="w-full max-w-sm rounded-2xl border border-[var(--feg-green)]/12 bg-white p-8 shadow-[0_20px_60px_rgba(0,36,3,0.1)]">
-        <p className="text-center text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--feg-green-2)]">
-          FEG
-        </p>
+        <div className="flex justify-center">
+          <FegLogo
+            size="nav"
+            className="h-16 object-center sm:h-[4.25rem]"
+          />
+        </div>
         <h1 className="mt-2 text-center font-heading text-2xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
           Iniciar sesión
         </h1>
