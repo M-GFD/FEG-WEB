@@ -59,24 +59,24 @@ export default async function HomePage() {
 
         <div className="relative mx-auto max-w-7xl px-6 pb-12 lg:px-8">
           <RevealOnScroll revealIndex={3} yOffset={32} className="ml-auto w-full max-w-sm">
-          <div className="overflow-hidden rounded-2xl bg-white/45 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+          <div className="overflow-hidden rounded-2xl bg-gradient-to-b from-white/45 to-[var(--feg-green)] backdrop-blur-md shadow-[0_20px_60px_rgba(0,36,3,0.22)]">
             <div className="p-5">
-              <div className="inline-flex rounded-full bg-[#7c1b1b] px-3 py-1.5 text-[10px] font-semibold text-white">
+              <div className="inline-flex rounded-full bg-[#7c1b1b] px-3 py-1.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-black/10">
                 Próximo torneo
               </div>
-              <div className="mt-3 text-xl font-semibold text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
+              <div className="mt-3 text-xl font-semibold leading-snug text-white [text-shadow:0_2px_12px_rgba(0,36,3,0.55),0_1px_3px_rgba(0,36,3,0.85)]">
                 Los Bretes — Colón
               </div>
-              <div className="mt-1 text-xl font-bold text-[#f3e12b]">
+              <div className="mt-1 text-xl font-bold text-[var(--feg-yellow)] [text-shadow:0_2px_10px_rgba(0,36,3,0.5),0_1px_2px_rgba(0,36,3,0.75)]">
                 9 de Mayo
               </div>
               <div className="mt-3 flex items-center gap-2">
-                <div className="rounded-full border border-white/40 px-3 py-1.5 text-xs font-semibold text-white">
+                <div className="rounded-full border border-[var(--feg-green)]/25 bg-white/55 px-3 py-1.5 text-xs font-semibold text-[var(--feg-ink)] backdrop-blur-sm">
                   18H Mayores
                 </div>
                 <Link
                   href="/calendario"
-                  className="ml-auto inline-flex items-center justify-center rounded-full bg-[#e7f4e7] px-3 py-1.5 text-xs font-semibold text-[#146638] hover:brightness-95"
+                  className="ml-auto inline-flex items-center justify-center rounded-full bg-[var(--feg-yellow)] px-3 py-1.5 text-xs font-semibold text-[var(--feg-ink)] shadow-sm ring-1 ring-[var(--feg-green)]/15 transition hover:brightness-95"
                 >
                   Calendario →
                 </Link>
