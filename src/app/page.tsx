@@ -108,13 +108,13 @@ export default async function HomePage() {
 
         <div className="relative z-10 bg-[#7b2b2b]">
           <RevealOnScroll revealIndex={4} yOffset={16} className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
-          <div className="flex items-center justify-between gap-4 text-white">
-            <p className="min-w-0 flex-1 pr-2 font-heading text-xs font-semibold leading-snug sm:text-sm md:text-base lg:text-lg">
+          <div className="flex flex-wrap items-center gap-3 text-white">
+            <p className="min-w-0 font-heading text-xs font-semibold leading-snug sm:text-sm md:text-base lg:text-lg">
               RESULTADOS DISPONIBLES-VILLA ELISA - SENIOR CABALLEROS
             </p>
             <Link
               href="/ranking"
-              className="shrink-0 rounded-full bg-[#f3e12b] px-5 py-2 text-sm font-semibold text-[#146638] hover:brightness-95"
+              className="rounded-full bg-[#f3e12b] px-5 py-2 text-sm font-semibold text-[#146638] hover:brightness-95"
             >
               Ranking →
             </Link>
