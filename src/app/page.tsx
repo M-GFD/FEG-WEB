@@ -243,10 +243,10 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-white/35" />
         </div>
         <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
-          <div className="relative grid gap-8 rounded-3xl border border-white/35 bg-white/20 p-8 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,36,3,0.14)] ring-1 ring-white/25 lg:grid-cols-12 lg:items-center lg:p-10">
+          <div className="relative grid gap-8 rounded-3xl border border-white/35 bg-white/14 p-8 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,36,3,0.18)] ring-1 ring-white/25 lg:grid-cols-12 lg:items-center lg:p-10">
             <div className="lg:col-span-7">
               <RevealOnScroll revealIndex={0} yOffset={18}>
-                <p className="inline-flex rounded-full border border-white/30 bg-white/10 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] backdrop-blur">
+                <p className="inline-flex rounded-full border border-white/30 bg-white/8 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] backdrop-blur">
                   Federación
                 </p>
                 <h2 className="mt-4 font-heading text-[28px] font-semibold leading-[1.1] text-white sm:text-[36px] [text-shadow:0_2px_12px_rgba(0,36,3,0.55),0_1px_3px_rgba(0,36,3,0.85)]">
@@ -261,7 +261,7 @@ export default async function HomePage() {
             <div className="lg:col-span-5">
               <RevealOnScroll revealIndex={1} yOffset={18}>
                 <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                  <div className="rounded-2xl border border-white/25 bg-white/10 p-4 backdrop-blur-sm">
+                  <div className="rounded-2xl border border-white/25 bg-white/8 p-4 backdrop-blur-sm">
                     <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
                       Objetivos
                     </div>
@@ -270,7 +270,7 @@ export default async function HomePage() {
                       Rankings, resultados y gestión clara.
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-white/25 bg-white/10 p-4 backdrop-blur-sm">
+                  <div className="rounded-2xl border border-white/25 bg-white/8 p-4 backdrop-blur-sm">
                     <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
                       Rol regional
                     </div>
@@ -279,7 +279,7 @@ export default async function HomePage() {
                       Calendario, clubes y circuito federado.
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-white/25 bg-white/10 p-4 backdrop-blur-sm">
+                  <div className="rounded-2xl border border-white/25 bg-white/8 p-4 backdrop-blur-sm">
                     <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
                       Visión
                     </div>
