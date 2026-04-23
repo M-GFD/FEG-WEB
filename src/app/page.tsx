@@ -77,7 +77,7 @@ export default async function HomePage() {
                 yOffset={32}
                 className="ml-auto w-full max-w-sm shrink-0"
               >
-                <div className="w-full overflow-hidden rounded-2xl border border-white/35 bg-white/20 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,36,3,0.18)] ring-1 ring-white/25">
+                <div className="w-full overflow-hidden rounded-2xl border border-white/35 bg-white/20 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,36,3,0.18)] ring-1 ring-white/25">
                   <div className="p-5">
                     <div className="inline-flex rounded-full bg-[#7c1b1b] px-3 py-1.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-black/10">
                       Próximo torneo
@@ -243,7 +243,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-white/35" />
         </div>
         <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
-          <div className="relative grid gap-8 rounded-3xl border border-white/35 bg-white/20 p-8 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,36,3,0.14)] ring-1 ring-white/25 lg:grid-cols-12 lg:items-center lg:p-10">
+          <div className="relative grid gap-8 rounded-3xl border border-white/35 bg-white/20 p-8 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,36,3,0.14)] ring-1 ring-white/25 lg:grid-cols-12 lg:items-center lg:p-10">
             <div className="lg:col-span-7">
               <RevealOnScroll revealIndex={0} yOffset={18}>
                 <p className="inline-flex rounded-full border border-white/30 bg-white/10 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] backdrop-blur">
