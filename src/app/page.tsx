@@ -20,12 +20,13 @@ export default async function HomePage() {
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
             <Image
-              src="/feg%20image%20(4).jpeg"
+              src="/hero%20gif.gif"
               alt="Cancha de golf"
               fill
               priority
               className="object-cover object-[50%_38%] max-md:object-[40%_50%]"
               sizes="100vw"
+              unoptimized
             />
             <div className="absolute inset-0 bg-white/40" />
           </div>
