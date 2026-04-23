@@ -199,9 +199,9 @@ export default async function HomePage() {
                         {n.excerpt}
                       </p>
                     )}
-                    <div className="mt-3 flex justify-end">
-                      <span className="inline-flex h-7 w-9 items-center justify-center rounded-full bg-[var(--feg-green)] text-sm text-white">
-                        →
+                    <div className="mt-4 flex justify-end">
+                      <span className="inline-flex items-center justify-center rounded-full bg-[var(--feg-green)] px-3 py-1.5 text-xs font-semibold text-white transition group-hover:brightness-110">
+                        Ver más →
                       </span>
                     </div>
                   </div>
