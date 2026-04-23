@@ -225,6 +225,73 @@ export default async function HomePage() {
 
       {/* Próximos torneos */}
       <UpcomingTournamentsTabs />
+
+      {/* Institucional (resumen) */}
+      <section className="bg-[var(--feg-bg)]">
+        <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
+          <div className="grid gap-8 rounded-3xl border border-[var(--feg-green)]/12 bg-white p-8 shadow-[0_20px_60px_rgba(0,36,3,0.08)] lg:grid-cols-12 lg:items-center lg:p-10">
+            <div className="lg:col-span-7">
+              <RevealOnScroll revealIndex={0} yOffset={18}>
+                <p className="inline-flex rounded-full border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)]">
+                  Federación
+                </p>
+                <h2 className="mt-4 font-heading text-[28px] font-semibold leading-[1.1] text-[var(--feg-ink)] sm:text-[36px]">
+                  INSTITUCIONAL
+                </h2>
+                <p className="mt-4 max-w-xl text-base font-medium leading-relaxed text-[var(--feg-green)] sm:text-lg">
+                  Conocé la misión de la FEG, su rol regional y la visión para el desarrollo del golf entrerriano.
+                </p>
+              </RevealOnScroll>
+            </div>
+
+            <div className="lg:col-span-5">
+              <RevealOnScroll revealIndex={1} yOffset={18}>
+                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+                  <div className="rounded-2xl border border-[var(--feg-green)]/12 bg-[var(--feg-bg)] p-4">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]">
+                      Objetivos
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-[var(--feg-ink)]">Regulación y transparencia</div>
+                    <div className="mt-1 text-[13px] leading-relaxed text-[var(--feg-green)]/85">
+                      Rankings, resultados y gestión clara.
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-[var(--feg-green)]/12 bg-[var(--feg-bg)] p-4">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]">
+                      Rol regional
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-[var(--feg-ink)]">Coordinación provincial</div>
+                    <div className="mt-1 text-[13px] leading-relaxed text-[var(--feg-green)]/85">
+                      Calendario, clubes y circuito federado.
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-[var(--feg-green)]/12 bg-[var(--feg-bg)] p-4">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]">
+                      Visión
+                    </div>
+                    <div className="mt-2 text-sm font-semibold text-[var(--feg-ink)]">Desarrollo del deporte</div>
+                    <div className="mt-1 text-[13px] leading-relaxed text-[var(--feg-green)]/85">
+                      Crecimiento, jóvenes y proyección.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <Link
+                    href="/institucional"
+                    className="inline-flex items-center justify-center rounded-full bg-[var(--feg-ink)] px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
+                  >
+                    Ver institucional →
+                  </Link>
+                  <p className="text-sm font-medium text-[var(--feg-green)]/70">
+                    Información sobre misión, rol y visión.
+                  </p>
+                </div>
+              </RevealOnScroll>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
