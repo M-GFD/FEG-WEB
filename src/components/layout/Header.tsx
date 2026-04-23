@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { href: "/clubes", label: "Clubes" },
   { href: "/torneos", label: "Torneos" },
   { href: "/#proximos-torneos", label: "Calendario" },
-  { href: "/institucional", label: "Institucional" },
+  { href: "/#institucional", label: "Institucional" },
 ] as const;
 
 export function Header() {

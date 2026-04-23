@@ -227,7 +227,10 @@ export default async function HomePage() {
       <UpcomingTournamentsTabs />
 
       {/* Institucional (resumen) */}
-      <section className="bg-[var(--feg-bg)]">
+      <section
+        id="institucional"
+        className="scroll-mt-28 bg-[var(--feg-bg)] lg:scroll-mt-24"
+      >
         <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
           <div className="grid gap-8 rounded-3xl border border-[var(--feg-green)]/12 bg-white p-8 shadow-[0_20px_60px_rgba(0,36,3,0.08)] lg:grid-cols-12 lg:items-center lg:p-10">
             <div className="lg:col-span-7">
@@ -281,7 +284,7 @@ export default async function HomePage() {
                     href="/institucional"
                     className="inline-flex items-center justify-center rounded-full bg-[var(--feg-ink)] px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
                   >
-                    Ver institucional →
+                    Ver más →
                   </Link>
                   <p className="text-sm font-medium text-[var(--feg-green)]/70">
                     Información sobre misión, rol y visión.
