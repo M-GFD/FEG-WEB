@@ -243,54 +243,63 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-white/35" />
         </div>
         <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
-          <div className="relative grid gap-8 rounded-3xl border border-white/35 bg-white/14 p-8 backdrop-blur-md shadow-[0_20px_60px_rgba(0,36,3,0.18)] ring-1 ring-white/25 lg:grid-cols-12 lg:items-center lg:p-10">
-            <div className="lg:col-span-7">
-              <RevealOnScroll revealIndex={0} yOffset={18}>
-                <p className="inline-flex rounded-full border border-white/30 bg-white/8 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] backdrop-blur-sm">
-                  Federación
-                </p>
-                <h2 className="mt-4 font-heading text-[28px] font-semibold leading-[1.1] text-white sm:text-[36px] [text-shadow:0_2px_12px_rgba(0,36,3,0.55),0_1px_3px_rgba(0,36,3,0.85)]">
-                  INSTITUCIONAL
-                </h2>
-                <p className="mt-4 max-w-xl text-base font-medium leading-relaxed text-white/85 sm:text-lg [text-shadow:0_2px_12px_rgba(0,36,3,0.42),0_1px_3px_rgba(0,36,3,0.7)]">
-                  Conocé la misión de la FEG, su rol regional y la visión para el desarrollo del golf entrerriano.
-                </p>
-              </RevealOnScroll>
-            </div>
+          <div className="relative rounded-3xl border border-white/35 bg-white/14 p-8 backdrop-blur-sm shadow-[0_20px_60px_rgba(0,36,3,0.18)] ring-1 ring-white/25 lg:p-10">
+            <RevealOnScroll revealIndex={0} yOffset={18} className="block">
+              <div className="flex flex-col gap-8 lg:min-h-[360px]">
+                {/* Arriba a la izquierda */}
+                <div className="max-w-2xl">
+                  <p className="inline-flex rounded-full border border-white/30 bg-white/8 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] backdrop-blur-[1px]">
+                    Federación
+                  </p>
+                  <h2 className="mt-4 font-heading text-[28px] font-semibold leading-[1.1] text-white sm:text-[36px] [text-shadow:0_2px_12px_rgba(0,36,3,0.55),0_1px_3px_rgba(0,36,3,0.85)]">
+                    INSTITUCIONAL
+                  </h2>
+                  <p className="mt-4 max-w-xl text-base font-medium leading-relaxed text-white/85 sm:text-lg [text-shadow:0_2px_12px_rgba(0,36,3,0.42),0_1px_3px_rgba(0,36,3,0.7)]">
+                    Conocé la misión de la FEG, su rol regional y la visión para el desarrollo del golf entrerriano.
+                  </p>
+                </div>
 
-            <div className="lg:col-span-5">
-              <RevealOnScroll revealIndex={1} yOffset={18}>
-                <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                  <div className="rounded-2xl border border-white/25 bg-white/8 p-4 backdrop-blur-[2px]">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
-                      Objetivos
+                {/* Centro: 3 bloques distribuidos a lo ancho */}
+                <div className="flex flex-1 items-center">
+                  <div className="grid w-full gap-3 sm:grid-cols-3">
+                    <div className="rounded-2xl border border-white/25 bg-white/8 p-4 backdrop-blur-[1px]">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
+                        Objetivos
+                      </div>
+                      <div className="mt-2 text-sm font-semibold text-white [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
+                        Regulación y transparencia
+                      </div>
+                      <div className="mt-1 text-[13px] leading-relaxed text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.3)]">
+                        Rankings, resultados y gestión clara.
+                      </div>
                     </div>
-                    <div className="mt-2 text-sm font-semibold text-white [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">Regulación y transparencia</div>
-                    <div className="mt-1 text-[13px] leading-relaxed text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.3)]">
-                      Rankings, resultados y gestión clara.
+                    <div className="rounded-2xl border border-white/25 bg-white/8 p-4 backdrop-blur-[1px]">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
+                        Rol regional
+                      </div>
+                      <div className="mt-2 text-sm font-semibold text-white [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
+                        Coordinación provincial
+                      </div>
+                      <div className="mt-1 text-[13px] leading-relaxed text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.3)]">
+                        Calendario, clubes y circuito federado.
+                      </div>
                     </div>
-                  </div>
-                  <div className="rounded-2xl border border-white/25 bg-white/8 p-4 backdrop-blur-[2px]">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
-                      Rol regional
-                    </div>
-                    <div className="mt-2 text-sm font-semibold text-white [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">Coordinación provincial</div>
-                    <div className="mt-1 text-[13px] leading-relaxed text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.3)]">
-                      Calendario, clubes y circuito federado.
-                    </div>
-                  </div>
-                  <div className="rounded-2xl border border-white/25 bg-white/8 p-4 backdrop-blur-[2px]">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
-                      Visión
-                    </div>
-                    <div className="mt-2 text-sm font-semibold text-white [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">Desarrollo del deporte</div>
-                    <div className="mt-1 text-[13px] leading-relaxed text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.3)]">
-                      Crecimiento, jóvenes y proyección.
+                    <div className="rounded-2xl border border-white/25 bg-white/8 p-4 backdrop-blur-[1px]">
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
+                        Visión
+                      </div>
+                      <div className="mt-2 text-sm font-semibold text-white [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
+                        Desarrollo del deporte
+                      </div>
+                      <div className="mt-1 text-[13px] leading-relaxed text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.3)]">
+                        Crecimiento, jóvenes y proyección.
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-6 flex">
+                {/* Botón: mantener ubicación (abajo a la derecha) */}
+                <div className="flex">
                   <Link
                     href="/institucional"
                     className="ml-auto inline-flex items-center justify-center rounded-full bg-[var(--feg-ink)] px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
@@ -298,8 +307,8 @@ export default async function HomePage() {
                     Ver más →
                   </Link>
                 </div>
-              </RevealOnScroll>
-            </div>
+              </div>
+            </RevealOnScroll>
           </div>
         </div>
       </section>
