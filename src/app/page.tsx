@@ -248,10 +248,7 @@ export default async function HomePage() {
               <div className="flex flex-col gap-8 lg:min-h-[360px]">
                 {/* Arriba a la izquierda */}
                 <div className="max-w-2xl">
-                  <p className="inline-flex rounded-full border border-white/30 bg-white/8 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] backdrop-blur-[1px]">
-                    Federación
-                  </p>
-                  <h2 className="mt-4 font-heading text-[28px] font-semibold leading-[1.1] text-white sm:text-[36px] [text-shadow:0_2px_12px_rgba(0,36,3,0.55),0_1px_3px_rgba(0,36,3,0.85)]">
+                  <h2 className="font-heading text-[28px] font-semibold leading-[1.1] text-white sm:text-[36px] [text-shadow:0_2px_12px_rgba(0,36,3,0.55),0_1px_3px_rgba(0,36,3,0.85)]">
                     INSTITUCIONAL
                   </h2>
                   <p className="mt-4 max-w-xl text-base font-medium leading-relaxed text-white/85 sm:text-lg [text-shadow:0_2px_12px_rgba(0,36,3,0.42),0_1px_3px_rgba(0,36,3,0.7)]">
