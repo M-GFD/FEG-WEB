@@ -114,7 +114,7 @@ export default async function HomePage() {
             </p>
             <Link
               href="/ranking"
-              className="rounded-full bg-[#f3e12b] px-5 py-2 text-sm font-semibold text-[#146638] hover:brightness-95"
+              className="rounded-full bg-[#f3e12b] px-3 py-1.5 text-xs font-semibold text-[#146638] transition hover:brightness-95"
             >
               Ranking →
             </Link>
