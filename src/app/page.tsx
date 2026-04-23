@@ -110,7 +110,7 @@ export default async function HomePage() {
           <RevealOnScroll revealIndex={4} yOffset={16} className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
           <div className="flex flex-wrap items-center gap-3 text-white">
             <p className="min-w-0 font-heading text-xs font-semibold leading-snug sm:text-sm md:text-base lg:text-lg">
-              RESULTADOS DISPONIBLES-VILLA ELISA - SENIOR CABALLEROS
+              RESULTADOS DISPONIBLES: Villa Elisa (Senior Caballeros)
             </p>
             <Link
               href="/ranking"
