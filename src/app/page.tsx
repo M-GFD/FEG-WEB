@@ -77,7 +77,7 @@ export default async function HomePage() {
                 yOffset={32}
                 className="ml-auto w-full max-w-sm shrink-0"
               >
-                <div className="w-full overflow-hidden rounded-2xl bg-gradient-to-b from-white/45 to-[var(--feg-green)] backdrop-blur-md shadow-[0_20px_60px_rgba(0,36,3,0.22)]">
+                <div className="w-full overflow-hidden rounded-2xl border border-white/35 bg-white/20 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,36,3,0.18)] ring-1 ring-white/25">
                   <div className="p-5">
                     <div className="inline-flex rounded-full bg-[#7c1b1b] px-3 py-1.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-black/10">
                       Próximo torneo
