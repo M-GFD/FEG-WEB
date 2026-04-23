@@ -279,16 +279,13 @@ export default async function HomePage() {
                   </div>
                 </div>
 
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-6 flex">
                   <Link
                     href="/institucional"
-                    className="inline-flex items-center justify-center rounded-full bg-[var(--feg-ink)] px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
+                    className="ml-auto inline-flex items-center justify-center rounded-full bg-[var(--feg-ink)] px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
                   >
                     Ver más →
                   </Link>
-                  <p className="text-sm font-medium text-[var(--feg-green)]/70">
-                    Información sobre misión, rol y visión.
-                  </p>
                 </div>
               </RevealOnScroll>
             </div>
