@@ -173,7 +173,7 @@ export default async function HomePage() {
                 >
                 <Link
                   href={`/noticias/${n.slug}`}
-                  className="group relative block overflow-hidden rounded-[18px] bg-white shadow-[0_14px_40px_rgba(0,0,0,0.1)] transition hover:-translate-y-0.5"
+                  className="group relative flex h-full flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_14px_40px_rgba(0,0,0,0.1)] transition hover:-translate-y-0.5"
                 >
                   <div className="relative h-[200px]">
                     <Image
@@ -184,7 +184,7 @@ export default async function HomePage() {
                       sizes="(max-width: 1024px) 100vw, 33vw"
                     />
                   </div>
-                  <div className="p-4">
+                  <div className="flex flex-1 flex-col p-4">
                     <time
                       dateTime={cardWhen.dateTime}
                       className="text-[11px] font-semibold uppercase tracking-wide text-[var(--feg-green-2)]/80"
@@ -194,12 +194,10 @@ export default async function HomePage() {
                     <h3 className="mt-2 font-heading text-lg font-semibold leading-snug text-[var(--feg-ink)] line-clamp-2">
                       {n.title}
                     </h3>
-                    {n.excerpt && (
-                      <p className="mt-2 text-[13px] font-medium leading-relaxed text-[var(--feg-green)] line-clamp-2">
-                        {n.excerpt}
-                      </p>
-                    )}
-                    <div className="mt-4 flex justify-end">
+                    <p className="mt-2 min-h-[2.6rem] text-[13px] font-medium leading-relaxed text-[var(--feg-green)] line-clamp-2">
+                      {n.excerpt || ""}
+                    </p>
+                    <div className="mt-auto flex justify-end pt-4">
                       <span className="inline-flex items-center justify-center rounded-full bg-[var(--feg-green)] px-3 py-1.5 text-xs font-semibold text-white transition group-hover:brightness-110">
                         Ver más →
                       </span>
