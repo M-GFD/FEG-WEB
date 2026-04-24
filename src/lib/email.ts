@@ -6,8 +6,14 @@ function getResendClient() {
   return new Resend(apiKey);
 }
 
+/**
+ * Resend exige un remitente de un dominio verificado, o en pruebas `onboarding@resend.dev`.
+ * Si EMAIL_FROM no está definido y el envío falla por dominio, configurá EMAIL_FROM en Vercel / .env.local.
+ */
 function getFrom(): string {
-  return process.env.EMAIL_FROM || "FEG <no-reply@fegolf.ar>";
+  const explicit = process.env.EMAIL_FROM?.trim();
+  if (explicit) return explicit;
+  return "FEG <onboarding@resend.dev>";
 }
 
 type SendEmailArgs = {
@@ -20,7 +26,7 @@ type SendEmailArgs = {
 async function sendEmail({ to, subject, html, text }: SendEmailArgs) {
   const resend = getResendClient();
   if (!resend) {
-    return { ok: false as const, error: "Falta RESEND_API_KEY" };
+    return { ok: false as const, error: "Falta RESEND_API_KEY en el entorno del servidor." };
   }
 
   const from = getFrom();
@@ -33,8 +39,13 @@ async function sendEmail({ to, subject, html, text }: SendEmailArgs) {
     text,
   });
 
-  if ((result as { error?: unknown }).error) {
-    return { ok: false as const, error: "No se pudo enviar el email" };
+  if (result.error) {
+    const detail = result.error.message || result.error.name || "Error de Resend";
+    console.error("[email] Resend:", result.error);
+    return {
+      ok: false as const,
+      error: `No se pudo enviar el correo: ${detail}`,
+    };
   }
 
   return { ok: true as const };
