@@ -79,7 +79,7 @@ export default async function HomePage() {
               >
                 <div className="w-full overflow-hidden rounded-2xl border border-white/35 bg-white/20 backdrop-blur-xl ring-1 ring-white/25">
                   <div className="p-5">
-                    <div className="inline-flex rounded-full bg-[#7c1b1b] px-3 py-1.5 text-[10px] font-semibold text-white ring-1 ring-black/10">
+                    <div className="inline-flex rounded-full bg-[var(--feg-green)] px-3 py-1.5 text-[10px] font-semibold text-white ring-1 ring-black/10">
                       Próximo torneo
                     </div>
                     <div className="mt-3 text-xl font-semibold leading-snug text-white">
