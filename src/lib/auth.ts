@@ -112,7 +112,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             throw new Error("EMAIL_NOT_VERIFIED");
           }
           return user;
-        } catch {
+        } catch (e) {
+          if (e instanceof Error && e.message === "EMAIL_NOT_VERIFIED") {
+            throw e;
+          }
           return null;
         }
       },
