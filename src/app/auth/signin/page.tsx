@@ -156,12 +156,6 @@ function SignInForm() {
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-[var(--feg-green)]">
-          ¿No tienes cuenta?{" "}
-          <Link href="/auth/signup" className="font-medium text-[var(--feg-green-2)] underline-offset-2 hover:underline">
-            Registrarse
-          </Link>
-        </p>
         <p className="mt-2 text-center text-sm text-[var(--feg-green)]">
           <Link href="/" className="font-medium underline-offset-2 hover:text-[var(--feg-ink)] hover:underline">
             Volver al inicio

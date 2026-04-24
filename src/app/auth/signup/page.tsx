@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signUp, getClubsForSignup } from "./actions";
 import { FegLogo } from "@/components/layout/FegLogo";
+import { useSession } from "next-auth/react";
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Federación (Admin)",
@@ -19,10 +20,16 @@ export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [clubs, setClubs] = useState<{ id: string; name: string }[]>([]);
   const [selectedRole, setSelectedRole] = useState<string>("");
+  const { status, data: session } = useSession();
+  const isAdmin = status === "authenticated" && session?.user?.role === "ADMIN";
 
   useEffect(() => {
+    if (status === "authenticated" && !isAdmin) {
+      router.replace("/auth/unauthorized");
+      return;
+    }
     getClubsForSignup().then(setClubs);
-  }, []);
+  }, [isAdmin, router, status]);
 
   async function handleSubmit(formData: FormData) {
     setError(null);
@@ -43,7 +50,15 @@ export default function SignUpPage() {
         <h1 className="mt-2 text-center font-heading text-2xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
           Crear cuenta
         </h1>
-        <form action={handleSubmit} className="mt-6 space-y-4">
+        {status === "loading" ? (
+          <p className="mt-4 text-center text-sm text-[var(--feg-green)]">Cargando…</p>
+        ) : !isAdmin ? (
+          <p className="mt-4 text-center text-sm text-[var(--feg-green)]">
+            No autorizado.
+          </p>
+        ) : (
+          <div className="mt-6">
+            <form action={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="role"
@@ -161,13 +176,17 @@ export default function SignUpPage() {
           >
             Registrarse
           </button>
-        </form>
-        <p className="mt-4 text-center text-sm text-[var(--feg-green)]">
-          ¿Ya tienes cuenta?{" "}
-          <Link href="/auth/signin" className="font-medium text-[var(--feg-green-2)] underline-offset-2 hover:underline">
-            Iniciar sesión
-          </Link>
-        </p>
+            </form>
+            <p className="mt-4 text-center text-sm text-[var(--feg-green)]">
+              <Link
+                href="/auth/signin"
+                className="font-medium text-[var(--feg-green-2)] underline-offset-2 hover:underline"
+              >
+                Volver a iniciar sesión
+              </Link>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

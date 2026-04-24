@@ -1,6 +1,7 @@
 "use server";
 
 import { hash } from "bcryptjs";
+import { auth } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getClubs } from "@/lib/data";
 import { z } from "zod";
@@ -39,6 +40,11 @@ export async function getClubsForSignup() {
 }
 
 export async function signUp(formData: FormData) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return { ok: false, error: "No autorizado" };
+  }
+
   const parsed = signUpSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
