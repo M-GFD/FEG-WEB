@@ -259,7 +259,7 @@ export default async function HomePage() {
                 {/* Centro: 3 bloques distribuidos a lo ancho */}
                 <div className="flex flex-1 items-center">
                   <div className="grid w-full gap-3 sm:grid-cols-3">
-                    <div className="rounded-2xl border border-white/25 bg-white/8 p-4 backdrop-blur-[1px]">
+                    <div className="rounded-2xl border border-white/15 bg-[var(--feg-green)] p-4">
                       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
                         Objetivos
                       </div>
@@ -270,7 +270,7 @@ export default async function HomePage() {
                         Rankings, resultados y gestión clara.
                       </div>
                     </div>
-                    <div className="rounded-2xl border border-white/25 bg-white/8 p-4 backdrop-blur-[1px]">
+                    <div className="rounded-2xl border border-white/15 bg-[var(--feg-green)] p-4">
                       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
                         Rol regional
                       </div>
@@ -281,7 +281,7 @@ export default async function HomePage() {
                         Calendario, clubes y circuito federado.
                       </div>
                     </div>
-                    <div className="rounded-2xl border border-white/25 bg-white/8 p-4 backdrop-blur-[1px]">
+                    <div className="rounded-2xl border border-white/15 bg-[var(--feg-green)] p-4">
                       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
                         Visión
                       </div>
