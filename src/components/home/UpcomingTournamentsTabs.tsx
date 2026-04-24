@@ -170,7 +170,7 @@ export function UpcomingTournamentsTabs() {
               src={imageUrl}
               alt={`${selected.sede} — ${selected.fecha}`}
               fill
-              className="object-cover transition-opacity duration-500"
+              className="object-cover object-top transition-opacity duration-500"
               sizes="(max-width: 1024px) 100vw, 66vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
