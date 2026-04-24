@@ -28,11 +28,12 @@ const CALENDARIO_2026: CalendarEntry[] = [
 ];
 
 const PLACEHOLDER_IMAGES = [
-  "/feg image (1).jpeg",
-  "/feg image (2).jpeg",
-  "/feg image (3).jpeg",
-  "/feg image (4).jpeg",
-  "/feg image (5).jpeg",
+  "/feg%20image%20(1).jpg",
+  "/feg%20image%20(2).jpg",
+  "/feg%20image%20(3).jpg",
+  "/feg%20image%20(4).jpg",
+  "/feg%20image%20(5).jpeg",
+  "/feg%20image%20(6).jpg",
 ];
 
 function getNextDates(count: number): CalendarEntry[] {
@@ -170,7 +171,7 @@ export function UpcomingTournamentsTabs() {
               src={imageUrl}
               alt={`${selected.sede} — ${selected.fecha}`}
               fill
-              className="object-cover object-top transition-opacity duration-500"
+              className="object-cover object-center transition-opacity duration-500"
               sizes="(max-width: 1024px) 100vw, 66vw"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
