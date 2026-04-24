@@ -4,6 +4,9 @@ import { hash } from "bcryptjs";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getClubs } from "@/lib/data";
 import { z } from "zod";
+import { createUserToken } from "@/lib/user-tokens";
+import { getBaseUrl } from "@/lib/app-url";
+import { sendVerifyEmail } from "@/lib/email";
 
 const ROLES = ["ADMIN", "CLUB", "PRESS", "DIRECTOR", "TREASURER"] as const;
 
@@ -86,6 +89,16 @@ export async function signUp(formData: FormData) {
 
   if (error) {
     return { ok: false, error: error.message };
+  }
+
+  // Verificación obligatoria por email
+  try {
+    const { token } = await createUserToken({ purpose: "verify", email, ttlMs: 24 * 60 * 60 * 1000 });
+    const baseUrl = getBaseUrl();
+    const verifyUrl = `${baseUrl}/auth/verify-email?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
+    await sendVerifyEmail({ to: email, verifyUrl });
+  } catch {
+    // No bloqueamos el alta por fallas de envío, pero el login seguirá bloqueado hasta verificar.
   }
 
   return { ok: true };
