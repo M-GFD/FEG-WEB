@@ -45,5 +45,7 @@ node -e "require('bcryptjs').hash('tu_contraseña', 12).then(console.log)"
 Para que lleguen los correos de verificación o recuperación de contraseña, configurá en el entorno de despliegue:
 
 - `RESEND_API_KEY`
-- `EMAIL_FROM`
-- `NEXTAUTH_URL` o `NEXT_PUBLIC_APP_URL`
+- `EMAIL_FROM` — en Resend debe ser un remitente de un **dominio verificado**. Si no definís `EMAIL_FROM`, el código usa `FEG <onboarding@resend.dev>` (válido para pruebas con Resend).
+- `NEXTAUTH_URL` o `NEXT_PUBLIC_APP_URL` — URL pública de la app (los links del mail apuntan acá; en Vercel debe ser tu dominio `https://...`, no `localhost`).
+
+Si pedís recuperación de contraseña y no llega nada: revisá **spam**, el dashboard de **Resend** (estado del envío) y los **logs del servidor**; si falta la API key o el `from` es inválido, el formulario de “Olvidé mi contraseña” mostrará un mensaje de error.

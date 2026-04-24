@@ -12,7 +12,11 @@ export default function ForgotPasswordPage() {
   async function onSubmit(formData: FormData) {
     setError(null);
     try {
-      await requestPasswordReset(formData);
+      const res = await requestPasswordReset(formData);
+      if (!res.ok) {
+        setError(res.error ?? "No se pudo enviar el correo. Revisá la configuración de email del servidor.");
+        return;
+      }
       setSent(true);
     } catch {
       setError("No se pudo procesar la solicitud. Intenta de nuevo.");

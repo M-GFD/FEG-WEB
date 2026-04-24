@@ -17,13 +17,13 @@ export async function requestPasswordReset(formData: FormData) {
 
   const email = parsed.data.email;
 
-  // Respuesta siempre OK para evitar enumeración de usuarios.
   const supabase = getSupabaseAdmin();
   const user =
     supabase
       ? (await supabase.from("User").select("id,email").eq("email", email).maybeSingle()).data
       : await prisma.user.findUnique({ where: { email }, select: { id: true, email: true } }).catch(() => null);
 
+  // Misma respuesta si el email no está registrado (no enumerar cuentas).
   if (!user) return { ok: true as const };
 
   const { token } = await createUserToken({
@@ -35,7 +35,12 @@ export async function requestPasswordReset(formData: FormData) {
   const baseUrl = getBaseUrl();
   const resetUrl = `${baseUrl}/auth/reset-password?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
 
-  await sendResetPasswordEmail({ to: email, resetUrl });
+  const sent = await sendResetPasswordEmail({ to: email, resetUrl });
+  if (!sent.ok) {
+    console.error("[forgot-password] no se envió el email:", sent.error);
+    return { ok: false as const, error: sent.error };
+  }
+
   return { ok: true as const };
 }
 
