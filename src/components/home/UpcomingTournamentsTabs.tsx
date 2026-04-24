@@ -151,7 +151,7 @@ export function UpcomingTournamentsTabs() {
 
             <Link
               href="/calendario"
-              className="mt-6 inline-flex text-sm font-semibold text-[var(--feg-yellow)] underline-offset-2 hover:underline"
+              className="mt-6 inline-flex items-center justify-center rounded-full bg-[var(--feg-yellow)] px-7 py-3 text-sm font-semibold text-[var(--feg-green-2)] transition hover:brightness-95"
             >
               Ver calendario completo →
             </Link>
