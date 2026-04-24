@@ -41,12 +41,12 @@ export default async function HomePage() {
                   yOffset={14}
                   className="flex w-full justify-center"
                 >
-                  <div className="inline-flex items-center justify-center rounded-full bg-white/70 px-4 py-1.5 text-xs font-semibold text-[#123c15] shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+                  <div className="inline-flex items-center justify-center rounded-full border border-white/35 bg-black/30 px-4 py-1.5 text-xs font-semibold text-[#FFFFFF] shadow-[0_10px_30px_rgba(0,0,0,0.2)] backdrop-blur-sm">
                     Federación Entrerriana de Golf
                   </div>
                 </RevealOnScroll>
                 <RevealOnScroll revealIndex={1} yOffset={24} className="block w-full">
-                  <h1 className="mt-6 font-heading font-semibold leading-[1.08] text-[#002403] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[52px] md:leading-[1.05]">
+                  <h1 className="mt-6 font-heading font-semibold leading-[1.08] text-[#FFFFFF] [text-shadow:0_2px_14px_rgba(0,0,0,0.45),0_1px_4px_rgba(0,0,0,0.55)] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[52px] md:leading-[1.05]">
                     <span className="md:hidden">
                       <span className="block max-md:text-[clamp(1.56rem,7.3vw,2.46rem)] max-[380px]:text-[1.5rem]">
                         TODO EL GOLF DE ENTRE RÍOS,
@@ -63,7 +63,7 @@ export default async function HomePage() {
                   </h1>
                 </RevealOnScroll>
                 <RevealOnScroll revealIndex={2} yOffset={18} className="block w-full">
-                  <p className="mx-auto mt-4 max-w-xl text-[0.95rem] font-medium leading-relaxed text-[#123c15] sm:text-base sm:leading-normal md:text-lg">
+                  <p className="mx-auto mt-4 max-w-xl text-[0.95rem] font-medium leading-relaxed text-[#FFFFFF] [text-shadow:0_1px_10px_rgba(0,0,0,0.42)] sm:text-base sm:leading-normal md:text-lg">
                     Una plataforma diseñada para jugadores, clubes y competencias de
                     toda la provincia.
                   </p>
