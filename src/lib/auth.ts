@@ -95,6 +95,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (!user) return null;
           const valid = await compare(password, user.password);
           if (!valid) return null;
+          if (!user.emailVerified) {
+            throw new Error("EMAIL_NOT_VERIFIED");
+          }
           return user;
         }
 
@@ -105,6 +108,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (!user) return null;
           const valid = await compare(password, user.password);
           if (!valid) return null;
+          if (!user.emailVerified) {
+            throw new Error("EMAIL_NOT_VERIFIED");
+          }
           return user;
         } catch {
           return null;

@@ -6,16 +6,22 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 import { FegLogo } from "@/components/layout/FegLogo";
+import { resendVerification } from "@/app/auth/verify-email/actions";
 
 function SignInForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/gestion";
   const registered = searchParams.get("registered") === "1";
+  const verified = searchParams.get("verified") === "1";
+  const reset = searchParams.get("reset") === "1";
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    setInfo(null);
 
     const form = e.currentTarget;
     const formData = new FormData(form);
@@ -39,6 +45,17 @@ function SignInForm() {
     });
 
     if (result?.error) {
+      if (result.error === "EMAIL_NOT_VERIFIED") {
+        setError("Tu email aún no está verificado.");
+        setBusy(true);
+        try {
+          await resendVerification(email.trim().toLowerCase());
+          setInfo("Te reenviamos el email de verificación.");
+        } finally {
+          setBusy(false);
+        }
+        return;
+      }
       setError("Email o contraseña incorrectos");
       return;
     }
@@ -63,7 +80,17 @@ function SignInForm() {
 
         {registered && (
           <p className="mb-4 mt-4 rounded-xl bg-[var(--feg-green-2)]/10 p-3 text-sm text-[var(--feg-green-2)]">
-            Cuenta creada. Ingresa con tu email y contraseña.
+            Cuenta creada. Revisá tu email para verificarla antes de ingresar.
+          </p>
+        )}
+        {verified && (
+          <p className="mb-4 mt-4 rounded-xl bg-[var(--feg-green-2)]/10 p-3 text-sm text-[var(--feg-green-2)]">
+            Email verificado. Ya podés iniciar sesión.
+          </p>
+        )}
+        {reset && (
+          <p className="mb-4 mt-4 rounded-xl bg-[var(--feg-green-2)]/10 p-3 text-sm text-[var(--feg-green-2)]">
+            Contraseña actualizada. Ya podés iniciar sesión.
           </p>
         )}
 
@@ -101,14 +128,28 @@ function SignInForm() {
               className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-4 py-2.5 text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
               placeholder="••••••••"
             />
+            <div className="mt-2 flex justify-end">
+              <Link
+                href="/auth/forgot-password"
+                className="text-sm font-medium text-[var(--feg-green-2)] underline-offset-2 hover:underline"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
           </div>
           {error && (
             <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
               {error}
             </p>
           )}
+          {info && (
+            <p className="rounded-xl bg-[var(--feg-green-2)]/10 p-3 text-sm text-[var(--feg-green-2)]">
+              {info}
+            </p>
+          )}
           <button
             type="submit"
+            disabled={busy}
             className="w-full rounded-xl bg-[var(--feg-green-2)] py-3 font-semibold text-white transition hover:brightness-95"
           >
             Entrar
