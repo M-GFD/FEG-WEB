@@ -16,7 +16,7 @@ export default async function HomePage() {
       <HomeScrollHash />
       {/* Hero: min-h asegura área visible; object-cover usa el menor zoom que cubre (recorte mínimo matemático) */}
       <div className="relative flex min-h-[100svh] flex-col">
-        {/* Imagen solo hasta arriba de la franja de resultados (no detrás del bar rojo) */}
+        {/* Imagen solo hasta arriba de la franja de resultados (no detrás del banner) */}
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
             <Image
@@ -77,15 +77,15 @@ export default async function HomePage() {
                 yOffset={32}
                 className="ml-auto w-full max-w-sm shrink-0"
               >
-                <div className="w-full overflow-hidden rounded-2xl border border-white/35 bg-white/20 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,36,3,0.18)] ring-1 ring-white/25">
+                <div className="w-full overflow-hidden rounded-2xl border border-white/35 bg-white/20 backdrop-blur-xl ring-1 ring-white/25">
                   <div className="p-5">
-                    <div className="inline-flex rounded-full bg-[#7c1b1b] px-3 py-1.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-black/10">
+                    <div className="inline-flex rounded-full bg-[#7c1b1b] px-3 py-1.5 text-[10px] font-semibold text-white ring-1 ring-black/10">
                       Próximo torneo
                     </div>
-                    <div className="mt-3 text-xl font-semibold leading-snug text-white [text-shadow:0_2px_12px_rgba(0,36,3,0.55),0_1px_3px_rgba(0,36,3,0.85)]">
+                    <div className="mt-3 text-xl font-semibold leading-snug text-white">
                       Los Bretes — Colón
                     </div>
-                    <div className="mt-1 text-xl font-bold text-[var(--feg-yellow)] [text-shadow:0_2px_10px_rgba(0,36,3,0.5),0_1px_2px_rgba(0,36,3,0.75)]">
+                    <div className="mt-1 text-xl font-bold text-[var(--feg-yellow)]">
                       9 de Mayo
                     </div>
                     <div className="mt-3 flex items-center gap-2">
@@ -106,7 +106,7 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className="relative z-10 bg-[#7b2b2b]">
+        <div className="relative z-10 bg-[var(--feg-green)]">
           <RevealOnScroll revealIndex={4} yOffset={16} className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
           <div className="flex flex-wrap items-center gap-3 text-white">
             <p className="min-w-0 font-heading text-xs font-semibold leading-snug sm:text-sm md:text-base lg:text-lg">
@@ -299,7 +299,7 @@ export default async function HomePage() {
                 <div className="flex">
                   <Link
                     href="/institucional"
-                    className="ml-auto inline-flex items-center justify-center rounded-full bg-[var(--feg-ink)] px-7 py-3 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
+                    className="ml-auto inline-flex items-center justify-center rounded-full bg-[var(--feg-yellow)] px-7 py-3 text-sm font-semibold text-[var(--feg-green-2)] transition hover:brightness-95"
                   >
                     Ver más →
                   </Link>
