@@ -240,7 +240,7 @@ export default async function HomePage() {
             sizes="100vw"
             unoptimized
           />
-          <div className="absolute inset-0 bg-white/35" />
+          <div className="absolute inset-0 bg-black/25" />
         </div>
         <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
           <div className="relative rounded-3xl border border-white/35 bg-white/14 p-8 backdrop-blur-sm shadow-[0_20px_60px_rgba(0,36,3,0.18)] ring-1 ring-white/25 lg:p-10">
