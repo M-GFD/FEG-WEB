@@ -8,18 +8,21 @@ Si no podés entrar con tu correo, suele deberse a una de estas causas:
 2. El usuario existe pero **`role` no es `ADMIN`** (el panel de “Crear usuario” solo crea CLUB / PRENSA / TESORERÍA).
 3. **`emailVerified` es null** (cuenta sin verificar).
 
-## Opción recomendada: script local
+## Opción recomendada: script local (`npm run bootstrap-admin`)
 
-Con `DATABASE_URL` configurado (por ejemplo en `.env` o `.env.local`):
+El script intenta primero **Supabase por API** (`NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`), igual que el alta de usuarios en la app. Así evitás depender de `DATABASE_URL` cuando Prisma devuelve errores como **`FATAL: Tenant or user not found`** (cadena de Postgres incorrecta o pooler).
 
-En **PowerShell**:
+En **PowerShell** (en la raíz del repo):
 
 ```powershell
 cd ruta\al\repo\web-feg
+npm install
 $env:ADMIN_EMAIL="tu@email.com"
 $env:ADMIN_PASSWORD="tu_contraseña_segura"
-node scripts/bootstrap-admin.cjs
+npm run bootstrap-admin
 ```
+
+Si Supabase no está configurado en el `.env`, el script intentará **Prisma** con `DATABASE_URL`.
 
 Luego entrá a `/auth/signin` con ese email y contraseña y abrí `/gestion`.
 
