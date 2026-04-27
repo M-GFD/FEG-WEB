@@ -3,10 +3,10 @@
 import { usePathname } from "next/navigation";
 import { Footer } from "@/components/layout/Footer";
 
-/** Oculta el footer en el panel interno (`/gestion`); en el resto del sitio se muestra. */
+/** Oculta el footer en el panel interno (`/gestion`) y en la pantalla temporal de desarrollo. */
 export function FooterPublicOnly() {
   const pathname = usePathname();
-  if (pathname?.startsWith("/gestion")) {
+  if (pathname?.startsWith("/gestion") || pathname?.startsWith("/sitio-en-desarrollo")) {
     return null;
   }
   return <Footer />;
