@@ -40,14 +40,6 @@ export default function ForgotPasswordPage() {
         {sent ? (
           <div className="mt-6 rounded-xl bg-[var(--feg-green-2)]/10 p-4 text-sm text-[var(--feg-green-2)]">
             Si el email existe, te enviamos un enlace para restablecer la contraseña.
-            <div className="mt-3">
-              <Link
-                href="/auth/signin"
-                className="font-semibold text-[var(--feg-green-2)] underline-offset-2 hover:underline"
-              >
-                Volver a iniciar sesión →
-              </Link>
-            </div>
           </div>
         ) : (
           <form action={onSubmit} className="mt-6 space-y-4">
@@ -78,7 +70,10 @@ export default function ForgotPasswordPage() {
         )}
 
         <p className="mt-4 text-center text-sm text-[var(--feg-green)]">
-          <Link href="/auth/signin" className="font-medium underline-offset-2 hover:text-[var(--feg-ink)] hover:underline">
+          <Link
+            href="/auth/signin"
+            className="font-medium underline-offset-2 hover:text-[var(--feg-ink)] hover:underline"
+          >
             Volver a iniciar sesión
           </Link>
         </p>
