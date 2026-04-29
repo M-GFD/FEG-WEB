@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function InstitucionalPage() {
   return (
@@ -238,27 +239,21 @@ export default function InstitucionalPage() {
                   </p>
 
                   <div className="mt-4 rounded-2xl border border-[var(--feg-green)]/12 bg-[var(--feg-bg)] p-4">
-                    <p className="text-sm font-semibold text-[var(--feg-ink)]">Cuadro de cupos (extracto del PDF)</p>
-                    <pre className="mt-3 whitespace-pre-wrap break-words rounded-xl bg-white p-4 text-[11px] leading-relaxed text-[var(--feg-ink)] shadow-[0_14px_40px_rgba(0,36,3,0.06)]">
-TOP 50 TOP 35 \tTOP 25 TOP 15 \tTOP 60 TOP 8 \tTOP 25 Top 6
-FEDERACION o AREA METROPOLITANA
-SUR \t1 \t1 \t1 \t3 \t0 \t0 \t1 \t1 \t1 \t2 \t3 \t1 \t1
-MAR Y SIERRAS \t2 \t1 \t2 \t5 \t0 \t0 \t1 \t1 \t2 \t1 \t3 \t2 \t1 \t3
-FENOBA \t4 \t1 \t3 \t8 \t1 \t0 \t1 \t3 \t2 \t5 \t0 \t1 \t1
-NOROESTE \t0 \t0 \t1 \t1 \t0 \t0 \t1 \t1 \t0 \t1 \t1 \t0 \t1 \t1
-NORDESTE \t0 \t0 \t1 \t1 \t0 \t0 \t1 \t1 \t2 \t2 \t0 \t1 \t1
-CENTRO-CUYO \t1 \t0 \t1 \t0 \t0 \t1 \t1 \t2 \t1 \t3 \t0 \t1 \t1
-CORDOBA \t5 \t5 \t1 \t11 \t2 \t2 \t1 \t5 \t2 \t1 \t1 \t4 \t2 \t1 \t1 \t4
-METROPOLITANA \t4 \t3 \t2 \t9 \t4 \t2 \t1 \t7 \t3 \t1 \t4 \t3 \t1 \t4
-LITORAL \t0 \t0 \t1 \t1 \t0 \t0 \t1 \t1 \t0 \t1 \t1 \t0 \t1 \t1
-SUR DEL LITORAL \t1 \t3 \t1 \t5 \t0 \t1 \t1 \t1 \t1 \t2 \t1 \t1 \t2
-Adicional Fed/Club sede \t1 \t1 \t1 \t1
-SUB TOTALES \t18 \t14 \t3 \t10 \t46 \t7 \t5 \t6 \t2 \t21 \t16 \t8 \t1 \t3 \t29 \t9 \t4 \t5 \t1 \t20
-TOTAL \t116
-Nota: Los cuatro restantes lugares, hasta completar los 120 del field, están reservados para jugadores/as extranjeros en la eventualidad de que participen.
-                    </pre>
+                    <p className="text-sm font-semibold text-[var(--feg-ink)]">Cuadro de cupos (según PDF)</p>
+                    <div className="mt-3 overflow-x-auto rounded-xl bg-white p-3 shadow-[0_14px_40px_rgba(0,36,3,0.06)]">
+                      <div className="min-w-[900px]">
+                        <Image
+                          src="/reglamento-cupos.png"
+                          alt="Cuadro de cupos por federación (Juveniles y Prejuveniles 2026)"
+                          width={1535}
+                          height={425}
+                          className="h-auto w-full"
+                          priority={false}
+                        />
+                      </div>
+                    </div>
                     <p className="mt-3 text-xs text-[var(--feg-green)]">
-                      Nota: el cuadro completo y el detalle de columnas se encuentra en el PDF descargable.
+                      Tip: en celular podés desplazar horizontalmente. Para el detalle completo, descargá el PDF.
                     </p>
                   </div>
 
