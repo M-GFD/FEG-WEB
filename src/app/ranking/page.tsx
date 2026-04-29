@@ -16,9 +16,17 @@ export default async function RankingPage() {
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
             Competencia
           </p>
-          <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
-            Ranking {year}
-          </h1>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
+              Ranking {year}
+            </h1>
+            <Link
+              href="/institucional#reglamento"
+              className="inline-flex items-center justify-center rounded-full bg-[var(--feg-ink)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
+            >
+              Reglamento juveniles/prejuveniles →
+            </Link>
+          </div>
         </header>
         <div className="overflow-x-auto rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.08)]">
           <table className="w-full text-left text-sm">
