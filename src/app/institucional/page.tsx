@@ -140,13 +140,6 @@ export default function InstitucionalPage() {
                 </p>
               </div>
 
-              <div className="mt-6 rounded-2xl border border-[var(--feg-green)]/15 bg-[var(--feg-green-2)]/5 p-5">
-                <p className="font-heading text-lg italic leading-relaxed text-[var(--feg-ink)]/80">
-                  “Que cada jugador entrerriano, sin importar el club ni la ciudad, tenga las mismas posibilidades de competir,
-                  crecer y representar a la provincia.”
-                </p>
-              </div>
-
               <div className="mt-6">
                 <Link
                   href="/"
