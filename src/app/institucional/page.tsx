@@ -1,7 +1,78 @@
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import Link from "next/link";
-import Image from "next/image";
+
+type CuposGroup = {
+  aLabel: string;
+  bLabel: string;
+  title: string;
+};
+
+type CuposRow = {
+  fed: string;
+  values: number[]; // 4 grupos * 5 columnas = 20
+};
+
+const CUPOS_GROUPS: CuposGroup[] = [
+  { title: "M18 - Varones", aLabel: "2008-2009", bLabel: "2010" },
+  { title: "M18 - Mujeres", aLabel: "2008-2009", bLabel: "2010" },
+  { title: "M15 - Varones", aLabel: "2011 y post.", bLabel: "TNJ" },
+  { title: "M15 - Mujeres", aLabel: "2011 y post.", bLabel: "TNJ" },
+];
+
+const CUPOS_LINES: string[] = [
+  "SUR 1 1 1 3 0 0 1 1 1 2 3 1 1",
+  "MAR Y SIERRAS 2 1 2 5 0 0 1 1 2 1 3 2 1 3",
+  "FENOBA 4 1 3 8 1 0 1 3 2 5 0 1 1",
+  "NOROESTE 0 0 1 1 0 0 1 1 0 1 1 0 1 1",
+  "NORDESTE 0 0 1 1 0 0 1 1 2 2 0 1 1",
+  "CENTRO-CUYO 1 0 1 0 0 1 1 2 1 3 0 1 1",
+  "CORDOBA 5 5 1 11 2 2 1 5 2 1 1 4 2 1 1 4",
+  "METROPOLITANA 4 3 2 9 4 2 1 7 3 1 4 3 1 4",
+  "LITORAL 0 0 1 1 0 0 1 1 0 1 1 0 1 1",
+  "SUR DEL LITORAL 1 3 1 5 0 1 1 1 1 2 1 1 2",
+  "Adicional Fed/Club sede 1 1 1 1",
+  "SUB TOTALES 18 14 3 10 46 7 5 6 2 21 16 8 1 3 29 9 4 5 1 20",
+];
+
+function parseCuposLine(line: string): CuposRow {
+  const parts = line.trim().split(/\s+/);
+  const nums = parts.filter((p) => /^\d+$/.test(p)).map((p) => Number(p));
+  const fed = parts.slice(0, parts.length - nums.length).join(" ");
+
+  // Construye 20 valores (4 grupos * 5 columnas). El PDF omite algunos campos (p. ej. "cupo adicional" cuando es 0).
+  // Estrategia: para cada grupo consumimos 5, 4 o 3 números, dejando que el resto pueda completarse.
+  const out: number[] = [];
+  let idx = 0;
+  for (let g = 0; g < 4; g++) {
+    const groupsLeft = 4 - (g + 1);
+    const remaining = nums.length - idx;
+    const minNeeded = groupsLeft * 3;
+
+    let take = 3;
+    if (remaining - 5 >= minNeeded) take = 5;
+    else if (remaining - 4 >= minNeeded) take = 4;
+
+    const chunk = nums.slice(idx, idx + take);
+    idx += take;
+
+    if (take === 5) {
+      out.push(chunk[0] ?? 0, chunk[1] ?? 0, chunk[2] ?? 0, chunk[3] ?? 0, chunk[4] ?? 0);
+    } else if (take === 4) {
+      // Asumimos que falta "cupo adicional" (0)
+      out.push(chunk[0] ?? 0, chunk[1] ?? 0, chunk[2] ?? 0, 0, chunk[3] ?? 0);
+    } else {
+      // Asumimos que faltan "cupo mínimo" y "cupo adicional" (0)
+      out.push(chunk[0] ?? 0, chunk[1] ?? 0, 0, 0, chunk[2] ?? 0);
+    }
+  }
+
+  // Si quedó algo sin consumir (pasa con líneas cortas), lo ignoramos; si faltó, rellenamos.
+  while (out.length < 20) out.push(0);
+  return { fed, values: out.slice(0, 20) };
+}
+
+const CUPOS_ROWS: CuposRow[] = CUPOS_LINES.map(parseCuposLine);
 
 export default function InstitucionalPage() {
   return (
@@ -240,17 +311,104 @@ export default function InstitucionalPage() {
 
                   <div className="mt-4 rounded-2xl border border-[var(--feg-green)]/12 bg-[var(--feg-bg)] p-4">
                     <p className="text-sm font-semibold text-[var(--feg-ink)]">Cuadro de cupos (según PDF)</p>
-                    <div className="mt-3 overflow-x-auto rounded-xl bg-white p-3 shadow-[0_14px_40px_rgba(0,36,3,0.06)]">
-                      <div className="min-w-[900px]">
-                        <Image
-                          src="/reglamento-cupos.png"
-                          alt="Cuadro de cupos por federación (Juveniles y Prejuveniles 2026)"
-                          width={1535}
-                          height={425}
-                          className="h-auto w-full"
-                          priority={false}
-                        />
-                      </div>
+                    <div className="mt-3 overflow-x-auto rounded-xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.06)]">
+                      <table className="min-w-[1100px] w-full text-left text-xs">
+                        <thead>
+                          <tr className="bg-[var(--feg-green-soft)] text-white">
+                            <th
+                              rowSpan={2}
+                              className="sticky left-0 z-10 w-[230px] bg-[var(--feg-green-soft)] px-4 py-3 font-heading text-[11px] font-semibold uppercase tracking-wider"
+                            >
+                              Federación / Área Metropolitana
+                            </th>
+                            {CUPOS_GROUPS.map((g) => (
+                              <th
+                                key={g.title}
+                                colSpan={5}
+                                className="px-3 py-3 text-center font-heading text-[11px] font-semibold uppercase tracking-wider"
+                              >
+                                {g.title}
+                              </th>
+                            ))}
+                          </tr>
+                          <tr className="bg-[var(--feg-green-soft)]/95 text-white">
+                            {CUPOS_GROUPS.flatMap((g) => [
+                              <th
+                                key={`${g.title}-a`}
+                                className="px-3 py-2 text-center font-heading text-[10px] font-semibold uppercase tracking-wider"
+                              >
+                                {g.aLabel}
+                              </th>,
+                              <th
+                                key={`${g.title}-b`}
+                                className="px-3 py-2 text-center font-heading text-[10px] font-semibold uppercase tracking-wider"
+                              >
+                                {g.bLabel}
+                              </th>,
+                              <th
+                                key={`${g.title}-min`}
+                                className="px-3 py-2 text-center font-heading text-[10px] font-semibold uppercase tracking-wider"
+                              >
+                                Cupo mínimo
+                              </th>,
+                              <th
+                                key={`${g.title}-add`}
+                                className="px-3 py-2 text-center font-heading text-[10px] font-semibold uppercase tracking-wider"
+                              >
+                                Cupo adicional
+                              </th>,
+                              <th
+                                key={`${g.title}-total`}
+                                className="px-3 py-2 text-center font-heading text-[10px] font-semibold uppercase tracking-wider"
+                              >
+                                Total
+                              </th>,
+                            ])}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {CUPOS_ROWS.map((row) => {
+                            const isSubtotal = row.fed.toUpperCase().includes("SUB TOTALES");
+                            const isAdicional = row.fed.toUpperCase().includes("ADICIONAL");
+                            return (
+                              <tr
+                                key={row.fed}
+                                className={
+                                  "border-t border-[var(--feg-green)]/10 " +
+                                  (isSubtotal ? "bg-[var(--feg-bg)]" : "bg-white") +
+                                  " hover:bg-[var(--feg-bg)]/70"
+                                }
+                              >
+                                <td
+                                  className={
+                                    "sticky left-0 z-10 whitespace-nowrap px-4 py-2.5 font-heading text-[11px] font-semibold uppercase tracking-wide " +
+                                    (isSubtotal ? "bg-[var(--feg-bg)] text-[var(--feg-ink)]" : "bg-white text-[var(--feg-ink)]")
+                                  }
+                                >
+                                  {row.fed}
+                                </td>
+                                {row.values.map((v, i) => {
+                                  const isTotalCol = (i + 1) % 5 === 0;
+                                  const muted = v === 0 && !isTotalCol;
+                                  return (
+                                    <td
+                                      key={`${row.fed}-${i}`}
+                                      className={
+                                        "px-3 py-2.5 text-center font-medium " +
+                                        (isTotalCol ? "font-semibold text-[var(--feg-ink)]" : "text-[var(--feg-green)]") +
+                                        (muted ? " opacity-50" : "") +
+                                        (isAdicional ? " italic" : "")
+                                      }
+                                    >
+                                      {v || (isTotalCol ? 0 : "—")}
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
                     <p className="mt-3 text-xs text-[var(--feg-green)]">
                       Tip: en celular podés desplazar horizontalmente. Para el detalle completo, descargá el PDF.
