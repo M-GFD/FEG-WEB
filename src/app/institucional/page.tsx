@@ -139,15 +139,6 @@ export default function InstitucionalPage() {
                   deporte organizado, cuando es bien gestionado, es también un camino de pertenencia e identidad.
                 </p>
               </div>
-
-              <div className="mt-6">
-                <Link
-                  href="/"
-                  className="inline-flex items-center justify-center rounded-full bg-[var(--feg-ink)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
-                >
-                  Volver al inicio →
-                </Link>
-              </div>
             </div>
           </section>
 
