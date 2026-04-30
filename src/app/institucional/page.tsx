@@ -313,7 +313,7 @@ export default function InstitucionalPage() {
                     <p className="text-sm font-semibold text-[var(--feg-ink)]">Cuadro de cupos (según PDF)</p>
                     <div className="mt-3 max-w-full overflow-hidden rounded-xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.06)]">
                       <div className="w-full max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain">
-                      <table className="min-w-[1100px] w-full text-left text-xs">
+                      <table className="w-max min-w-full text-left text-xs">
                         <thead>
                           <tr className="bg-[var(--feg-green-soft)] text-white">
                             <th
