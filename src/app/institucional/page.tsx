@@ -311,109 +311,94 @@ export default function InstitucionalPage() {
 
                   <div className="mt-4 rounded-2xl border border-[var(--feg-green)]/12 bg-[var(--feg-bg)] p-4">
                     <p className="text-sm font-semibold text-[var(--feg-ink)]">Cuadro de cupos (según PDF)</p>
-                    <div className="mt-3 max-w-full overflow-hidden rounded-xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.06)]">
-                      <div className="w-full max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain">
-                      <table className="w-max min-w-full text-left text-xs">
-                        <thead>
-                          <tr className="bg-[var(--feg-green-soft)] text-white">
-                            <th
-                              rowSpan={2}
-                              className="sticky left-0 z-10 w-[230px] bg-[var(--feg-green-soft)] px-4 py-3 font-heading text-[11px] font-semibold uppercase tracking-wider"
-                            >
-                              Federación / Área Metropolitana
-                            </th>
-                            {CUPOS_GROUPS.map((g) => (
-                              <th
-                                key={g.title}
-                                colSpan={5}
-                                className="px-3 py-3 text-center font-heading text-[11px] font-semibold uppercase tracking-wider"
-                              >
-                                {g.title}
-                              </th>
-                            ))}
-                          </tr>
-                          <tr className="bg-[var(--feg-green-soft)]/95 text-white">
-                            {CUPOS_GROUPS.flatMap((g) => [
-                              <th
-                                key={`${g.title}-a`}
-                                className="px-3 py-2 text-center font-heading text-[10px] font-semibold uppercase tracking-wider"
-                              >
-                                {g.aLabel}
-                              </th>,
-                              <th
-                                key={`${g.title}-b`}
-                                className="px-3 py-2 text-center font-heading text-[10px] font-semibold uppercase tracking-wider"
-                              >
-                                {g.bLabel}
-                              </th>,
-                              <th
-                                key={`${g.title}-min`}
-                                className="px-3 py-2 text-center font-heading text-[10px] font-semibold uppercase tracking-wider"
-                              >
-                                Cupo mínimo
-                              </th>,
-                              <th
-                                key={`${g.title}-add`}
-                                className="px-3 py-2 text-center font-heading text-[10px] font-semibold uppercase tracking-wider"
-                              >
-                                Cupo adicional
-                              </th>,
-                              <th
-                                key={`${g.title}-total`}
-                                className="px-3 py-2 text-center font-heading text-[10px] font-semibold uppercase tracking-wider"
-                              >
-                                Total
-                              </th>,
-                            ])}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {CUPOS_ROWS.map((row) => {
-                            const isSubtotal = row.fed.toUpperCase().includes("SUB TOTALES");
-                            const isAdicional = row.fed.toUpperCase().includes("ADICIONAL");
-                            return (
-                              <tr
-                                key={row.fed}
-                                className={
-                                  "border-t border-[var(--feg-green)]/10 " +
-                                  (isSubtotal ? "bg-[var(--feg-bg)]" : "bg-white") +
-                                  " hover:bg-[var(--feg-bg)]/70"
-                                }
-                              >
-                                <td
-                                  className={
-                                    "sticky left-0 z-10 whitespace-nowrap px-4 py-2.5 font-heading text-[11px] font-semibold uppercase tracking-wide " +
-                                    (isSubtotal ? "bg-[var(--feg-bg)] text-[var(--feg-ink)]" : "bg-white text-[var(--feg-ink)]")
-                                  }
-                                >
-                                  {row.fed}
-                                </td>
-                                {row.values.map((v, i) => {
-                                  const isTotalCol = (i + 1) % 5 === 0;
-                                  const muted = v === 0 && !isTotalCol;
+                    <div className="mt-3 grid gap-4 lg:grid-cols-2">
+                      {CUPOS_GROUPS.map((g, groupIndex) => (
+                        <div
+                          key={g.title}
+                          className="overflow-hidden rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.06)]"
+                        >
+                          <div className="border-b border-[var(--feg-green)]/10 bg-[var(--feg-green-soft)] px-4 py-3 text-white">
+                            <p className="font-heading text-xs font-semibold uppercase tracking-wider">
+                              {g.title}
+                            </p>
+                            <p className="mt-1 text-[11px] text-white/85">
+                              Ranking 2025
+                            </p>
+                          </div>
+
+                          <div className="w-full">
+                            <table className="w-full table-fixed text-left text-xs">
+                              <thead className="bg-[var(--feg-bg)]">
+                                <tr className="text-[10px] font-semibold uppercase tracking-wider text-[var(--feg-green-2)]">
+                                  <th className="w-[42%] px-3 py-2 font-heading text-[10px]">
+                                    Federación / Área
+                                  </th>
+                                  <th className="w-[10%] px-2 py-2 text-center font-heading">
+                                    {g.aLabel}
+                                  </th>
+                                  <th className="w-[10%] px-2 py-2 text-center font-heading">
+                                    {g.bLabel}
+                                  </th>
+                                  <th className="w-[12%] px-2 py-2 text-center font-heading">
+                                    Mín.
+                                  </th>
+                                  <th className="w-[12%] px-2 py-2 text-center font-heading">
+                                    Adic.
+                                  </th>
+                                  <th className="w-[14%] px-2 py-2 text-center font-heading">
+                                    Total
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {CUPOS_ROWS.map((row) => {
+                                  const isSubtotal = row.fed.toUpperCase().includes("SUB TOTALES");
+                                  const isAdicional = row.fed.toUpperCase().includes("ADICIONAL");
+                                  const base = groupIndex * 5;
+                                  const v0 = row.values[base] ?? 0;
+                                  const v1 = row.values[base + 1] ?? 0;
+                                  const vMin = row.values[base + 2] ?? 0;
+                                  const vAdd = row.values[base + 3] ?? 0;
+                                  const vTot = row.values[base + 4] ?? 0;
+
                                   return (
-                                    <td
-                                      key={`${row.fed}-${i}`}
+                                    <tr
+                                      key={`${g.title}-${row.fed}`}
                                       className={
-                                        "px-3 py-2.5 text-center font-medium " +
-                                        (isTotalCol ? "font-semibold text-[var(--feg-ink)]" : "text-[var(--feg-green)]") +
-                                        (muted ? " opacity-50" : "") +
-                                        (isAdicional ? " italic" : "")
+                                        "border-t border-[var(--feg-green)]/10 " +
+                                        (isSubtotal ? "bg-[var(--feg-bg)]" : "bg-white") +
+                                        " hover:bg-[var(--feg-bg)]/70"
                                       }
                                     >
-                                      {v || (isTotalCol ? 0 : "—")}
-                                    </td>
+                                      <td className="px-3 py-2 font-heading text-[11px] font-semibold uppercase tracking-wide text-[var(--feg-ink)]">
+                                        <span className={isAdicional ? "italic" : ""}>{row.fed}</span>
+                                      </td>
+                                      <td className={"px-2 py-2 text-center font-medium " + (v0 ? "text-[var(--feg-green)]" : "text-[var(--feg-green)]/40")}>
+                                        {v0 || "—"}
+                                      </td>
+                                      <td className={"px-2 py-2 text-center font-medium " + (v1 ? "text-[var(--feg-green)]" : "text-[var(--feg-green)]/40")}>
+                                        {v1 || "—"}
+                                      </td>
+                                      <td className={"px-2 py-2 text-center font-medium " + (vMin ? "text-[var(--feg-green)]" : "text-[var(--feg-green)]/40")}>
+                                        {vMin || "—"}
+                                      </td>
+                                      <td className={"px-2 py-2 text-center font-medium " + (vAdd ? "text-[var(--feg-green)]" : "text-[var(--feg-green)]/40")}>
+                                        {vAdd || "—"}
+                                      </td>
+                                      <td className="px-2 py-2 text-center font-semibold text-[var(--feg-ink)]">
+                                        {vTot}
+                                      </td>
+                                    </tr>
                                   );
                                 })}
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                      </div>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                     <p className="mt-3 text-xs text-[var(--feg-green)]">
-                      Tip: en celular podés desplazar horizontalmente. Para el detalle completo, descargá el PDF.
+                      Nota: el detalle y notas complementarias se encuentran en el PDF descargable.
                     </p>
                   </div>
 
