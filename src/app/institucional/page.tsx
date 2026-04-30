@@ -311,7 +311,8 @@ export default function InstitucionalPage() {
 
                   <div className="mt-4 rounded-2xl border border-[var(--feg-green)]/12 bg-[var(--feg-bg)] p-4">
                     <p className="text-sm font-semibold text-[var(--feg-ink)]">Cuadro de cupos (según PDF)</p>
-                    <div className="mt-3 overflow-x-auto rounded-xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.06)]">
+                    <div className="mt-3 max-w-full overflow-hidden rounded-xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.06)]">
+                      <div className="w-full max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain">
                       <table className="min-w-[1100px] w-full text-left text-xs">
                         <thead>
                           <tr className="bg-[var(--feg-green-soft)] text-white">
@@ -409,6 +410,7 @@ export default function InstitucionalPage() {
                           })}
                         </tbody>
                       </table>
+                      </div>
                     </div>
                     <p className="mt-3 text-xs text-[var(--feg-green)]">
                       Tip: en celular podés desplazar horizontalmente. Para el detalle completo, descargá el PDF.
