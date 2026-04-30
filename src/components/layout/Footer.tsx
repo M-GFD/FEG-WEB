@@ -8,10 +8,10 @@ export function Footer() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <FegLogoLink size="footer" className="ring-offset-white" />
           <div
-            className="flex-1 max-w-md rounded-2xl border border-[var(--feg-green)]/12 bg-[var(--feg-bg)] px-4 py-4 font-sans sm:max-w-lg"
+            className="w-full flex-1 rounded-2xl border border-[var(--feg-green)]/12 bg-[var(--feg-bg)] px-4 py-4 font-sans sm:px-5 md:px-6"
             aria-label="Información legal y de contacto"
           >
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]">
                   Contacto
@@ -20,7 +20,17 @@ export function Footer() {
                   <p>Federación Entrerriana de Golf</p>
                   <p>+54 (343) 555-1234</p>
                   <p>contacto@feg.ar</p>
-                  <p>Paraná, Entre Ríos (AR)</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]">
+                  Sede
+                </p>
+                <div className="mt-2 space-y-1 text-sm text-[var(--feg-green)]">
+                  <p>San Martín 1234 (ej.)</p>
+                  <p>Paraná, Entre Ríos</p>
+                  <p>C.P. 3100 (ej.)</p>
+                  <p>Lun a Vie · 9:00–17:00 (ej.)</p>
                 </div>
               </div>
               <div>
