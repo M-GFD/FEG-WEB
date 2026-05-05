@@ -26,15 +26,13 @@ export function Header() {
           <div className="hidden h-full items-center justify-between gap-3 md:flex">
             <div className="flex min-w-0 shrink-0 items-center gap-2">
               <FegLogoLink size="nav" />
-              {/* Wordmark al lado del logo: alto = al del logo (h-14), 3 renglones */}
-              <div
+              {/* Wordmark al lado del logo: 1 renglón, Urbanist regular, blanco, centrado verticalmente */}
+              <span
                 aria-hidden
-                className="flex h-14 select-none flex-col justify-between font-heading text-[12px] font-semibold uppercase leading-[1.05] tracking-tight text-[#FFFFFF] [text-shadow:0_1px_3px_rgba(0,0,0,0.45)]"
+                className="select-none whitespace-nowrap text-right font-sans text-sm font-normal leading-none text-[#FFFFFF] [text-shadow:0_1px_3px_rgba(0,0,0,0.45)]"
               >
-                <span>Federación</span>
-                <span>Entrerriana</span>
-                <span>de Golf</span>
-              </div>
+                Federación Entrerriana de Golf
+              </span>
             </div>
 
             <div className="shrink-0">
