@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { FegLogoLink } from "@/components/layout/FegLogo";
+import { FegLogo } from "@/components/layout/FegLogo";
 import { NavSearch } from "@/components/layout/NavSearch";
 
 /**
@@ -33,14 +34,20 @@ export function HeaderDesktopRail() {
 
   return (
     <div className="hidden h-full items-center justify-between gap-3 md:flex">
-      <div ref={leftRef} className="flex min-w-0 shrink-0 items-center gap-2">
-        <FegLogoLink size="nav" />
-        <span
-          aria-hidden
-          className="select-none whitespace-nowrap text-right font-sans text-base font-normal leading-none text-[#FFFFFF] [text-shadow:0_1px_3px_rgba(0,0,0,0.45)]"
+      <div ref={leftRef} className="min-w-0 shrink-0">
+        <Link
+          href="/"
+          aria-label="Inicio · Federación Entrerriana de Golf"
+          className="relative z-10 inline-flex shrink-0 items-center gap-2 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123c15]/40 focus-visible:ring-offset-2"
         >
-          Federación Entrerriana de Golf
-        </span>
+          <FegLogo size="nav" />
+          <span
+            aria-hidden
+            className="select-none whitespace-nowrap text-right font-sans text-base font-normal leading-none text-[#FFFFFF] [text-shadow:0_1px_3px_rgba(0,0,0,0.45)]"
+          >
+            Federación Entrerriana de Golf
+          </span>
+        </Link>
       </div>
 
       <div
