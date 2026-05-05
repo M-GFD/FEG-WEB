@@ -37,26 +37,17 @@ export default async function HomePage() {
           <div className="relative z-10 flex min-h-0 min-w-0 w-full flex-1 flex-col justify-between">
             <div className="mx-auto w-full max-w-7xl shrink-0 px-4 pb-6 pt-12 sm:px-6 lg:px-8">
               <div className="mx-auto max-w-2xl text-center">
-                <RevealOnScroll
-                  revealIndex={0}
-                  yOffset={14}
-                  className="flex w-full justify-center"
-                >
-                  <div className="inline-flex items-center justify-center rounded-full border border-white/35 bg-black/30 px-4 py-1.5 text-xs font-semibold text-[#FFFFFF] shadow-[0_10px_30px_rgba(0,0,0,0.2)] backdrop-blur-sm">
-                    Federación Entrerriana de Golf
-                  </div>
-                </RevealOnScroll>
                 <RevealOnScroll revealIndex={1} yOffset={24} className="block w-full">
-                  <h1 className="mt-6 font-heading font-semibold leading-[1.08] text-[#FFFFFF] [text-shadow:0_2px_14px_rgba(0,0,0,0.45),0_1px_4px_rgba(0,0,0,0.55)] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[52px] md:leading-[1.05]">
+                  <h1 className="font-heading font-semibold leading-[1.08] text-[#FFFFFF] [text-shadow:0_2px_14px_rgba(0,0,0,0.45),0_1px_4px_rgba(0,0,0,0.55)] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[56px] md:leading-[1.05]">
                     <span className="md:hidden">
-                      <span className="block max-md:text-[clamp(1.56rem,7.3vw,2.46rem)] max-[380px]:text-[1.5rem]">
+                      <span className="block max-md:text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
                         TODO EL GOLF DE ENTRE RÍOS,
                       </span>
-                      <span className="block max-md:text-[clamp(1.56rem,7.3vw,2.46rem)] max-[380px]:text-[1.5rem]">
+                      <span className="block max-md:text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
                         EN UN SOLO LUGAR.
                       </span>
                     </span>
-                    <span className="hidden md:inline md:text-[52px]">
+                    <span className="hidden md:inline md:text-[56px]">
                       TODO EL GOLF DE ENTRE RÍOS,
                       <br />
                       EN UN SOLO LUGAR.
