@@ -6,6 +6,7 @@ import { formatNewsDateParts } from "@/lib/news-dates";
 import { getGolfPlaceholder } from "@/lib/placeholders";
 import { UpcomingTournamentsTabs } from "@/components/home/UpcomingTournamentsTabs";
 import { HomeScrollHash } from "@/components/home/HomeScrollHash";
+import { HeroNextTournamentCard } from "@/components/home/HeroNextTournamentCard";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 
 export default async function HomePage() {
@@ -72,36 +73,7 @@ export default async function HomePage() {
             </div>
 
             <div className="mx-auto w-full max-w-7xl shrink-0 px-4 pb-12 pt-4 sm:px-6 lg:px-8">
-              <RevealOnScroll
-                revealIndex={3}
-                yOffset={32}
-                className="ml-auto w-full max-w-sm shrink-0"
-              >
-                <div className="w-full overflow-hidden rounded-2xl border border-white/35 bg-white/20 backdrop-blur-xl ring-1 ring-white/25">
-                  <div className="p-5">
-                    <div className="inline-flex rounded-full bg-[var(--feg-green)] px-3 py-1.5 text-[10px] font-semibold text-white ring-1 ring-black/10">
-                      Próximo torneo
-                    </div>
-                    <div className="mt-3 text-xl font-semibold leading-snug text-white">
-                      Los Bretes — Colón
-                    </div>
-                    <div className="mt-1 text-xl font-bold text-[var(--feg-yellow)]">
-                      9 de Mayo
-                    </div>
-                    <div className="mt-3 flex items-center gap-2">
-                      <div className="rounded-full border border-white/35 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
-                        18H Mayores
-                      </div>
-                      <Link
-                        href="/calendario"
-                        className="ml-auto inline-flex items-center justify-center rounded-full bg-[#f3e12b] px-3 py-1.5 text-xs font-semibold text-[#146638] transition hover:brightness-95"
-                      >
-                        Calendario →
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </RevealOnScroll>
+              <HeroNextTournamentCard />
             </div>
           </div>
         </div>
