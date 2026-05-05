@@ -18,7 +18,9 @@ export function Header() {
   return (
     <div>
       <header className="fixed left-0 right-0 top-0 z-50 bg-transparent pt-4">
-        <div className="relative mx-auto h-16 max-w-7xl px-6 lg:px-8">
+        {/* Mobile: contenido limitado a max-w-7xl con su padding habitual.
+            Desktop (md+): casi full-viewport para distribuir logo / rutas / search a lo ancho. */}
+        <div className="relative mx-auto h-16 max-w-7xl px-6 md:max-w-none md:px-4 lg:px-6">
           {/* Desktop:
               - Logo a la izquierda (flujo normal)
               - Search a la derecha (flujo normal, mismo margen que el logo)
