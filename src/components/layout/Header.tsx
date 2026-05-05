@@ -29,7 +29,7 @@ export function Header() {
               {/* Wordmark al lado del logo: 1 renglón, Urbanist regular, blanco, centrado verticalmente */}
               <span
                 aria-hidden
-                className="select-none whitespace-nowrap text-right font-sans text-lg font-normal leading-none text-[#FFFFFF] [text-shadow:0_1px_3px_rgba(0,0,0,0.45)]"
+                className="select-none whitespace-nowrap text-right font-sans text-base font-normal leading-none text-[#FFFFFF] [text-shadow:0_1px_3px_rgba(0,0,0,0.45)]"
               >
                 Federación Entrerriana de Golf
               </span>
