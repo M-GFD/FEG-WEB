@@ -19,23 +19,29 @@ export function Header() {
     <div>
       <header className="fixed left-0 right-0 top-0 z-50 bg-transparent pt-4">
         <div className="relative mx-auto h-16 max-w-7xl px-6 lg:px-8">
-          {/* Desktop: 3 columnas simétricas (logo / rutas centradas / search) */}
-          <div className="hidden h-full items-center md:grid md:grid-cols-[auto,1fr,auto] md:gap-3">
-            <div className="min-w-0">
+          {/* Desktop:
+              - Logo a la izquierda (flujo normal)
+              - Search a la derecha (flujo normal, mismo margen que el logo)
+              - Cápsula de rutas absolutamente centrada respecto al viewport */}
+          <div className="hidden h-full items-center justify-between gap-3 md:flex">
+            <div className="min-w-0 shrink-0">
               <FegLogoLink size="nav" />
             </div>
 
-            <div className="flex min-w-0 justify-center">
-              <nav className="flex flex-wrap items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-                <NavLinks links={navLinks} variant="light" />
-              </nav>
-            </div>
-
-            <div className="flex justify-end">
-              <div className="flex items-center rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+            <div className="shrink-0">
+              <div className="flex items-center rounded-full bg-white/70 px-2.5 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
                 <NavSearch variant="desktop" />
               </div>
             </div>
+          </div>
+
+          <div
+            className="pointer-events-none absolute inset-0 hidden items-center justify-center md:flex"
+            aria-hidden="false"
+          >
+            <nav className="pointer-events-auto flex items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+              <NavLinks links={navLinks} variant="light" />
+            </nav>
           </div>
 
           {/* Mobile: logo izquierda, search al centro, menú derecha */}
