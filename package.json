@@ -10,7 +10,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "bootstrap-admin": "node scripts/bootstrap-admin.cjs"
+    "bootstrap-admin": "node scripts/bootstrap-admin.cjs",
+    "import-feg-players": "node scripts/import-feg-players.cjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",

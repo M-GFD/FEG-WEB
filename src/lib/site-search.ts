@@ -13,9 +13,18 @@ export type SiteSearchHit = {
   title: string;
   href: string;
   description?: string;
+  /**
+   * Metadata segura asociada al resultado.
+   * IMPORTANTE: nunca debe incluir datos sensibles (correo, DNI, teléfono).
+   */
+  meta?: {
+    handicap?: number | null;
+    club?: string | null;
+    category?: string | null;
+  };
 };
 
-const PER_TYPE = 8;
+const PER_TYPE = 10;
 const MAX_QUERY = 80;
 
 type StaticPage = {
@@ -51,14 +60,14 @@ const STATIC_PAGES: StaticPage[] = [
     keywords: ["noticias", "actualidad", "prensa", "novedades"],
   },
   {
-    title: "Calendario (inicio)",
-    href: "/#proximos-torneos",
-    keywords: ["próximos torneos", "proximos torneos", "agenda"],
+    title: "Calendario",
+    href: "/calendario",
+    keywords: ["calendario", "próximos torneos", "proximos torneos", "agenda"],
   },
   {
     title: "Torneos",
     href: "/torneos",
-    keywords: ["torneos", "calendario", "histórico", "fechas", "competencias", "galería", "galeria", "fotos", "imágenes"],
+    keywords: ["torneos", "histórico", "fechas", "competencias", "galería", "galeria", "fotos", "imágenes"],
   },
   {
     title: "Clubes",
@@ -96,13 +105,31 @@ function matchStaticPages(q: string): SiteSearchHit[] {
   return hits;
 }
 
+/**
+ * Mejor handicap “mostrable”: prefiere el index oficial (Float),
+ * sino el handicap entero histórico.
+ */
+function bestHandicap(p: {
+  handicap: number | null;
+  handicapIndex: number | null | undefined;
+}): number | null {
+  if (typeof p.handicapIndex === "number") return p.handicapIndex;
+  if (typeof p.handicap === "number" && p.handicap !== 0) return p.handicap;
+  return null;
+}
+
+function formatHandicap(h: number | null): string | null {
+  if (h == null) return null;
+  return Number.isInteger(h) ? `${h}` : h.toFixed(1);
+}
+
 async function searchViaSupabase(q: string): Promise<SiteSearchHit[] | null> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return null;
 
   const pattern = `%${q}%`;
 
-  const [newsRes, tourRes, clubRes, playerRes] = await Promise.all([
+  const [newsRes, tourRes, clubRes, playerRes, clubsByNameRes] = await Promise.all([
     supabase
       .from("News")
       .select("id,title,slug,excerpt")
@@ -117,15 +144,24 @@ async function searchViaSupabase(q: string): Promise<SiteSearchHit[] | null> {
       .limit(PER_TYPE),
     supabase
       .from("Club")
-      .select("id,name,slug,address,phone")
+      .select("id,name,slug,address,phone,code")
       .or(`name.ilike.${pattern},address.ilike.${pattern},phone.ilike.${pattern}`)
       .order("name")
       .limit(PER_TYPE),
+    // SOLO campos no sensibles. Nunca emailEnc/phoneEnc/dniEnc.
     supabase
       .from("Player")
-      .select("id,firstName,lastName,clubId")
+      .select("id,firstName,lastName,handicap,handicapIndex,clubId,category")
       .or(`firstName.ilike.${pattern},lastName.ilike.${pattern}`)
+      .order("lastName")
       .limit(PER_TYPE),
+    // Para soportar “buscar jugadores por club”: traemos clubes que matcheen el query y luego
+    // enlistamos hasta PER_TYPE jugadores por club coincidente (en una segunda consulta).
+    supabase
+      .from("Club")
+      .select("id,name")
+      .ilike("name", pattern)
+      .limit(3),
   ]);
 
   const hits: SiteSearchHit[] = [];
@@ -152,25 +188,53 @@ async function searchViaSupabase(q: string): Promise<SiteSearchHit[] | null> {
   }
 
   const clubRows = clubRes.data ?? [];
-
   for (const row of clubRows) {
-    const r = row as { name: string; address: string | null; phone: string | null };
+    const r = row as { name: string; address: string | null; phone: string | null; code: string | null };
     hits.push({
       type: "club",
       title: r.name,
       href: "/clubes",
-      description: [r.address, r.phone].filter(Boolean).join(" · ") || "Ver listado de clubes",
+      description: [r.code ? `Cód. ${r.code}` : null, r.address, r.phone]
+        .filter(Boolean)
+        .join(" · ") || "Ver listado de clubes",
     });
   }
 
-  const playerRows = playerRes.data ?? [];
-  const pClubIds = [
-    ...new Set(
-      (playerRows as { clubId: string }[])
-        .map((p) => p.clubId)
-        .filter(Boolean)
-    ),
-  ];
+  // Mapa global id→nombre para enriquecer los hits de jugador.
+  const allPlayerRows = (playerRes.data ?? []) as Array<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    handicap: number;
+    handicapIndex: number | null;
+    clubId: string;
+    category: string | null;
+  }>;
+
+  // Búsqueda adicional: jugadores cuyo CLUB matchea el query.
+  const matchClubs = (clubsByNameRes.data ?? []) as Array<{ id: string; name: string }>;
+  let playersByClubMatch: typeof allPlayerRows = [];
+  if (matchClubs.length > 0) {
+    const ids = matchClubs.map((c) => c.id);
+    const { data } = await supabase
+      .from("Player")
+      .select("id,firstName,lastName,handicap,handicapIndex,clubId,category")
+      .in("clubId", ids)
+      .order("lastName")
+      .limit(PER_TYPE * 2);
+    playersByClubMatch = (data ?? []) as typeof allPlayerRows;
+  }
+
+  const merged = [...allPlayerRows, ...playersByClubMatch];
+  const seenPlayerIds = new Set<string>();
+  const playerRows = merged.filter((p) => {
+    if (seenPlayerIds.has(p.id)) return false;
+    seenPlayerIds.add(p.id);
+    return true;
+  });
+
+  // Resolución de nombres de club (incluyendo los de la búsqueda directa por jugador).
+  const pClubIds = [...new Set(playerRows.map((p) => p.clubId).filter(Boolean))];
   let pClubNames: Record<string, string> = {};
   if (pClubIds.length) {
     const { data: pclubs } = await supabase.from("Club").select("id,name").in("id", pClubIds);
@@ -179,14 +243,22 @@ async function searchViaSupabase(q: string): Promise<SiteSearchHit[] | null> {
     );
   }
 
-  for (const row of playerRows) {
-    const r = row as { id: string; firstName: string; lastName: string; clubId: string };
-    const clubName = pClubNames[r.clubId] ?? "";
+  for (const r of playerRows) {
+    const clubName = pClubNames[r.clubId] ?? null;
+    const h = bestHandicap({ handicap: r.handicap, handicapIndex: r.handicapIndex });
+    const hStr = formatHandicap(h);
     hits.push({
       type: "player",
-      title: `${r.firstName} ${r.lastName}`,
+      title: `${r.firstName} ${r.lastName}`.trim(),
       href: `/jugadores/${r.id}`,
-      description: clubName ? `Club: ${clubName}` : "Jugador matriculado",
+      description: [clubName ? `Club: ${clubName}` : null, hStr ? `Handicap ${hStr}` : null]
+        .filter(Boolean)
+        .join(" · ") || "Jugador matriculado",
+      meta: {
+        handicap: h,
+        club: clubName,
+        category: r.category,
+      },
     });
   }
 
@@ -196,7 +268,7 @@ async function searchViaSupabase(q: string): Promise<SiteSearchHit[] | null> {
 async function searchViaPrisma(q: string): Promise<SiteSearchHit[]> {
   const hits: SiteSearchHit[] = [];
 
-  const [newsList, tours, clubs, players] = await Promise.all([
+  const [newsList, tours, clubs, players, clubMatchPlayers] = await Promise.all([
     prisma.news
       .findMany({
         where: {
@@ -231,9 +303,10 @@ async function searchViaPrisma(q: string): Promise<SiteSearchHit[]> {
             { name: { contains: q, mode: "insensitive" } },
             { address: { contains: q, mode: "insensitive" } },
             { phone: { contains: q, mode: "insensitive" } },
+            { code: { contains: q, mode: "insensitive" } },
           ],
         },
-        select: { name: true, address: true, phone: true },
+        select: { name: true, code: true, address: true, phone: true },
         orderBy: { name: "asc" },
         take: PER_TYPE,
       })
@@ -250,6 +323,26 @@ async function searchViaPrisma(q: string): Promise<SiteSearchHit[]> {
           id: true,
           firstName: true,
           lastName: true,
+          handicap: true,
+          handicapIndex: true,
+          category: true,
+          club: { select: { name: true } },
+        },
+        take: PER_TYPE,
+      })
+      .catch(() => []),
+    prisma.player
+      .findMany({
+        where: {
+          club: { name: { contains: q, mode: "insensitive" } },
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          handicap: true,
+          handicapIndex: true,
+          category: true,
           club: { select: { name: true } },
         },
         take: PER_TYPE,
@@ -278,15 +371,30 @@ async function searchViaPrisma(q: string): Promise<SiteSearchHit[]> {
       type: "club",
       title: c.name,
       href: "/clubes",
-      description: [c.address, c.phone].filter(Boolean).join(" · ") || undefined,
+      description: [c.code ? `Cód. ${c.code}` : null, c.address, c.phone]
+        .filter(Boolean)
+        .join(" · ") || undefined,
     });
   }
-  for (const p of players) {
+
+  const seen = new Set<string>();
+  for (const p of [...players, ...clubMatchPlayers]) {
+    if (seen.has(p.id)) continue;
+    seen.add(p.id);
+    const h = bestHandicap({ handicap: p.handicap, handicapIndex: p.handicapIndex });
+    const hStr = formatHandicap(h);
     hits.push({
       type: "player",
-      title: `${p.firstName} ${p.lastName}`,
+      title: `${p.firstName} ${p.lastName}`.trim(),
       href: `/jugadores/${p.id}`,
-      description: p.club?.name ? `Club: ${p.club.name}` : undefined,
+      description: [p.club?.name ? `Club: ${p.club.name}` : null, hStr ? `Handicap ${hStr}` : null]
+        .filter(Boolean)
+        .join(" · ") || undefined,
+      meta: {
+        handicap: h,
+        club: p.club?.name ?? null,
+        category: p.category ?? null,
+      },
     });
   }
 
@@ -328,7 +436,8 @@ export function labelForSearchType(t: SearchResultType): string {
 }
 
 /**
- * Búsqueda global: noticias, torneos, clubes, jugadores y secciones estáticas.
+ * Búsqueda global por noticias, torneos, clubes y jugadores.
+ * IMPORTANTE: NUNCA expone correo/DNI/teléfono.
  */
 export async function searchSite(rawQuery: string): Promise<{
   query: string;
