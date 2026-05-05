@@ -24,7 +24,9 @@ export function NavSearch({ className, variant = "desktop" }: Props) {
   }
 
   const widthClass =
-    variant === "mobile" ? "w-full min-w-0" : "w-44 sm:w-52 lg:w-56";
+    variant === "mobile"
+      ? "w-full min-w-0"
+      : "w-[clamp(10rem,18vw,22rem)]";
 
   return (
     <form
