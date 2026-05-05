@@ -1,31 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
-
-type CalendarEntry = {
-  fecha: string;
-  sede: string;
-  modalidad: string;
-};
-
-const CALENDARIO_2026: CalendarEntry[] = [
-  { fecha: "28 de marzo", sede: "Villa Elisa", modalidad: "18H Mayores" },
-  { fecha: "25 de abril", sede: "Club Social La Paz", modalidad: "18H Mayores" },
-  { fecha: "9 de mayo", sede: "Los Bretes", modalidad: "18H Mayores" },
-  { fecha: "15/16 de mayo", sede: "Interfederativo (cancha a des.)", modalidad: "36H Mayores" },
-  { fecha: "30 de mayo", sede: "Villa Libertador", modalidad: "18H Mayores" },
-  { fecha: "13 de junio", sede: "Las Colinas", modalidad: "18H Mayores" },
-  { fecha: "4 de julio", sede: "CUCU", modalidad: "18H Mayores" },
-  { fecha: "15 de agosto", sede: "Aero Club Villaguay", modalidad: "18H Mayores" },
-  { fecha: "22 de agosto", sede: "Concordia Golf Club", modalidad: "18H Mayores" },
-  { fecha: "5 de setiembre", sede: "Gualeguaychú", modalidad: "18H Mayores" },
-  { fecha: "26 de setiembre", sede: "Santa Elena", modalidad: "18H Mayores" },
-  { fecha: "24 de octubre", sede: "Colón Golf Club", modalidad: "18H Mayores" },
-  { fecha: "14 de noviembre", sede: "CAE", modalidad: "18H Mayores" },
-];
+import { getUpcomingFegDates } from "@/lib/calendario-feg";
 
 const PLACEHOLDER_IMAGES = [
   "/feg%20image%20(1).jpg",
@@ -36,36 +15,16 @@ const PLACEHOLDER_IMAGES = [
   "/feg%20image%20(6).jpg",
 ];
 
-function getNextDates(count: number): CalendarEntry[] {
-  const now = new Date();
-  const currentYear = 2026;
-
-  const MONTH_MAP: Record<string, number> = {
-    enero: 0, febrero: 1, marzo: 2, abril: 3, mayo: 4, junio: 5,
-    julio: 6, agosto: 7, setiembre: 8, septiembre: 8, octubre: 9,
-    noviembre: 10, diciembre: 11,
-  };
-
-  const withParsedDate = CALENDARIO_2026.map((entry) => {
-    const parts = entry.fecha.split(" de ");
-    const dayStr = parts[0]?.split("/")[0]?.trim();
-    const monthStr = parts[1]?.trim().toLowerCase();
-    const day = parseInt(dayStr ?? "1", 10);
-    const month = MONTH_MAP[monthStr ?? ""] ?? 0;
-    return { ...entry, _parsed: new Date(currentYear, month, day) };
-  });
-
-  const upcoming = withParsedDate
-    .filter((e) => e._parsed >= now)
-    .slice(0, count);
-
-  if (upcoming.length >= count) return upcoming;
-
-  return withParsedDate.slice(0, count);
-}
-
 export function UpcomingTournamentsTabs() {
-  const dates = getNextDates(4);
+  // Recalcula al montar (cliente) y cada cambio de día relevante,
+  // usando la fecha REAL del navegador.
+  const [now, setNow] = useState<Date>(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000 * 60 * 60); // cada hora
+    return () => clearInterval(id);
+  }, []);
+
+  const dates = useMemo(() => getUpcomingFegDates(4, now), [now]);
   const [activeIdx, setActiveIdx] = useState(0);
   const selected = dates[activeIdx] ?? dates[0];
 
@@ -184,7 +143,7 @@ export function UpcomingTournamentsTabs() {
                 {selected.sede}
               </h4>
               <p className="mt-2 text-lg font-medium text-white/85">
-                {selected.fecha} · 2026
+                {selected.fecha} · {selected.year ?? selected._parsed.getFullYear()}
               </p>
             </div>
           </div>
