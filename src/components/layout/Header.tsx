@@ -1,6 +1,7 @@
 import { FegLogoLink } from "@/components/layout/FegLogo";
 import { MobileHeaderMenu } from "@/components/layout/MobileHeaderMenu";
 import { NavLinks } from "./NavLinks";
+import { NavSearch } from "@/components/layout/NavSearch";
 
 const NAV_ITEMS = [
   { href: "/#noticias", label: "Noticias" },
@@ -25,6 +26,8 @@ export function Header() {
         <div className="pointer-events-none absolute inset-0 hidden items-center justify-center md:flex">
           <nav className="pointer-events-auto flex items-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
             <NavLinks links={navLinks} variant="light" />
+            <div className="mx-1 h-7 w-px bg-[#123c15]/10" aria-hidden />
+            <NavSearch />
           </nav>
         </div>
 
