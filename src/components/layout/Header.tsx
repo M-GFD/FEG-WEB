@@ -18,32 +18,42 @@ export function Header() {
   return (
     <div>
       <header className="fixed left-0 right-0 top-0 z-50 bg-transparent pt-4">
-      <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-6 lg:px-8">
-        <div className="min-w-0 shrink">
-          <FegLogoLink size="nav" />
-        </div>
+        <div className="relative mx-auto h-16 max-w-7xl px-6 lg:px-8">
+          {/* Desktop: 3 columnas simétricas (logo / rutas centradas / search) */}
+          <div className="hidden h-full items-center md:grid md:grid-cols-[auto,1fr,auto] md:gap-3">
+            <div className="min-w-0">
+              <FegLogoLink size="nav" />
+            </div>
 
-        <div className="pointer-events-none absolute inset-0 hidden items-center justify-center md:flex">
-          <div className="pointer-events-auto flex max-w-[calc(100%-2rem)] items-center gap-3">
-            <nav className="flex flex-wrap items-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-              <NavLinks links={navLinks} variant="light" />
-            </nav>
-            <div className="flex items-center rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-              <NavSearch variant="desktop" />
+            <div className="flex min-w-0 justify-center">
+              <nav className="flex flex-wrap items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+                <NavLinks links={navLinks} variant="light" />
+              </nav>
+            </div>
+
+            <div className="flex justify-end">
+              <div className="flex items-center rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+                <NavSearch variant="desktop" />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-2 md:flex-none">
-          <div className="min-w-0 flex-1 md:hidden">
-            <div className="flex items-center rounded-full bg-white/70 px-2.5 py-1.5 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-              <NavSearch variant="mobile" className="w-full min-w-0" />
+          {/* Mobile: logo izquierda, search al centro, menú derecha */}
+          <div className="flex h-full items-center justify-between gap-3 md:hidden">
+            <div className="min-w-0 shrink">
+              <FegLogoLink size="nav" />
             </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center rounded-full bg-white/70 px-2.5 py-1.5 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+                <NavSearch variant="mobile" className="w-full min-w-0" />
+              </div>
+            </div>
+
+            <MobileHeaderMenu links={navLinks} />
           </div>
-          <MobileHeaderMenu links={navLinks} />
         </div>
-      </div>
-    </header>
+      </header>
       {/* Altura del header fijo (pt-4 + fila única en todos los anchos) */}
       <div
         aria-hidden
