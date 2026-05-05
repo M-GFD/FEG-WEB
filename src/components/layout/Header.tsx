@@ -2,6 +2,7 @@ import { FegLogoLink } from "@/components/layout/FegLogo";
 import { MobileHeaderMenu } from "@/components/layout/MobileHeaderMenu";
 import { NavLinks } from "./NavLinks";
 import { NavSearch } from "@/components/layout/NavSearch";
+import { HeaderDesktopRail } from "@/components/layout/HeaderDesktopRail";
 
 const NAV_ITEMS = [
   { href: "/noticias", label: "Noticias" },
@@ -22,27 +23,11 @@ export function Header() {
             Desktop (md+): casi full-viewport para distribuir logo / rutas / search a lo ancho. */}
         <div className="relative mx-auto h-16 max-w-7xl px-6 md:max-w-none md:px-4 lg:px-6">
           {/* Desktop:
-              - Logo a la izquierda (flujo normal)
-              - Search a la derecha (flujo normal, mismo margen que el logo)
+              - Logo + wordmark a la izquierda
+              - Cápsula de búsqueda a la derecha con el MISMO ancho que el bloque
+                logo+wordmark (sincronizado por JS en HeaderDesktopRail)
               - Cápsula de rutas absolutamente centrada respecto al viewport */}
-          <div className="hidden h-full items-center justify-between gap-3 md:flex">
-            <div className="flex min-w-0 shrink-0 items-center gap-2">
-              <FegLogoLink size="nav" />
-              {/* Wordmark al lado del logo: 1 renglón, Urbanist regular, blanco, centrado verticalmente */}
-              <span
-                aria-hidden
-                className="select-none whitespace-nowrap text-right font-sans text-base font-normal leading-none text-[#FFFFFF] [text-shadow:0_1px_3px_rgba(0,0,0,0.45)]"
-              >
-                Federación Entrerriana de Golf
-              </span>
-            </div>
-
-            <div className="shrink-0">
-              <div className="flex items-center rounded-full bg-white/70 px-2.5 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-                <NavSearch variant="desktop" />
-              </div>
-            </div>
-          </div>
+          <HeaderDesktopRail />
 
           <div
             className="pointer-events-none absolute inset-0 hidden items-center justify-center md:flex"
