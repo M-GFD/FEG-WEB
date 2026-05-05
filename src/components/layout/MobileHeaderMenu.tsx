@@ -2,24 +2,9 @@
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
-import { smoothScrollToElementId } from "@/lib/smoothScroll";
 
 export type MobileNavLink = { href: string; label: string };
-
-function handleAnchorClick(
-  e: React.MouseEvent<HTMLAnchorElement>,
-  href: string,
-  pathname: string
-) {
-  if (!href.startsWith("/#")) return;
-  const id = href.slice(2);
-  if (pathname === "/") {
-    e.preventDefault();
-    smoothScrollToElementId(id);
-  }
-}
 
 type Props = {
   links: readonly MobileNavLink[];
@@ -29,8 +14,6 @@ type Props = {
  * Navegación móvil: menú desplegable alineado a la derecha (misma lógica de anclas que NavLinks).
  */
 export function MobileHeaderMenu({ links }: Props) {
-  const pathname = usePathname() ?? "";
-
   return (
     <div className="md:hidden">
       <DropdownMenu.Root>
@@ -55,7 +38,6 @@ export function MobileHeaderMenu({ links }: Props) {
               <DropdownMenu.Item key={href} asChild>
                 <Link
                   href={href}
-                  onClick={(e) => handleAnchorClick(e, href, pathname)}
                   className="block cursor-pointer rounded-xl px-4 py-3 font-heading text-sm font-semibold uppercase tracking-wide text-[#24321c] outline-none transition hover:bg-[var(--feg-bg)] focus:bg-[var(--feg-bg)] data-[highlighted]:bg-[var(--feg-bg)]"
                 >
                   {label}
