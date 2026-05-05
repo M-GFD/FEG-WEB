@@ -242,6 +242,47 @@ export async function getClubs() {
   return data ?? [];
 }
 
+/** Lista de clubes con cantidad de jugadores afiliados. */
+export async function getClubsWithCounts(): Promise<
+  Array<{
+    id: string;
+    code: string | null;
+    name: string;
+    slug: string;
+    address: string | null;
+    phone: string | null;
+    playersCount: number;
+  }>
+> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const [{ data: clubs }, { data: players }] = await Promise.all([
+    supabase
+      .from("Club")
+      .select("id,code,name,slug,address,phone")
+      .order("code", { ascending: true, nullsFirst: false }),
+    supabase.from("Player").select("clubId"),
+  ]);
+
+  const counts: Record<string, number> = {};
+  for (const p of (players ?? []) as { clubId: string }[]) {
+    counts[p.clubId] = (counts[p.clubId] ?? 0) + 1;
+  }
+
+  return ((clubs ?? []) as Array<{
+    id: string;
+    code: string | null;
+    name: string;
+    slug: string;
+    address: string | null;
+    phone: string | null;
+  }>).map((c) => ({
+    ...c,
+    playersCount: counts[c.id] ?? 0,
+  }));
+}
+
 export async function getNews() {
   const supabase = getSupabaseAdmin();
   if (!supabase) return [];
@@ -480,7 +521,14 @@ export async function getPlayerById(id: string) {
   const supabase = getSupabaseAdmin();
   if (!supabase) return null;
 
-  const { data: p } = await supabase.from("Player").select("*").eq("id", id).single();
+  // Whitelist explícita: NUNCA seleccionar emailEnc/phoneEnc/dniEnc.
+  const { data: p } = await supabase
+    .from("Player")
+    .select(
+      "id,matricula,firstName,lastName,handicap,handicapIndex,handicapCourse,califIda,slopeIda,califVta,slopeVta,califTotal,slopeTotal,category,birthYear,age,gender,clubId,createdAt,updatedAt"
+    )
+    .eq("id", id)
+    .single();
   if (!p) return null;
 
   const { data: club } = await supabase.from("Club").select("name").eq("id", p.clubId).single();

@@ -47,6 +47,7 @@ enum Role {
 // ============ CORE ENTITIES ============
 model Club {
   id        String   @id @default(cuid())
+  code      String?  @unique // Código AAG/FEG (ej. "302" Estudiantes Paraná)
   name      String
   slug      String   @unique
   logoUrl   String?
@@ -63,13 +64,31 @@ model Club {
 
 model Player {
   id             String          @id @default(cuid())
+  matricula      String?         // Nº de matrícula AAG/FEG
   firstName      String
   lastName       String
-  handicap       Int             @default(0)
+  handicap       Int             @default(0) // Compat: handicap entero histórico
+  handicapIndex  Float?          // Index oficial (ej. 12.5)
+  handicapCourse Float?          // Handicap cancha
+  califIda       Float?
+  slopeIda       Int?
+  califVta       Float?
+  slopeVta       Int?
+  califTotal     Float?
+  slopeTotal     Int?
+  category       String?         // CAB, DAM, CAB-24, DAM75%, etc.
   birthYear      Int             @default(1900)  // 1900 = desconocido
+  birthDate      DateTime?       @db.Date
+  age            Int?
   gender         Gender
   clubId         String
   club           Club            @relation(fields: [clubId], references: [id])
+
+  // Datos sensibles cifrados (AES-256-GCM). NO se exponen al frontend.
+  emailEnc       String?
+  phoneEnc       String?
+  dniEnc         String?
+
   entries        TournamentEntry[]
   teamEntries    TeamPlayer[]
   rankingEntries RankingEntry[]
@@ -77,6 +96,9 @@ model Player {
   updatedAt      DateTime        @updatedAt
 
   @@unique([firstName, lastName, clubId])
+  @@unique([clubId, matricula], name: "Player_clubId_matricula_key")
+  @@index([lastName])
+  @@index([firstName])
 }
 
 enum Gender {

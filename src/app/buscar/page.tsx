@@ -1,20 +1,83 @@
 import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
-import { labelForSearchType, searchSite } from "@/lib/site-search";
+import { labelForSearchType, searchSite, type SiteSearchHit } from "@/lib/site-search";
 
 type Props = {
   searchParams: Promise<{ q?: string }>;
 };
 
+function PlayerCard({ hit }: { hit: SiteSearchHit }) {
+  const handicap = hit.meta?.handicap ?? null;
+  const handicapStr =
+    handicap == null ? "-" : Number.isInteger(handicap) ? `${handicap}` : handicap.toFixed(1);
+  const club = hit.meta?.club ?? null;
+  const category = hit.meta?.category ?? null;
+
+  return (
+    <article className="rounded-2xl border border-[var(--feg-green)]/12 bg-white p-5 shadow-[0_10px_30px_rgba(0,36,3,0.06)] transition hover:border-[var(--feg-green)]/25 hover:shadow-[0_14px_40px_rgba(0,36,3,0.1)]">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]">
+            Jugador
+          </p>
+          <h2 className="mt-1.5 truncate font-heading text-lg font-semibold leading-snug text-[var(--feg-ink)]">
+            {hit.title}
+          </h2>
+          {club && (
+            <p className="mt-1 truncate text-sm font-medium text-[var(--feg-green)]">{club}</p>
+          )}
+          {category && (
+            <span className="mt-2 inline-flex rounded-full bg-[var(--feg-bg)] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--feg-green-2)]">
+              {category}
+            </span>
+          )}
+        </div>
+        <div className="shrink-0 rounded-2xl bg-[var(--feg-green-soft)]/10 px-4 py-3 text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]/80">
+            Handicap
+          </p>
+          <p className="mt-0.5 font-heading text-xl font-semibold text-[var(--feg-ink)]">
+            {handicapStr}
+          </p>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function GenericCard({ hit }: { hit: SiteSearchHit }) {
+  return (
+    <Link
+      href={hit.href}
+      className="block rounded-2xl border border-[var(--feg-green)]/12 bg-white p-5 shadow-[0_10px_30px_rgba(0,36,3,0.06)] transition hover:border-[var(--feg-green)]/25 hover:shadow-[0_14px_40px_rgba(0,36,3,0.1)]"
+    >
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]">
+        {labelForSearchType(hit.type)}
+      </p>
+      <h2 className="mt-1.5 font-heading text-lg font-semibold leading-snug text-[var(--feg-ink)]">
+        {hit.title}
+      </h2>
+      {hit.description ? (
+        <p className="mt-2 line-clamp-2 text-sm font-medium text-[var(--feg-green)]">
+          {hit.description}
+        </p>
+      ) : null}
+    </Link>
+  );
+}
+
 export default async function BuscarPage({ searchParams }: Props) {
   const { q: rawQ } = await searchParams;
   const { query, hits } = await searchSite(rawQ ?? "");
 
+  const playerHits = hits.filter((h) => h.type === "player");
+  const otherHits = hits.filter((h) => h.type !== "player");
+
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
       <Header />
-      <main className="mx-auto max-w-3xl px-6 pb-16 pt-8 lg:px-8">
+      <main className="mx-auto max-w-5xl px-6 pb-16 pt-8 lg:px-8">
         <BackToHome />
         <header className="mb-8">
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
@@ -25,7 +88,8 @@ export default async function BuscarPage({ searchParams }: Props) {
           </h1>
           {query ? (
             <p className="mt-3 text-base font-medium text-[var(--feg-green)]">
-              Resultados para «{query}»
+              Resultados para «{query}» — {hits.length}{" "}
+              {hits.length === 1 ? "coincidencia" : "coincidencias"}
             </p>
           ) : (
             <p className="mt-3 text-base font-medium text-[var(--feg-green)]">
@@ -36,31 +100,40 @@ export default async function BuscarPage({ searchParams }: Props) {
 
         {!query ? null : hits.length === 0 ? (
           <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-10 text-center text-[var(--feg-green)]">
-            No encontramos resultados. Probá con otro texto o revisá la ortografía.
+            No encontramos resultados. Probá con otro nombre, apellido o club.
           </p>
         ) : (
-          <ul className="space-y-3">
-            {hits.map((h) => (
-              <li key={`${h.type}-${h.href}-${h.title}`}>
-                <Link
-                  href={h.href}
-                  className="block rounded-2xl border border-[var(--feg-green)]/12 bg-white p-5 shadow-[0_10px_30px_rgba(0,36,3,0.06)] transition hover:border-[var(--feg-green)]/25 hover:shadow-[0_14px_40px_rgba(0,36,3,0.1)]"
-                >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]">
-                    {labelForSearchType(h.type)}
-                  </p>
-                  <h2 className="mt-1.5 font-heading text-lg font-semibold leading-snug text-[var(--feg-ink)]">
-                    {h.title}
-                  </h2>
-                  {h.description ? (
-                    <p className="mt-2 line-clamp-2 text-sm font-medium text-[var(--feg-green)]">
-                      {h.description}
-                    </p>
-                  ) : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-10">
+            {otherHits.length > 0 && (
+              <section>
+                <h2 className="mb-3 font-heading text-sm font-semibold uppercase tracking-[0.16em] text-[var(--feg-green-2)]">
+                  Sitio · Noticias · Torneos · Clubes
+                </h2>
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {otherHits.map((h) => (
+                    <li key={`${h.type}-${h.href}-${h.title}`}>
+                      <GenericCard hit={h} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {playerHits.length > 0 && (
+              <section>
+                <h2 className="mb-3 font-heading text-sm font-semibold uppercase tracking-[0.16em] text-[var(--feg-green-2)]">
+                  Jugadores ({playerHits.length})
+                </h2>
+                <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {playerHits.map((h) => (
+                    <li key={`player-${h.href}-${h.title}`}>
+                      <PlayerCard hit={h} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
         )}
       </main>
     </div>

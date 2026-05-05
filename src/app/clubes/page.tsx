@@ -1,9 +1,9 @@
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
-import { getClubs } from "@/lib/data";
+import { getClubsWithCounts } from "@/lib/data";
 
 export default async function ClubesPage() {
-  const clubs = await getClubs();
+  const clubs = await getClubsWithCounts();
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
@@ -17,6 +17,9 @@ export default async function ClubesPage() {
           <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
             Clubes
           </h1>
+          <p className="mt-3 max-w-2xl text-base font-medium leading-relaxed text-[var(--feg-green)] sm:text-lg">
+            Clubes afiliados a la Federación Entrerriana de Golf.
+          </p>
         </header>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {clubs.length === 0 ? (
@@ -25,20 +28,38 @@ export default async function ClubesPage() {
             </p>
           ) : (
             clubs.map((club) => (
-              <div
+              <article
                 key={club.id}
-                className="rounded-2xl border border-[var(--feg-green)]/12 bg-white p-6 shadow-[0_14px_40px_rgba(0,36,3,0.08)]"
+                className="flex flex-col rounded-2xl border border-[var(--feg-green)]/12 bg-white p-6 shadow-[0_14px_40px_rgba(0,36,3,0.08)]"
               >
-                <h2 className="font-heading text-xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
-                  {club.name}
-                </h2>
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="font-heading text-xl font-semibold uppercase leading-tight tracking-tight text-[var(--feg-ink)]">
+                    {club.name}
+                  </h2>
+                  {club.code && (
+                    <span className="inline-flex shrink-0 items-center rounded-full bg-[var(--feg-bg)] px-3 py-1 font-heading text-xs font-semibold uppercase tracking-wider text-[var(--feg-green-2)]">
+                      {club.code}
+                    </span>
+                  )}
+                </div>
+
                 {club.address && (
-                  <p className="mt-3 text-sm leading-relaxed text-[var(--feg-green)]">{club.address}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-[var(--feg-green)]">
+                    {club.address}
+                  </p>
                 )}
                 {club.phone && (
-                  <p className="mt-2 text-sm font-medium text-[var(--feg-green-2)]">{club.phone}</p>
+                  <p className="mt-2 text-sm font-medium text-[var(--feg-green-2)]">
+                    {club.phone}
+                  </p>
                 )}
-              </div>
+
+                <p className="mt-auto pt-4 text-xs font-semibold uppercase tracking-wide text-[var(--feg-green)]/70">
+                  {club.playersCount > 0
+                    ? `${club.playersCount} jugadores matriculados`
+                    : "Padrón pendiente de carga"}
+                </p>
+              </article>
             ))
           )}
         </div>
