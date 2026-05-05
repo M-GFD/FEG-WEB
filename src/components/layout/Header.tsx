@@ -4,12 +4,12 @@ import { NavLinks } from "./NavLinks";
 import { NavSearch } from "@/components/layout/NavSearch";
 
 const NAV_ITEMS = [
-  { href: "/#noticias", label: "Noticias" },
+  { href: "/noticias", label: "Noticias" },
   { href: "/ranking", label: "Rankings" },
   { href: "/clubes", label: "Clubes" },
   { href: "/torneos", label: "Torneos" },
-  { href: "/#proximos-torneos", label: "Calendario" },
-  { href: "/#institucional", label: "Institucional" },
+  { href: "/torneos", label: "Calendario" },
+  { href: "/institucional", label: "Institucional" },
 ] as const;
 
 export function Header() {
