@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { href: "/ranking", label: "Rankings" },
   { href: "/clubes", label: "Clubes" },
   { href: "/torneos", label: "Torneos" },
-  { href: "/torneos", label: "Calendario" },
+  { href: "/calendario", label: "Calendario" },
   { href: "/institucional", label: "Institucional" },
 ] as const;
 
