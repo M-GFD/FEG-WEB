@@ -24,14 +24,24 @@ export function Header() {
         </div>
 
         <div className="pointer-events-none absolute inset-0 hidden items-center justify-center md:flex">
-          <nav className="pointer-events-auto flex items-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-            <NavLinks links={navLinks} variant="light" />
-            <div className="mx-1 h-7 w-px bg-[#123c15]/10" aria-hidden />
-            <NavSearch />
-          </nav>
+          <div className="pointer-events-auto flex max-w-[calc(100%-2rem)] items-center gap-3">
+            <nav className="flex flex-wrap items-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+              <NavLinks links={navLinks} variant="light" />
+            </nav>
+            <div className="flex items-center rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+              <NavSearch variant="desktop" />
+            </div>
+          </div>
         </div>
 
-        <MobileHeaderMenu links={navLinks} />
+        <div className="flex min-w-0 flex-1 items-center justify-end gap-2 md:flex-none">
+          <div className="min-w-0 flex-1 md:hidden">
+            <div className="flex items-center rounded-full bg-white/70 px-2.5 py-1.5 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+              <NavSearch variant="mobile" className="w-full min-w-0" />
+            </div>
+          </div>
+          <MobileHeaderMenu links={navLinks} />
+        </div>
       </div>
     </header>
       {/* Altura del header fijo (pt-4 + fila única en todos los anchos) */}
