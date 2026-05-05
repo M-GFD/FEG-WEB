@@ -2,19 +2,19 @@ import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 
 const CALENDARIO_2026 = [
-  { num: "1°", fecha: "28 de marzo", sede: "Villa Elisa", modalidad: "18H Mayores" },
-  { num: "2°", fecha: "25 de abril", sede: "Club Social La Paz", modalidad: "18H Mayores" },
-  { num: "3°", fecha: "9 de mayo", sede: "Los Bretes", modalidad: "18H Mayores" },
-  { num: "—", fecha: "15/16 de mayo", sede: "Interfederativo (cancha a des.)", modalidad: "36H Mayores" },
-  { num: "4°", fecha: "30 de mayo", sede: "Villa Libertador", modalidad: "18H Mayores" },
-  { num: "5°", fecha: "13 de junio", sede: "Las Colinas", modalidad: "18H Mayores" },
-  { num: "6°", fecha: "4 de julio", sede: "CUCU", modalidad: "18H Mayores" },
-  { num: "7°", fecha: "15 de agosto", sede: "Aero Club Villaguay", modalidad: "18H Mayores" },
-  { num: "8°", fecha: "22 de agosto", sede: "Concordia Golf Club", modalidad: "18H Mayores" },
-  { num: "9°", fecha: "5 de setiembre", sede: "Gualeguaychú", modalidad: "18H Mayores" },
-  { num: "10°", fecha: "26 de setiembre", sede: "Santa Elena", modalidad: "18H Mayores" },
-  { num: "11°", fecha: "24 de octubre", sede: "Colón Golf Club", modalidad: "18H Mayores" },
-  { num: "12°", fecha: "14 de noviembre", sede: "CAE", modalidad: "18H Mayores" },
+  { num: "1°", fecha: "28 de Marzo", sede: "Villa Elisa", modalidad: "18H Mayores" },
+  { num: "2°", fecha: "25 de Abril", sede: "Club Social La Paz", modalidad: "18H Mayores" },
+  { num: "3°", fecha: "9 de Mayo", sede: "Los Bretes", modalidad: "18H Mayores" },
+  { num: "—", fecha: "15/16 de Mayo", sede: "Interfederativo (cancha a des.)", modalidad: "36H Mayores" },
+  { num: "4°", fecha: "30 de Mayo", sede: "Villa Libertador", modalidad: "18H Mayores" },
+  { num: "5°", fecha: "13 de Junio", sede: "Las Colinas", modalidad: "18H Mayores" },
+  { num: "6°", fecha: "4 de Julio", sede: "CUCU", modalidad: "18H Mayores" },
+  { num: "7°", fecha: "15 de Agosto", sede: "Aero Club Villaguay", modalidad: "18H Mayores" },
+  { num: "8°", fecha: "22 de Agosto", sede: "Concordia Golf Club", modalidad: "18H Mayores" },
+  { num: "9°", fecha: "5 de Setiembre", sede: "Gualeguaychú", modalidad: "18H Mayores" },
+  { num: "10°", fecha: "26 de Setiembre", sede: "Santa Elena", modalidad: "18H Mayores" },
+  { num: "11°", fecha: "24 de Octubre", sede: "Colón Golf Club", modalidad: "18H Mayores" },
+  { num: "12°", fecha: "14 de Noviembre", sede: "CAE", modalidad: "18H Mayores" },
 ];
 
 export default function CalendarioPage() {

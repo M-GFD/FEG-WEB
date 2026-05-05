@@ -5,7 +5,7 @@
  */
 
 export type CalendarEntry = {
-  fecha: string;       // Texto humano: "28 de marzo", "15/16 de mayo"
+  fecha: string;       // Texto humano (mes en Title Case): "28 de Marzo", "15/16 de Mayo"
   sede: string;
   modalidad: string;
   /** Año del torneo (por defecto 2026, la temporada cargada). */
@@ -15,19 +15,19 @@ export type CalendarEntry = {
 const SEASON_YEAR = 2026;
 
 export const CALENDARIO_FEG: CalendarEntry[] = [
-  { fecha: "28 de marzo",     sede: "Villa Elisa",                     modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "25 de abril",     sede: "Club Social La Paz",              modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "9 de mayo",       sede: "Los Bretes",                      modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "15/16 de mayo",   sede: "Interfederativo (cancha a des.)", modalidad: "36H Mayores", year: SEASON_YEAR },
-  { fecha: "30 de mayo",      sede: "Villa Libertador",                modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "13 de junio",     sede: "Las Colinas",                     modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "4 de julio",      sede: "CUCU",                            modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "15 de agosto",    sede: "Aero Club Villaguay",             modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "22 de agosto",    sede: "Concordia Golf Club",             modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "5 de setiembre",  sede: "Gualeguaychú",                    modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "26 de setiembre", sede: "Santa Elena",                     modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "24 de octubre",   sede: "Colón Golf Club",                 modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "14 de noviembre", sede: "CAE",                             modalidad: "18H Mayores", year: SEASON_YEAR },
+  { fecha: "28 de Marzo",     sede: "Villa Elisa",                     modalidad: "18H Mayores", year: SEASON_YEAR },
+  { fecha: "25 de Abril",     sede: "Club Social La Paz",              modalidad: "18H Mayores", year: SEASON_YEAR },
+  { fecha: "9 de Mayo",       sede: "Los Bretes",                      modalidad: "18H Mayores", year: SEASON_YEAR },
+  { fecha: "15/16 de Mayo",   sede: "Interfederativo (cancha a des.)", modalidad: "36H Mayores", year: SEASON_YEAR },
+  { fecha: "30 de Mayo",      sede: "Villa Libertador",                modalidad: "18H Mayores", year: SEASON_YEAR },
+  { fecha: "13 de Junio",     sede: "Las Colinas",                     modalidad: "18H Mayores", year: SEASON_YEAR },
+  { fecha: "4 de Julio",      sede: "CUCU",                            modalidad: "18H Mayores", year: SEASON_YEAR },
+  { fecha: "15 de Agosto",    sede: "Aero Club Villaguay",             modalidad: "18H Mayores", year: SEASON_YEAR },
+  { fecha: "22 de Agosto",    sede: "Concordia Golf Club",             modalidad: "18H Mayores", year: SEASON_YEAR },
+  { fecha: "5 de Setiembre",  sede: "Gualeguaychú",                    modalidad: "18H Mayores", year: SEASON_YEAR },
+  { fecha: "26 de Setiembre", sede: "Santa Elena",                     modalidad: "18H Mayores", year: SEASON_YEAR },
+  { fecha: "24 de Octubre",   sede: "Colón Golf Club",                 modalidad: "18H Mayores", year: SEASON_YEAR },
+  { fecha: "14 de Noviembre", sede: "CAE",                             modalidad: "18H Mayores", year: SEASON_YEAR },
 ];
 
 const MONTH_MAP: Record<string, number> = {
