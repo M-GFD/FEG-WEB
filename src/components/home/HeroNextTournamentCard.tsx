@@ -24,7 +24,7 @@ export function HeroNextTournamentCard() {
       yOffset={32}
       className="ml-auto w-full max-w-sm shrink-0"
     >
-      <div className="w-full overflow-hidden rounded-2xl border border-white/35 bg-white/20 backdrop-blur-xl ring-1 ring-white/25">
+      <div className="w-full overflow-hidden rounded-2xl bg-white/20 backdrop-blur-xl">
         <div className="p-5">
           <div className="inline-flex rounded-full bg-[var(--feg-green)] px-3 py-1.5 text-[10px] font-semibold text-white ring-1 ring-black/10">
             Próximo torneo
@@ -39,7 +39,7 @@ export function HeroNextTournamentCard() {
                 {formatFechaTitle(next.fecha)}
               </div>
               <div className="mt-3 flex items-center gap-2">
-                <div className="rounded-full border border-white/35 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
+                <div className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
                   {next.modalidad}
                 </div>
                 <Link
