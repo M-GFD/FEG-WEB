@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { getClubsWithCounts } from "@/lib/data";
@@ -28,9 +29,10 @@ export default async function ClubesPage() {
             </p>
           ) : (
             clubs.map((club) => (
-              <article
+              <Link
                 key={club.id}
-                className="flex flex-col rounded-2xl border border-[var(--feg-green)]/12 bg-white p-6 shadow-[0_14px_40px_rgba(0,36,3,0.08)]"
+                href={`/clubes/${club.slug}`}
+                className="flex flex-col rounded-2xl border border-[var(--feg-green)]/12 bg-white p-6 shadow-[0_14px_40px_rgba(0,36,3,0.08)] transition hover:border-[var(--feg-green)]/30 hover:shadow-[0_18px_48px_rgba(0,36,3,0.12)]"
               >
                 <div className="flex items-start justify-between gap-3">
                   <h2 className="font-heading text-xl font-semibold uppercase leading-tight tracking-tight text-[var(--feg-ink)]">
@@ -56,10 +58,10 @@ export default async function ClubesPage() {
 
                 <p className="mt-auto pt-4 text-xs font-semibold uppercase tracking-wide text-[var(--feg-green)]/70">
                   {club.playersCount > 0
-                    ? `${club.playersCount} jugadores matriculados`
+                    ? `${club.playersCount} jugadores matriculados · Ver padrón →`
                     : "Padrón pendiente de carga"}
                 </p>
-              </article>
+              </Link>
             ))
           )}
         </div>
