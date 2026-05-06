@@ -10,6 +10,10 @@ import {
   scorecardToDbFields,
 } from "@/lib/scorecard";
 import { parseTournamentTee } from "@/lib/whs-handicap";
+import {
+  recalculatePlayerHandicapIndex,
+  upsertPublishedHandicapRound,
+} from "@/lib/handicap-recalc";
 import type { Category } from "@prisma/client";
 
 async function checkClubAccess(tournamentId: string) {
@@ -150,12 +154,68 @@ export async function publishTournamentScores(tournamentId: string) {
     });
     let pos = 1;
     for (const e of sorted) {
-      await supabase
-        .from("Scorecard")
-        .update({ status: "PUBLISHED", position: pos, updatedAt: new Date().toISOString() })
-        .eq("entryId", e.id);
       entriesWithPosition.push({ id: e.id, playerId: e.playerId, position: pos++ });
     }
+  }
+
+  // Handicap: primero persistir rondas y recalcular índices; si falla, no publicamos torneo ni tarjetas.
+  const tMeta = tournament as {
+    id: string;
+    date: string;
+    whsSlopeRating?: number | null;
+    whsCourseRating?: number | null;
+    whsPar?: number | null;
+  };
+  const playedAt =
+    typeof tMeta.date === "string"
+      ? tMeta.date.slice(0, 10)
+      : new Date(tMeta.date).toISOString().slice(0, 10);
+
+  const playersToRecalc = new Set<string>();
+  for (const e of entries as Array<{
+    id: string;
+    playerId: string;
+    scorecard: { gross: number | null } | null;
+  }>) {
+    const gross = e.scorecard?.gross;
+    if (gross == null) continue;
+
+    const r = await upsertPublishedHandicapRound(supabase, {
+      playerId: e.playerId,
+      tournamentId,
+      tournamentEntryId: e.id,
+      playedAt,
+      gross,
+      tournament: tMeta,
+    });
+    if (!r.ok) {
+      return {
+        ok: false,
+        error: r.error ?? "No se pudo registrar la ronda para handicap",
+      };
+    }
+    playersToRecalc.add(e.playerId);
+  }
+
+  for (const playerId of playersToRecalc) {
+    const hi = await recalculatePlayerHandicapIndex(supabase, playerId);
+    if (!hi.ok) {
+      return {
+        ok: false,
+        error: hi.error ?? "Error al recalcular handicap del jugador",
+      };
+    }
+  }
+
+  for (const row of entriesWithPosition) {
+    await supabase
+      .from("Scorecard")
+      .update({
+        status: "PUBLISHED",
+        position: row.position,
+        updatedAt: new Date().toISOString(),
+      })
+      .eq("entryId", row.id);
   }
 
   await supabase
@@ -206,5 +266,9 @@ export async function publishTournamentScores(tournamentId: string) {
   revalidatePath(`/gestion/club/torneos/${tournamentId}/scores`);
   revalidatePath(`/torneos`);
   revalidatePath(`/ranking`);
+  revalidatePath(`/buscar`);
+  for (const playerId of playersToRecalc) {
+    revalidatePath(`/jugadores/${playerId}`);
+  }
   return { ok: true, message: "Resultados publicados" };
 }
