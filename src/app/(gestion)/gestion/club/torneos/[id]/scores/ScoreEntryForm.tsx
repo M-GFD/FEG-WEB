@@ -1,14 +1,17 @@
 "use client";
 
 import { useActionState } from "react";
+import type { Category } from "@prisma/client";
 import { saveScorecard } from "./actions";
 import { Button } from "@/components/ui/button";
+import { strokesForMedalNet, type WhsTeeContext } from "@/lib/scorecard";
 
 const HOLES = Array.from({ length: 18 }, (_, i) => i + 1);
 
 type Entry = {
   id: string;
-  player: { handicap: number };
+  category: Category;
+  player: { handicap: number; handicapIndex?: number | null };
   scorecard: {
     h1: number | null;
     h2: number | null;
@@ -32,7 +35,13 @@ type Entry = {
   } | null;
 };
 
-export function ScoreEntryForm({ entry }: { entry: Entry }) {
+export function ScoreEntryForm({
+  entry,
+  whsTee,
+}: {
+  entry: Entry;
+  whsTee: WhsTeeContext;
+}) {
   const sc = entry.scorecard;
   const initial = {
     h1: sc?.h1 ?? "",
@@ -69,7 +78,7 @@ export function ScoreEntryForm({ entry }: { entry: Entry }) {
   const total = strokes.reduce((a, b) => a + b, 0);
   const net =
     total > 0
-      ? total - Math.floor(entry.player.handicap * 0.9)
+      ? total - strokesForMedalNet(entry.category, entry.player, whsTee)
       : 0;
 
   return (

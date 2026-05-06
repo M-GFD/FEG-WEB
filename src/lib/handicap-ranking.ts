@@ -49,8 +49,8 @@ export function slugifyRankingCategoryKey(key: string): string {
 }
 
 /**
- * Valor numérico para ordenar (menor handicap = mejor puesto).
- * Prioriza handicap index; si no hay, usa el entero histórico (incluye 0).
+ * Valor numérico para ordenar (menor = mejor puesto en golf).
+ * Usa el **Handicap Index** (WHS / AAG) cuando existe; si no, el entero `handicap` de respaldo.
  */
 export function handicapSortValue(p: {
   handicap: number | null | undefined;
@@ -68,6 +68,7 @@ export function formatHandicapRankingCell(p: {
   handicap: number | null | undefined;
   handicapIndex: number | null | undefined;
 }): string {
+  // Handicap Index (WHS) preferido para exhibición.
   if (typeof p.handicapIndex === "number" && !Number.isNaN(p.handicapIndex)) {
     return Number.isInteger(p.handicapIndex)
       ? String(p.handicapIndex)
