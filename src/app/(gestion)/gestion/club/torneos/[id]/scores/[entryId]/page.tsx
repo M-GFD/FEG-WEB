@@ -3,6 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { getTournamentById, getTournamentEntry } from "@/lib/data";
 import { requireGestionArea } from "@/lib/gestion-access";
+import { parseTournamentTee } from "@/lib/whs-handicap";
 import { ScoreEntryForm } from "../ScoreEntryForm";
 
 export default async function ScoreEntryPage({
@@ -39,11 +40,16 @@ export default async function ScoreEntryPage({
         {entry.player.firstName} {entry.player.lastName}
       </h1>
       <p className="mb-6 text-[var(--feg-green)]">
-        {entry.player.club.name} · HCP {entry.player.handicap} ·{" "}
-        {entry.category.replace(/_/g, " ")}
+        {entry.player.club.name} · HCP{" "}
+        {typeof entry.player.handicapIndex === "number"
+          ? Number.isInteger(entry.player.handicapIndex)
+            ? `${entry.player.handicapIndex}`
+            : entry.player.handicapIndex.toFixed(1)
+          : entry.player.handicap}{" "}
+        · {entry.category.replace(/_/g, " ")}
       </p>
 
-      <ScoreEntryForm entry={entry} />
+      <ScoreEntryForm entry={entry} whsTee={parseTournamentTee(tournament)} />
     </div>
   );
 }

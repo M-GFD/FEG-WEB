@@ -5,6 +5,9 @@
  * parsea cada formato, cifra los datos sensibles y hace upsert en
  * la tabla public."Player" usando la clave de servicio de Supabase.
  *
+ * Handicap: `handicapIndex` debe reflejar el **Handicap Index** oficial (WHS / AAG)
+ * cuando el padrón lo aporta; `handicap` es respaldo entero (p. ej. redondeo).
+ *
  * Variables de entorno requeridas:
  *   - NEXT_PUBLIC_SUPABASE_URL
  *   - SUPABASE_SERVICE_ROLE_KEY

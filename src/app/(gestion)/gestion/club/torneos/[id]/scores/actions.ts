@@ -9,6 +9,7 @@ import {
   computeNet,
   scorecardToDbFields,
 } from "@/lib/scorecard";
+import { parseTournamentTee } from "@/lib/whs-handicap";
 import type { Category } from "@prisma/client";
 
 async function checkClubAccess(tournamentId: string) {
@@ -46,8 +47,14 @@ export async function saveScorecard(formData: FormData) {
 
   const { data: player } = await supabase
     .from("Player")
-    .select("handicap")
+    .select("handicap,handicapIndex")
     .eq("id", entry.playerId)
+    .single();
+
+  const { data: trow } = await supabase
+    .from("Tournament")
+    .select("whsSlopeRating,whsCourseRating,whsPar")
+    .eq("id", entry.tournamentId)
     .single();
 
   const access = await checkClubAccess(entry.tournamentId);
@@ -55,9 +62,14 @@ export async function saveScorecard(formData: FormData) {
 
   const fields = scorecardToDbFields(scores);
   const gross = fields.gross;
+  const tee = parseTournamentTee(trow ?? {});
+  const pl = player as { handicap: number; handicapIndex: number | null } | null;
   const net =
-    gross != null
-      ? computeNet(gross, (player as { handicap: number })?.handicap ?? 0, entry.category as Category)
+    gross != null && pl
+      ? computeNet(gross, entry.category as Category, {
+          handicap: pl.handicap ?? 0,
+          handicapIndex: pl.handicapIndex,
+        }, tee)
       : null;
 
   const { data: existing } = await supabase

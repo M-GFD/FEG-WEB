@@ -1,7 +1,14 @@
-import { prisma } from "./db";
 import type { Category } from "@prisma/client";
+import {
+  courseHandicap18,
+  playingHandicap18,
+  type WhsTeeContext,
+  NEUTRAL_TEE,
+} from "./whs-handicap";
 
 const HOLES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18] as const;
+
+export type { WhsTeeContext };
 
 export type HoleScores = Record<number, number>;
 
@@ -23,11 +30,41 @@ export function computeGross(scores: HoleScores): number | null {
   return vals.reduce((a, b) => a + b, 0);
 }
 
-export function computeNet(gross: number, handicap: number, category: Category): number {
+/** Golpes que recibe el jugador en medal play (Playing Handicap 18 hoyos). */
+export function strokesForMedalNet(
+  category: Category,
+  player: { handicap: number; handicapIndex?: number | null },
+  tee: WhsTeeContext = NEUTRAL_TEE,
+  playingAllowancePercent: number = 100
+): number {
   const isScratch =
     category === "DAMAS_SCRATCH" || category === "CABALLEROS_SCRATCH";
-  if (isScratch) return gross;
-  const strokes = Math.floor(handicap * 0.9);
+  if (isScratch) return 0;
+  const hi =
+    typeof player.handicapIndex === "number" && !Number.isNaN(player.handicapIndex)
+      ? player.handicapIndex
+      : player.handicap;
+  const ch = courseHandicap18(hi, tee);
+  return playingHandicap18(ch, playingAllowancePercent);
+}
+
+/**
+ * Neto stroke play (medal) según WHS: gross − Playing Handicap.
+ * `handicapIndex` es el Handicap Index oficial cuando existe.
+ */
+export function computeNet(
+  gross: number,
+  category: Category,
+  player: { handicap: number; handicapIndex?: number | null },
+  tee: WhsTeeContext | null = null,
+  playingAllowancePercent: number = 100
+): number {
+  const strokes = strokesForMedalNet(
+    category,
+    player,
+    tee ?? NEUTRAL_TEE,
+    playingAllowancePercent
+  );
   return gross - strokes;
 }
 

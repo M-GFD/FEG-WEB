@@ -82,7 +82,13 @@ export default async function ScoresPage({
                     {e.player.firstName} {e.player.lastName}
                   </td>
                   <td className="px-3 py-2 text-[var(--feg-green)]">{e.player.club.name}</td>
-                  <td className="px-3 py-2 text-[var(--feg-green)]">{e.player.handicap}</td>
+                  <td className="px-3 py-2 text-[var(--feg-green)]">
+                    {typeof e.player.handicapIndex === "number"
+                      ? Number.isInteger(e.player.handicapIndex)
+                        ? `${e.player.handicapIndex}`
+                        : e.player.handicapIndex.toFixed(1)
+                      : e.player.handicap}
+                  </td>
                   <td className="px-3 py-2 text-[var(--feg-green)]">
                     {e.category.replace(/_/g, " ")}
                   </td>

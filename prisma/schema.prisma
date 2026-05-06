@@ -113,6 +113,12 @@ model Tournament {
   date        DateTime
   clubId      String
   club        Club     @relation(fields: [clubId], references: [id])
+  /// WHS: Slope Rating del tee jugado (opcional).
+  whsSlopeRating   Int?
+  /// WHS: Course Rating del tee jugado (opcional).
+  whsCourseRating  Float?
+  /// WHS: Par del recorrido 18 hoyos (opcional).
+  whsPar           Int?
   isTeamEvent Boolean  @default(false)
   multiplier  Float    @default(1)
   status      TournamentStatus @default(DRAFT)
