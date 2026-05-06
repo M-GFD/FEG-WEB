@@ -24,7 +24,7 @@ export function HeroNextTournamentCard() {
       yOffset={32}
       className="ml-auto w-full max-w-sm shrink-0"
     >
-      <div className="w-full overflow-hidden rounded-2xl bg-white/20 backdrop-blur-xl">
+      <div className="relative w-full overflow-hidden rounded-3xl bg-white/14 backdrop-blur-sm shadow-[0_20px_60px_rgba(0,36,3,0.18)]">
         <div className="p-5">
           <div className="inline-flex rounded-full bg-[var(--feg-green)] px-3 py-1.5 text-[10px] font-semibold text-white ring-1 ring-black/10">
             Próximo torneo
