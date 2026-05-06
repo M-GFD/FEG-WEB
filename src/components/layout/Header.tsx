@@ -1,6 +1,5 @@
 import { FegLogoLink } from "@/components/layout/FegLogo";
 import { MobileHeaderMenu } from "@/components/layout/MobileHeaderMenu";
-import { NavLinks } from "./NavLinks";
 import { NavSearch } from "@/components/layout/NavSearch";
 import { HeaderDesktopRail } from "@/components/layout/HeaderDesktopRail";
 
@@ -24,19 +23,10 @@ export function Header() {
         <div className="relative mx-auto h-16 max-w-7xl px-6 md:max-w-none md:px-4 lg:px-6">
           {/* Desktop:
               - Logo + wordmark a la izquierda
+              - Cápsula de rutas absolutamente centrada respecto al viewport
               - Cápsula de búsqueda a la derecha con el MISMO ancho que el bloque
-                logo+wordmark (sincronizado por JS en HeaderDesktopRail)
-              - Cápsula de rutas absolutamente centrada respecto al viewport */}
-          <HeaderDesktopRail />
-
-          <div
-            className="pointer-events-none absolute inset-0 hidden items-center justify-center md:flex"
-            aria-hidden="false"
-          >
-            <nav className="pointer-events-auto flex items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-              <NavLinks links={navLinks} variant="light" />
-            </nav>
-          </div>
+                logo+wordmark (sincronizado por JS, capado para no superponerse) */}
+          <HeaderDesktopRail navLinks={navLinks} />
 
           {/* Mobile: logo izquierda, search al centro, menú derecha */}
           <div className="flex h-full items-center justify-between gap-3 md:hidden">
