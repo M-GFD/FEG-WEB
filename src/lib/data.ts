@@ -4,6 +4,13 @@
  */
 
 import { getSupabaseAdmin } from "./supabase";
+import {
+  formatHandicapRankingCell,
+  handicapSortValue,
+  keyForRankingCategory,
+  labelForRankingCategory,
+  slugifyRankingCategoryKey,
+} from "./handicap-ranking";
 
 export type TournamentWithClub = {
   id: string;
@@ -344,6 +351,138 @@ export async function getRankingEntries(year: number) {
       ? { ...e.Player, club: clubMap[e.Player.clubId] ?? { name: "" } }
       : null,
   }));
+}
+
+/** Fila de ranking federativo por handicap (dato dinámico en DB). */
+export type HandicapRankingRow = {
+  position: number;
+  playerId: string;
+  firstName: string;
+  lastName: string;
+  clubName: string;
+  handicapLabel: string;
+};
+
+export type HandicapRankingCategoryBlock = {
+  groupKey: string;
+  slug: string;
+  label: string;
+  rows: HandicapRankingRow[];
+};
+
+type PlayerRankingRow = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  handicap: number;
+  handicapIndex: number | null;
+  category: string | null;
+  clubId: string;
+};
+
+async function fetchAllPlayersForHandicapRanking(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdmin>>
+): Promise<PlayerRankingRow[]> {
+  const pageSize = 1000;
+  const all: PlayerRankingRow[] = [];
+  let from = 0;
+  for (;;) {
+    const { data, error } = await supabase
+      .from("Player")
+      .select("id,firstName,lastName,handicap,handicapIndex,category,clubId")
+      .range(from, from + pageSize - 1);
+    if (error) {
+      console.error("[getHandicapRankingsByCategory]", error.message);
+      break;
+    }
+    const chunk = (data ?? []) as PlayerRankingRow[];
+    all.push(...chunk);
+    if (chunk.length < pageSize) break;
+    from += pageSize;
+  }
+  return all;
+}
+
+/**
+ * Rankings por categoría (`Player.category`), ordenados por handicap ascendente
+ * (menor = mejor). Excluye jugadores sin handicap válido o con handicap ≤ 0.
+ * Los datos se leen en cada request (handicaps actualizados en DB).
+ */
+export async function getHandicapRankingsByCategory(): Promise<HandicapRankingCategoryBlock[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const players = await fetchAllPlayersForHandicapRanking(supabase);
+  if (!players.length) return [];
+
+  const clubIds = [...new Set(players.map((p) => p.clubId).filter(Boolean))];
+  const { data: clubs } = clubIds.length
+    ? await supabase.from("Club").select("id, name").in("id", clubIds)
+    : { data: [] };
+  const clubMap = Object.fromEntries(
+    (clubs ?? []).map((c: { id: string; name: string }) => [c.id, c.name as string])
+  );
+
+  const byKey = new Map<
+    string,
+    { label: string; list: (PlayerRankingRow & { sort: number; hLabel: string })[] }
+  >();
+
+  for (const p of players) {
+    const sort = handicapSortValue(p);
+    // Solo entran jugadores con handicap efectivo finito y estrictamente > 0.
+    if (!Number.isFinite(sort) || sort <= 0) continue;
+
+    const gKey = keyForRankingCategory(p.category);
+    const label = labelForRankingCategory(p.category);
+    const hLabel = formatHandicapRankingCell(p);
+    if (!byKey.has(gKey)) {
+      byKey.set(gKey, { label, list: [] });
+    }
+    byKey.get(gKey)!.list.push({ ...p, sort, hLabel });
+  }
+
+  function tiebreak(
+    a: PlayerRankingRow,
+    b: PlayerRankingRow
+  ): number {
+    const ln = a.lastName.localeCompare(b.lastName, "es", { sensitivity: "base" });
+    if (ln !== 0) return ln;
+    return a.firstName.localeCompare(b.firstName, "es", { sensitivity: "base" });
+  }
+
+  const blocks: HandicapRankingCategoryBlock[] = [];
+
+  for (const [groupKey, { label, list }] of byKey) {
+    const sorted = [...list].sort((a, b) => {
+      if (a.sort !== b.sort) return a.sort - b.sort;
+      return tiebreak(a, b);
+    });
+
+    const rows: HandicapRankingRow[] = sorted.map((row, i) => ({
+      position: i + 1,
+      playerId: row.id,
+      firstName: row.firstName,
+      lastName: row.lastName,
+      clubName: clubMap[row.clubId] ?? "",
+      handicapLabel: row.hLabel,
+    }));
+
+    blocks.push({
+      groupKey,
+      slug: slugifyRankingCategoryKey(groupKey),
+      label,
+      rows,
+    });
+  }
+
+  blocks.sort((a, b) => {
+    if (a.groupKey === "__sin_categoria__") return 1;
+    if (b.groupKey === "__sin_categoria__") return -1;
+    return a.label.localeCompare(b.label, "es", { sensitivity: "base" });
+  });
+
+  return blocks;
 }
 
 export async function getTournamentEntry(entryId: string, tournamentId: string) {
