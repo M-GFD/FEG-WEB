@@ -207,7 +207,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-black/45" />
         </div>
         <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
-          <div className="relative rounded-3xl border border-white/35 bg-white/14 p-8 backdrop-blur-sm shadow-[0_20px_60px_rgba(0,36,3,0.18)] ring-1 ring-white/25 lg:p-10">
+          <div className="relative rounded-3xl bg-white/14 p-8 backdrop-blur-sm shadow-[0_20px_60px_rgba(0,36,3,0.18)] lg:p-10">
             <RevealOnScroll revealIndex={0} yOffset={18} className="block">
               <div className="flex flex-col gap-8 lg:min-h-[360px]">
                 {/* Arriba a la izquierda */}
