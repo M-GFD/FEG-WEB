@@ -67,8 +67,8 @@ model Player {
   matricula      String?         // Nº de matrícula AAG/FEG
   firstName      String
   lastName       String
-  handicap       Int             @default(0) // Compat: handicap entero histórico
-  handicapIndex  Float?          // Index oficial (ej. 12.5)
+  handicap       Int             @default(0) // Compat: entero; sincronizado con índice al publicar rondas
+  handicapIndex  Float?          // WHS Handicap Index (padrón y/o recalculado desde torneos publicados)
   handicapCourse Float?          // Handicap cancha
   califIda       Float?
   slopeIda       Int?
@@ -92,6 +92,7 @@ model Player {
   entries        TournamentEntry[]
   teamEntries    TeamPlayer[]
   rankingEntries RankingEntry[]
+  publishedHandicapRounds PublishedHandicapRound[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
@@ -124,8 +125,27 @@ model Tournament {
   status      TournamentStatus @default(DRAFT)
   entries     TournamentEntry[]
   teamEntries TeamEntry[]
+  publishedHandicapRounds PublishedHandicapRound[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+/// Tarjeta 18 hoyos **publicada**: diferencial WHS para recalcular Handicap Index (no se escribe hasta publicar).
+model PublishedHandicapRound {
+  id                  String     @id @default(cuid())
+  playerId            String
+  player              Player     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  tournamentId        String
+  tournament          Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  tournamentEntryId   String     @unique
+  playedAt            DateTime   @db.Date
+  gross               Int
+  adjustedGross       Int
+  differential        Float
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@index([playerId, playedAt(sort: Desc)])
 }
 
 enum TournamentStatus {

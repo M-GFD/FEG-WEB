@@ -3,8 +3,9 @@
  * The R&A y la USGA (Course Handicap, Playing Handicap, diferencial).
  *
  * En FEG:
- * - `Player.handicapIndex` debe ser el **Handicap Index** oficial (p. ej. AAG/GSAA).
- * - `Player.handicap` es respaldo entero / legado cuando no hay índice.
+ * - `Player.handicapIndex` refleja el **Handicap Index** (WHS); con ≥3 rondas en
+ *   `PublishedHandicapRound` se recalcula al **publicar** torneos. Hasta entonces
+ *   permanece el valor de padrón/import.
  * - El **neto en medal play** usa Playing Handicap (100% del Course Handicap en modalidad individual estándar).
  *
  * Referencia: https://www.usga.org/content/usga/home-page/handicapping/world-handicap-system.html
