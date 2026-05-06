@@ -29,7 +29,7 @@ type Props = {
  * Reglas:
  * - Los tres grupos NUNCA se superponen: se calcula `sideMax = (anchoRail - anchoRutas) / 2 - gap`
  *   y se aplica como `max-width` a los grupos laterales.
- * - El wordmark puede pasar a 2–3 renglones dentro de ese ancho (sin truncar) antes del layout móvil.
+ * - El wordmark puede pasar a 2–3 renglones como máximo (dinámico según viewport), alineado a la izquierda.
  * - La cápsula de rutas no hace wrap de los botones (`flex-nowrap`).
  * - La cápsula de búsqueda toma el ancho renderizado del bloque logo+wordmark (tope = sideMax).
  * - El color del wordmark se ajusta al fondo (claro/oscuro) bajo el header.
@@ -155,7 +155,7 @@ export function HeaderDesktopRail({ navLinks }: Props) {
           <FegLogo size="nav" className="shrink-0" />
           <span
             aria-hidden
-            className={`min-w-0 flex-1 select-none text-balance text-right font-sans text-base font-normal leading-snug transition-colors duration-150 ${wordmarkClass}`}
+            className={`line-clamp-3 min-w-0 flex-1 select-none text-left font-sans text-base font-normal leading-snug transition-colors duration-150 ${wordmarkClass}`}
           >
             Federación Entrerriana de Golf
           </span>
@@ -172,15 +172,15 @@ export function HeaderDesktopRail({ navLinks }: Props) {
       </div>
 
       <div
-        className="shrink-0"
+        className="min-w-0 shrink-0 overflow-hidden"
         style={
           searchWidth != null
             ? { width: `${searchWidth}px`, maxWidth: sideMax ? `${sideMax}px` : undefined }
             : undefined
         }
       >
-        <div className="flex w-full items-center rounded-full bg-white/70 px-2.5 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-          <NavSearch variant="desktop" className="w-full min-w-0" />
+        <div className="flex w-full min-w-0 max-w-full items-center overflow-hidden rounded-full bg-white/70 px-2.5 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+          <NavSearch variant="desktop" className="w-full min-w-0 max-w-full" />
         </div>
       </div>
     </div>

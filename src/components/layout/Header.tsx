@@ -34,9 +34,9 @@ export function Header() {
               <FegLogoLink size="nav" />
             </div>
 
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center rounded-full bg-white/70 px-2.5 py-1.5 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-                <NavSearch variant="mobile" className="w-full min-w-0" />
+            <div className="min-w-0 flex-1 overflow-hidden">
+              <div className="flex min-w-0 max-w-full items-center overflow-hidden rounded-full bg-white/70 px-2.5 py-1.5 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+                <NavSearch variant="mobile" className="w-full min-w-0 max-w-full" />
               </div>
             </div>
 
