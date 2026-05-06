@@ -16,7 +16,7 @@ export default async function HomePage() {
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
       <HomeScrollHash />
       {/* Hero: min-h asegura área visible; object-cover usa el menor zoom que cubre (recorte mínimo matemático) */}
-      <div className="relative flex min-h-[100svh] flex-col">
+      <div className="relative flex min-h-[100svh] flex-col" data-header-theme="dark">
         {/* Imagen solo hasta arriba de la franja de resultados (no detrás del banner) */}
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
@@ -69,7 +69,7 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className="relative z-10 bg-[var(--feg-green)]">
+        <div className="relative z-10 bg-[var(--feg-green)]" data-header-theme="dark">
           <RevealOnScroll revealIndex={4} yOffset={16} className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
           <div className="flex flex-wrap items-center gap-3 text-white">
             <p className="min-w-0 font-heading text-xs font-semibold leading-snug sm:text-sm md:text-base lg:text-lg">
@@ -192,6 +192,7 @@ export default async function HomePage() {
       {/* Institucional (resumen) */}
       <section
         id="institucional"
+        data-header-theme="dark"
         className="relative scroll-mt-28 lg:scroll-mt-24"
       >
         <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">

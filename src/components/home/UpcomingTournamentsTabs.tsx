@@ -32,6 +32,7 @@ export function UpcomingTournamentsTabs() {
     return (
       <section
         id="proximos-torneos"
+        data-header-theme="dark"
         className="scroll-mt-28 bg-[#0b0f0b] lg:scroll-mt-24"
       >
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
@@ -52,6 +53,7 @@ export function UpcomingTournamentsTabs() {
   return (
     <section
       id="proximos-torneos"
+      data-header-theme="dark"
       className="scroll-mt-28 bg-[#0b0f0b] lg:scroll-mt-24"
     >
       <div className="grid gap-0 lg:grid-cols-12 lg:items-stretch">
