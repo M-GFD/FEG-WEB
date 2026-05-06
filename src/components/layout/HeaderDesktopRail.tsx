@@ -29,9 +29,9 @@ type Props = {
  * Reglas:
  * - Los tres grupos NUNCA se superponen: se calcula `sideMax = (anchoRail - anchoRutas) / 2 - gap`
  *   y se aplica como `max-width` a los grupos laterales.
- * - El bloque logo+wordmark muestra hasta el ancho disponible (truncando el wordmark si hace falta).
- * - La cápsula de búsqueda toma exactamente el ancho real renderizado del bloque
- *   logo+wordmark (con tope = sideMax), manteniendo simetría visual.
+ * - El wordmark puede pasar a 2–3 renglones dentro de ese ancho (sin truncar) antes del layout móvil.
+ * - La cápsula de rutas no hace wrap de los botones (`flex-nowrap`).
+ * - La cápsula de búsqueda toma el ancho renderizado del bloque logo+wordmark (tope = sideMax).
  * - El color del wordmark se ajusta al fondo (claro/oscuro) bajo el header.
  */
 export function HeaderDesktopRail({ navLinks }: Props) {
@@ -140,11 +140,11 @@ export function HeaderDesktopRail({ navLinks }: Props) {
   return (
     <div
       ref={railRef}
-      className="relative hidden h-full items-center justify-between gap-3 md:flex"
+      className="relative hidden min-h-14 items-center justify-between gap-3 md:flex"
     >
       <div
         ref={leftRef}
-        className="min-w-0 shrink overflow-hidden"
+        className="min-w-0 shrink"
         style={sideMax != null ? { maxWidth: `${sideMax}px` } : undefined}
       >
         <Link
@@ -152,10 +152,10 @@ export function HeaderDesktopRail({ navLinks }: Props) {
           aria-label="Inicio · Federación Entrerriana de Golf"
           className="relative z-10 inline-flex w-full max-w-full items-center gap-2 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123c15]/40 focus-visible:ring-offset-2"
         >
-          <FegLogo size="nav" />
+          <FegLogo size="nav" className="shrink-0" />
           <span
             aria-hidden
-            className={`min-w-0 flex-1 select-none truncate text-right font-sans text-base font-normal leading-none transition-colors duration-150 ${wordmarkClass}`}
+            className={`min-w-0 flex-1 select-none text-balance text-right font-sans text-base font-normal leading-snug transition-colors duration-150 ${wordmarkClass}`}
           >
             Federación Entrerriana de Golf
           </span>
@@ -166,7 +166,7 @@ export function HeaderDesktopRail({ navLinks }: Props) {
         ref={routesRef}
         className="pointer-events-auto absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
       >
-        <nav className="flex max-w-[calc(100vw-2rem)] flex-wrap items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+        <nav className="flex max-w-[calc(100vw-2rem)] flex-nowrap items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
           <NavLinks links={navLinks} variant="light" />
         </nav>
       </div>

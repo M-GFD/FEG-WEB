@@ -20,7 +20,7 @@ export function Header() {
       <header className="fixed left-0 right-0 top-0 z-50 bg-transparent pt-4">
         {/* Mobile: contenido limitado a max-w-7xl con su padding habitual.
             Desktop (md+): casi full-viewport para distribuir logo / rutas / search a lo ancho. */}
-        <div className="relative mx-auto h-16 max-w-7xl px-6 md:max-w-none md:px-4 lg:px-6">
+        <div className="relative mx-auto min-h-16 max-w-7xl px-6 md:max-w-none md:px-4 md:py-2 lg:px-6">
           {/* Desktop:
               - Logo + wordmark a la izquierda
               - Cápsula de rutas absolutamente centrada respecto al viewport
@@ -47,7 +47,7 @@ export function Header() {
       {/* Altura del header fijo (pt-4 + fila única en todos los anchos) */}
       <div
         aria-hidden
-        className="pointer-events-none h-[calc(1rem+4rem)] shrink-0 select-none"
+        className="pointer-events-none h-[calc(1rem+4rem)] shrink-0 select-none md:h-[calc(1rem+1rem+5.25rem)]"
       />
     </div>
   );
