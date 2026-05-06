@@ -26,7 +26,7 @@ export function NavLinks({ links, variant = "dark" }: NavLinksProps) {
         <Link
           key={href}
           href={href}
-          className={base}
+          className={`${base} whitespace-nowrap`}
         >
           {label}
         </Link>
