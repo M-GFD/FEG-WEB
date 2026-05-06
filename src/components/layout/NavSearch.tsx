@@ -24,16 +24,12 @@ export function NavSearch({ className, variant = "desktop" }: Props) {
     router.push(`/buscar?q=${encodeURIComponent(q)}`);
   }
 
-  // El input siempre llena su contenedor; el ancho real lo decide el parent.
-  const widthClass = "w-full min-w-0";
-  // Sólo en desktop, si el componente NO está envuelto por un ancho fijo,
-  // limitamos a un ancho razonable como fallback.
-  const fallbackWidth =
-    variant === "mobile" ? "" : "min-w-[6rem]";
+  // Cadena min-w-0 + overflow-hidden: el texto largo no desborda la cápsula redonda.
+  const widthClass = "box-border w-full min-w-0 max-w-full";
 
   return (
     <form
-      className={`${className ?? ""} ${variant === "mobile" ? "w-full" : ""}`}
+      className={`${className ?? ""} w-full min-w-0 max-w-full overflow-hidden`}
       role="search"
       aria-label="Buscar en el sitio"
       onSubmit={onSubmit}
@@ -41,7 +37,7 @@ export function NavSearch({ className, variant = "desktop" }: Props) {
       <label htmlFor="nav-site-search" className="sr-only">
         Buscar noticias, torneos, clubes y jugadores
       </label>
-      <div className={`relative w-full ${fallbackWidth}`}>
+      <div className="relative w-full min-w-0 max-w-full overflow-hidden">
         <Search
           aria-hidden
           strokeWidth={2}
@@ -56,7 +52,7 @@ export function NavSearch({ className, variant = "desktop" }: Props) {
           placeholder="Buscar…"
           enterKeyHint="search"
           autoComplete="off"
-          className={`${inputBase} ${widthClass}`}
+          className={`${inputBase} ${widthClass} shrink`}
         />
       </div>
     </form>
