@@ -84,9 +84,6 @@ export default async function RankingPage() {
                     <h2 className="font-heading text-lg font-semibold uppercase tracking-tight md:text-xl">
                       {cat.label}
                     </h2>
-                    <p className="mt-1 text-xs font-medium text-white/85">
-                      Orden: handicap ascendente (menor primero).
-                    </p>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
