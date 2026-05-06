@@ -290,6 +290,53 @@ export async function getClubsWithCounts(): Promise<
   }));
 }
 
+export async function getClubBySlug(slug: string) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+
+  const { data } = await supabase
+    .from("Club")
+    .select("id,code,name,slug,address,phone")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  return data as {
+    id: string;
+    code: string | null;
+    name: string;
+    slug: string;
+    address: string | null;
+    phone: string | null;
+  } | null;
+}
+
+/** Jugadores de un club para vista pública (sin datos sensibles). */
+export async function getPublicPlayersByClubId(clubId: string) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("Player")
+    .select("id,firstName,lastName,handicap,handicapIndex,category")
+    .eq("clubId", clubId)
+    .order("lastName", { ascending: true })
+    .order("firstName", { ascending: true });
+
+  if (error) {
+    console.error("[getPublicPlayersByClubId]", error.message);
+    return [];
+  }
+
+  return (data ?? []) as Array<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    handicap: number;
+    handicapIndex: number | null;
+    category: string | null;
+  }>;
+}
+
 export async function getNews() {
   const supabase = getSupabaseAdmin();
   if (!supabase) return [];
