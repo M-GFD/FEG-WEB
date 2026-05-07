@@ -8,7 +8,14 @@ export async function GET() {
     const session = await auth();
     const userId = session?.user?.id ?? null;
     const notifications = await fetchSiteNotificationsList(userId);
-    return Response.json({ ok: true, notifications });
+    return Response.json(
+      { ok: true, notifications },
+      {
+        headers: {
+          "Cache-Control": "private, no-store, must-revalidate",
+        },
+      }
+    );
   } catch (e) {
     console.error("[api/site-notifications GET]", e);
     return Response.json(
