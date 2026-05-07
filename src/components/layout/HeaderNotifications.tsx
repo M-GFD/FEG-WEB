@@ -125,7 +125,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       : "text-[var(--feg-green)]";
 
   return (
-    <div ref={wrapRef} className={`relative z-[60] shrink-0 ${className}`}>
+    <div ref={wrapRef} className={`relative z-[70] shrink-0 ${className}`}>
       <button
         type="button"
         aria-expanded={open}
@@ -143,7 +143,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+0.5rem)] w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-black/10 bg-white/95 py-1 shadow-[0_16px_40px_rgba(0,0,0,0.12)] backdrop-blur-md"
+          className="absolute right-0 top-[calc(100%+0.5rem)] z-[80] w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-black/10 bg-white py-1 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-md"
         >
           <div className="border-b border-black/5 px-3 py-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--feg-green)]">
