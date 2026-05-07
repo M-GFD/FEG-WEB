@@ -35,6 +35,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<SiteNotificationDTO[]>([]);
   const [loading, setLoading] = useState(false);
+  const [dismissingReads, setDismissingReads] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
   const load = useCallback(async () => {
@@ -80,6 +81,26 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
     return () => document.removeEventListener("mousedown", onDocMouseDown);
   }, [open]);
 
+  async function dismissReadNotifications() {
+    const hasRead = items.some((n) => n.read);
+    if (!hasRead || dismissingReads) return;
+    setDismissingReads(true);
+    try {
+      const res = await fetch("/api/site-notifications/dismiss-read", {
+        method: "POST",
+        credentials: "same-origin",
+      });
+      const data = await parseApiJson<{ ok: boolean }>(res);
+      if (data.ok) {
+        await load();
+      }
+    } catch {
+      /* noop */
+    } finally {
+      setDismissingReads(false);
+    }
+  }
+
   async function markRead(id: string) {
     try {
       const res = await fetch("/api/site-notifications/read", {
@@ -118,6 +139,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   }
 
   const unread = items.filter((n) => !n.read).length;
+  const hasReadVisible = items.some((n) => n.read);
 
   const iconClass =
     theme === "dark"
@@ -145,10 +167,19 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
           role="menu"
           className="absolute right-0 top-[calc(100%+0.5rem)] z-[80] w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-black/10 bg-white py-1 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-md"
         >
-          <div className="border-b border-black/5 px-3 py-2">
+          <div className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--feg-green)]">
               Notificaciones
             </p>
+            <button
+              type="button"
+              title="Ocultar del listado las notificaciones que ya marcaste como leídas"
+              disabled={!hasReadVisible || dismissingReads || loading}
+              onClick={() => void dismissReadNotifications()}
+              className="shrink-0 rounded-md px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-neutral-500 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {dismissingReads ? "…" : "Quitar leídas"}
+            </button>
           </div>
 
           <div className="max-h-[min(22rem,50vh)] overflow-y-auto">

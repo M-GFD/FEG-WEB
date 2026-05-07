@@ -354,12 +354,14 @@ model SiteNotification {
 }
 
 model SiteNotificationRead {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   userId         String
   notificationId String
-  readAt         DateTime @default(now())
+  readAt         DateTime  @default(now())
+  dismissedAt    DateTime?
   notification   SiteNotification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 
   @@unique([userId, notificationId])
   @@index([userId])
+  @@index([userId, dismissedAt])
 }
