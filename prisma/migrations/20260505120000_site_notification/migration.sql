@@ -35,3 +35,6 @@ BEGIN
       FOREIGN KEY ("notificationId") REFERENCES "SiteNotification"("id") ON DELETE CASCADE ON UPDATE CASCADE;
   END IF;
 END $$;
+
+-- Si la app usa Supabase REST y falla al insertar/leer hasta refrescar el catálogo:
+-- NOTIFY pgrst, 'reload schema';
