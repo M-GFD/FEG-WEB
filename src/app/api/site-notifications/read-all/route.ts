@@ -44,7 +44,12 @@ export async function POST(request: Request) {
       return Response.json({ ok: false, error: result.error ?? "Error" }, { status: 500 });
     }
 
-    return Response.json({ ok: true });
+    return Response.json(
+      { ok: true },
+      {
+        headers: { "Cache-Control": "private, no-store" },
+      }
+    );
   } catch (e) {
     console.error("[api/site-notifications/read-all POST]", e);
     return Response.json(

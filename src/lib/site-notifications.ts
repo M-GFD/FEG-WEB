@@ -407,7 +407,7 @@ export async function markSiteNotificationReadForUser(
   }
 }
 
-/** Marca como leídas varias notificaciones: una transacción Prisma (fuente de verdad), sync opcional a Supabase REST. */
+/** Upsert masivo en una sola sentencia SQL (compatible con PgBouncer pool; evita $transaction multi-query). */
 export async function markSiteNotificationIdsReadForUser(
   userId: string,
   notificationIds: string[]
@@ -427,14 +427,48 @@ export async function markSiteNotificationIdsReadForUser(
     select: { id: true },
   });
   const validIds = existing.map((r) => r.id);
-  if (validIds.length === 0) return { ok: true };
+
+  if (ids.length > 0 && validIds.length === 0) {
+    console.error("[SiteNotificationRead] ningún notificationId coincide con SiteNotification", {
+      userId,
+      requested: ids,
+    });
+    return {
+      ok: false,
+      error:
+        "Las notificaciones no se encontraron en la base (verificá DATABASE_URL / migraciones).",
+    };
+  }
+
+  if (validIds.length < ids.length) {
+    console.warn("[SiteNotificationRead] parte de los ids no existe en SiteNotification", {
+      pedidos: ids.length,
+      validos: validIds.length,
+    });
+  }
 
   const readAt = new Date();
 
+  const valueRows = Prisma.join(
+    validIds.map((notificationId) =>
+      Prisma.sql`(gen_random_uuid()::text, ${userId}, ${notificationId}, ${readAt}, NULL)`
+    )
+  );
+
   try {
-    await prisma.$transaction(
-      validIds.map((notificationId) =>
-        prisma.siteNotificationRead.upsert({
+    await prisma.$executeRaw`
+      INSERT INTO "SiteNotificationRead" ("id", "userId", "notificationId", "readAt", "dismissedAt")
+      VALUES ${valueRows}
+      ON CONFLICT ("userId", "notificationId")
+      DO UPDATE SET
+        "readAt" = EXCLUDED."readAt",
+        "dismissedAt" = NULL
+    `;
+  } catch (e) {
+    console.error("[SiteNotificationRead] prisma batch upsert (raw)", e);
+    try {
+      for (const notificationId of validIds) {
+        await prisma.siteNotificationRead.upsert({
           where: {
             userId_notificationId: { userId, notificationId },
           },
@@ -443,15 +477,15 @@ export async function markSiteNotificationIdsReadForUser(
             readAt,
             dismissedAt: null,
           },
-        })
-      )
-    );
-  } catch (e) {
-    console.error("[SiteNotificationRead] prisma batch upsert", e);
-    if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      return { ok: false, error: `Error al marcar (${e.code}): ${e.message}` };
+        });
+      }
+    } catch (e2) {
+      console.error("[SiteNotificationRead] prisma secuencial fallback", e2);
+      if (e2 instanceof Prisma.PrismaClientKnownRequestError) {
+        return { ok: false, error: `Error al marcar (${e2.code}): ${e2.message}` };
+      }
+      return { ok: false, error: "Error al marcar como leídas" };
     }
-    return { ok: false, error: "Error al marcar como leídas" };
   }
 
   const readAtIso = readAt.toISOString();
