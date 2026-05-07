@@ -209,14 +209,20 @@ export async function fetchSiteNotificationsList(userId: string | null): Promise
       if (!userId) {
         return mapRecentToGuestBaseDto(typed);
       }
-      const { data: reads } = await supabase
+      // Solo notificationId: en proyectos sin migración dismissedAt (42703 en PostgREST si se pide la columna).
+      const { data: reads, error: readsErr } = await supabase
         .from("SiteNotificationRead")
-        .select("notificationId, dismissedAt")
+        .select("notificationId")
         .eq("userId", userId);
 
+      if (readsErr) {
+        console.error("[SiteNotificationRead] supabase fetch reads", readsErr);
+      }
+
+      const readRows = (reads ?? []) as Array<{ notificationId: string }>;
       return mapNotificationsWithReads(
         typed,
-        (reads ?? []) as Array<{ notificationId: string; dismissedAt: string | null }>
+        readRows.map((r) => ({ notificationId: r.notificationId, dismissedAt: null }))
       );
     }
     if (notifErr) {
@@ -343,9 +349,10 @@ async function upsertSiteNotificationReadViaSupabase(
   }
 
   if (existing?.id) {
+    // Sin dismissedAt en el payload: bases sin esa columna fallan con PostgREST 42703; Prisma ya persistió el estado correcto.
     const { error: upErr } = await supabase
       .from("SiteNotificationRead")
-      .update({ readAt: readAtIso, dismissedAt: null })
+      .update({ readAt: readAtIso })
       .eq("id", existing.id as string);
     if (upErr) {
       console.error("[SiteNotificationRead] supabase update (fallback)", upErr);
