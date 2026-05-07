@@ -1,5 +1,5 @@
-import { randomUUID } from "crypto";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { Prisma } from "@prisma/client";
+import { prisma } from "@/lib/db";
 
 export type SiteNotificationDTO = {
   id: string;
@@ -12,37 +12,54 @@ export type SiteNotificationDTO = {
 
 const LIST_LIMIT = 40;
 
+function mapPrismaInsertError(e: unknown): string {
+  if (e instanceof Prisma.PrismaClientKnownRequestError) {
+    if (e.code === "P2021") {
+      return "Falta crear las tablas en la base (migración SiteNotification). Revisá Supabase o ejecutá prisma migrate deploy.";
+    }
+    console.error("[SiteNotification] insert", e.code, e.message);
+    return "No se pudo guardar la notificación. Revisá los logs del servidor.";
+  }
+  console.error("[SiteNotification] insert", e);
+  return "No se pudo guardar la notificación";
+}
+
 export async function fetchSiteNotificationsForUser(userId: string): Promise<SiteNotificationDTO[]> {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) {
+  try {
+    const notifs = await prisma.siteNotification.findMany({
+      orderBy: { createdAt: "desc" },
+      take: LIST_LIMIT,
+      select: {
+        id: true,
+        title: true,
+        body: true,
+        linkUrl: true,
+        createdAt: true,
+      },
+    });
+
+    if (notifs.length === 0) {
+      return [];
+    }
+
+    const reads = await prisma.siteNotificationRead.findMany({
+      where: { userId },
+      select: { notificationId: true },
+    });
+    const readSet = new Set(reads.map((r) => r.notificationId));
+
+    return notifs.map((n) => ({
+      id: n.id,
+      title: n.title,
+      body: n.body,
+      linkUrl: n.linkUrl,
+      createdAt: n.createdAt.toISOString(),
+      read: readSet.has(n.id),
+    }));
+  } catch (e) {
+    console.error("[SiteNotification] fetch", e);
     return [];
   }
-
-  const { data: notifs, error: notifErr } = await supabase
-    .from("SiteNotification")
-    .select("id, title, body, linkUrl, createdAt")
-    .order("createdAt", { ascending: false })
-    .limit(LIST_LIMIT);
-
-  if (notifErr || !notifs?.length) {
-    return [];
-  }
-
-  const { data: reads } = await supabase
-    .from("SiteNotificationRead")
-    .select("notificationId")
-    .eq("userId", userId);
-
-  const readSet = new Set((reads ?? []).map((r: { notificationId: string }) => r.notificationId));
-
-  return notifs.map((n) => ({
-    id: n.id as string,
-    title: n.title as string,
-    body: (n.body as string | null) ?? null,
-    linkUrl: (n.linkUrl as string | null) ?? null,
-    createdAt: n.createdAt as string,
-    read: readSet.has(n.id as string),
-  }));
 }
 
 export async function insertSiteNotification(params: {
@@ -51,75 +68,44 @@ export async function insertSiteNotification(params: {
   linkUrl: string | null;
   createdByUserId: string;
 }): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) {
-    return { ok: false, error: "Servicio no configurado" };
+  try {
+    const row = await prisma.siteNotification.create({
+      data: {
+        title: params.title,
+        body: params.body,
+        linkUrl: params.linkUrl,
+        createdByUserId: params.createdByUserId,
+      },
+    });
+    return { ok: true, id: row.id };
+  } catch (e) {
+    return { ok: false, error: mapPrismaInsertError(e) };
   }
-
-  const id = randomUUID();
-  const { error } = await supabase.from("SiteNotification").insert({
-    id,
-    title: params.title,
-    body: params.body,
-    linkUrl: params.linkUrl,
-    createdByUserId: params.createdByUserId,
-  });
-
-  if (error) {
-    console.error("[SiteNotification] insert", error);
-    return { ok: false, error: "No se pudo guardar la notificación" };
-  }
-
-  return { ok: true, id };
 }
 
 export async function markSiteNotificationReadForUser(
   userId: string,
   notificationId: string
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) {
-    return { ok: false, error: "Servicio no configurado" };
-  }
-
-  const { data: existing, error: selErr } = await supabase
-    .from("SiteNotificationRead")
-    .select("id")
-    .eq("userId", userId)
-    .eq("notificationId", notificationId)
-    .maybeSingle();
-
-  if (selErr) {
-    console.error("[SiteNotificationRead] select", selErr);
-    return { ok: false, error: "Error al marcar como leída" };
-  }
-
-  const readAt = new Date().toISOString();
-
-  if (existing?.id) {
-    const { error: upErr } = await supabase
-      .from("SiteNotificationRead")
-      .update({ readAt })
-      .eq("id", existing.id as string);
-
-    if (upErr) {
-      console.error("[SiteNotificationRead] update", upErr);
-      return { ok: false, error: "Error al marcar como leída" };
-    }
+  try {
+    await prisma.siteNotificationRead.upsert({
+      where: {
+        userId_notificationId: {
+          userId,
+          notificationId,
+        },
+      },
+      create: {
+        userId,
+        notificationId,
+      },
+      update: {
+        readAt: new Date(),
+      },
+    });
     return { ok: true };
-  }
-
-  const { error: insErr } = await supabase.from("SiteNotificationRead").insert({
-    id: randomUUID(),
-    userId,
-    notificationId,
-    readAt,
-  });
-
-  if (insErr) {
-    console.error("[SiteNotificationRead] insert", insErr);
+  } catch (e) {
+    console.error("[SiteNotificationRead] upsert", e);
     return { ok: false, error: "Error al marcar como leída" };
   }
-
-  return { ok: true };
 }
