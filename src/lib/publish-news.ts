@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import { slugifyTitle } from "@/lib/slugify";
 import { sanitizeNewsContent } from "@/lib/sanitize-news";
 import { resolveUniqueNewsSlug } from "@/lib/news-db";
+import { broadcastNewsPublishedPush } from "@/lib/push";
 
 const createBodySchema = z.object({
   title: z.string().min(1, "Título requerido").max(200),
@@ -141,6 +142,14 @@ export async function publishNewsArticle(
       /** La noticia ya está guardada; no fallar el publish si la caché no revalida en este runtime. */
       console.error("[publishNewsArticle] revalidatePath", revErr);
     }
+
+    void broadcastNewsPublishedPush({
+      title: title.trim(),
+      slug: row.slug,
+      excerpt: excerpt?.trim() ? excerpt.trim() : null,
+    }).catch((pushErr) => {
+      console.error("[publishNewsArticle] push notify", pushErr);
+    });
 
     return { ok: true, slug: row.slug };
   } catch (e) {

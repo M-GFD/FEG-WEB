@@ -1,26 +1,16 @@
 /**
- * Push notifications - hooks para enviar notificaciones
- * Los clubes/prensa pueden disparar eventos que envían push a suscriptores
+ * Push notifications (PWA + Web Push + VAPID).
  *
- * Uso típico:
- * - Resultados publicados -> notificar a jugadores del torneo
- * - Noticia importante -> notificar a todos los suscriptores
- * - Aviso de torneo -> notificar a clubes/jugadores
- *
- * Requiere: tabla PushSubscription, endpoint para suscribirse,
- * y un job/API para enviar (ej: web-push con VAPID keys)
+ * - Suscripción: POST /api/push/subscribe (no requiere cuenta).
+ * - Envío masivo: `broadcastNewsPublishedPush` en `push-web.ts`.
  */
+
+export { broadcastNewsPublishedPush } from "./push-web";
 
 export async function notifyResultadosPublicados(
   tournamentId: string,
   tournamentName: string
 ) {
-  // TODO: Obtener suscripciones relevantes y enviar push
-  // await sendPush({ title: "Resultados publicados", body: tournamentName });
+  // TODO: segmentar suscripciones por torneo y enviar push
   return { tournamentId, tournamentName };
-}
-
-export async function notifyNuevaNoticia(title: string, excerpt: string) {
-  // TODO: Enviar a todos los suscriptores
-  return { title, excerpt };
 }

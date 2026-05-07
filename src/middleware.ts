@@ -17,6 +17,7 @@ function isPreviewGateBypassPath(pathname: string) {
   if (pathname.startsWith("/_next")) return true;
   if (pathname.startsWith("/sitio-en-desarrollo")) return true;
   if (/\.(svg|png|jpe?g|gif|webp|ico|webmanifest)$/i.test(pathname)) return true;
+  if (pathname === "/sw.js") return true;
   return false;
 }
 
