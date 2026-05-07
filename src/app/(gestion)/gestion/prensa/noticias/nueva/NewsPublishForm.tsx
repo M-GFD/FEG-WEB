@@ -26,6 +26,7 @@ export function NewsPublishForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [notifyPush, setNotifyPush] = useState(false);
 
   useEffect(() => {
     if (!slugTouched) {
@@ -82,6 +83,7 @@ export function NewsPublishForm() {
         content: contentHtml,
         imageUrl: imageUrl ?? "",
         galleryUrls,
+        notifyPush,
       });
 
       if (!data.ok) {
@@ -239,14 +241,34 @@ export function NewsPublishForm() {
         </p>
       )}
 
-      <div className="flex flex-wrap gap-3">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-full bg-[var(--feg-yellow)] px-6 py-2.5 font-heading text-sm font-semibold text-[var(--feg-ink)] transition hover:brightness-95 disabled:opacity-50"
-        >
-          {submitting ? "Publicando…" : "Publicar noticia"}
-        </button>
+      <div className="flex flex-col gap-3">
+        <label className="flex max-w-prose cursor-pointer items-start gap-3 rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)]/80 px-4 py-3 text-sm text-[var(--feg-ink)] shadow-sm">
+          <input
+            type="checkbox"
+            checked={notifyPush}
+            onChange={(e) => setNotifyPush(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--feg-green)]/40 text-[var(--feg-green-2)] focus:ring-[var(--feg-green-2)]"
+          />
+          <span>
+            <span className="font-medium text-[var(--feg-green)]">
+              Enviar notificación push al publicar
+            </span>
+            <span className="mt-0.5 block text-[var(--feg-green)]/85">
+              Si está marcado, los dispositivos con la PWA instalada y notificaciones permitidas recibirán un aviso con el
+              enlace a la noticia.
+            </span>
+          </span>
+        </label>
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="rounded-full bg-[var(--feg-yellow)] px-6 py-2.5 font-heading text-sm font-semibold text-[var(--feg-ink)] transition hover:brightness-95 disabled:opacity-50"
+          >
+            {submitting ? "Publicando…" : "Publicar noticia"}
+          </button>
+        </div>
       </div>
     </form>
   );

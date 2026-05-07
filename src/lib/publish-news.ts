@@ -13,6 +13,8 @@ const createBodySchema = z.object({
   content: z.string().min(1, "El cuerpo de la noticia no puede estar vacío"),
   imageUrl: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
   galleryUrls: z.array(z.string().url()).max(30).optional(),
+  /** Si es true, envía Web Push a suscriptores PWA; por defecto no se notifica. */
+  notifyPush: z.boolean().optional().default(false),
 });
 
 function isEffectivelyEmptyHtml(html: string): boolean {
@@ -44,8 +46,15 @@ export async function publishNewsArticle(
     return { ok: false, error: first, status: 400 };
   }
 
-  const { title, slug: slugInput, excerpt, content, imageUrl, galleryUrls } =
-    parsed.data;
+  const {
+    title,
+    slug: slugInput,
+    excerpt,
+    content,
+    imageUrl,
+    galleryUrls,
+    notifyPush,
+  } = parsed.data;
 
   if (isEffectivelyEmptyHtml(content)) {
     return {
@@ -143,13 +152,15 @@ export async function publishNewsArticle(
       console.error("[publishNewsArticle] revalidatePath", revErr);
     }
 
-    void broadcastNewsPublishedPush({
-      title: title.trim(),
-      slug: row.slug,
-      excerpt: excerpt?.trim() ? excerpt.trim() : null,
-    }).catch((pushErr) => {
-      console.error("[publishNewsArticle] push notify", pushErr);
-    });
+    if (notifyPush) {
+      void broadcastNewsPublishedPush({
+        title: title.trim(),
+        slug: row.slug,
+        excerpt: excerpt?.trim() ? excerpt.trim() : null,
+      }).catch((pushErr) => {
+        console.error("[publishNewsArticle] push notify", pushErr);
+      });
+    }
 
     return { ok: true, slug: row.slug };
   } catch (e) {
