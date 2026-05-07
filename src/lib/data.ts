@@ -351,32 +351,6 @@ export async function getNews() {
   return data ?? [];
 }
 
-/** Listado completo de noticias publicadas para gestión (prensa). */
-export async function getPublishedNewsForGestion(limit = 500) {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return [];
-
-  const { data, error } = await supabase
-    .from("News")
-    .select("id,title,slug,publishedAt,createdAt")
-    .eq("published", true)
-    .order("publishedAt", { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    console.error("[getPublishedNewsForGestion]", error.message);
-    return [];
-  }
-
-  return (data ?? []) as Array<{
-    id: string;
-    title: string;
-    slug: string;
-    publishedAt: string | null;
-    createdAt: string;
-  }>;
-}
-
 export async function getNewsBySlug(slug: string) {
   const supabase = getSupabaseAdmin();
   if (!supabase) return null;
