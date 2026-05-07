@@ -345,7 +345,7 @@ export function PwaPushRegister() {
           <button
             type="button"
             onClick={onDismissPush}
-            className="rounded-xl border border-[var(--feg-green)]/25 px-4 py-2 text-sm font-medium text-[var(--feg-green)]"
+            className="rounded-xl bg-[var(--feg-green-2)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95"
           >
             Ahora no
           </button>
@@ -353,7 +353,7 @@ export function PwaPushRegister() {
             type="button"
             onClick={onEnablePush}
             disabled={busy}
-            className="rounded-xl bg-[var(--feg-green-2)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+            className="rounded-xl bg-[var(--feg-yellow)] px-4 py-2 text-sm font-semibold text-[var(--feg-ink)] transition hover:brightness-95 disabled:opacity-60"
           >
             {busy ? "…" : "Activar"}
           </button>
