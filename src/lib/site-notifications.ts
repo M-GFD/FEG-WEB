@@ -358,6 +358,24 @@ export async function markSiteNotificationReadForUser(
   }
 }
 
+/** Marca como leídas varias notificaciones (orden de la lista actual). */
+export async function markSiteNotificationIdsReadForUser(
+  userId: string,
+  notificationIds: string[]
+): Promise<{ ok: boolean; error?: string }> {
+  const seen = new Set<string>();
+  for (const raw of notificationIds) {
+    const notificationId = String(raw ?? "").trim();
+    if (!notificationId || seen.has(notificationId)) continue;
+    seen.add(notificationId);
+    const r = await markSiteNotificationReadForUser(userId, notificationId);
+    if (!r.ok) {
+      return { ok: false, error: r.error ?? "Error al marcar como leídas" };
+    }
+  }
+  return { ok: true };
+}
+
 /** Marca como leídas (en servidor) todas las notificaciones recientes del listado. */
 export async function markAllRecentSiteNotificationsReadForUser(
   userId: string
