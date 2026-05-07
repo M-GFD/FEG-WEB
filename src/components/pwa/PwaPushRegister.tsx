@@ -13,7 +13,6 @@ function urlBase64ToUint8Array(base64String: string): BufferSource {
   return outputArray;
 }
 
-/** true si la app corre como PWA instalada (varía entre Android, iOS y modo pantalla). */
 function isStandalonePwa(): boolean {
   try {
     const nav = window.navigator as Navigator & { standalone?: boolean };
@@ -21,26 +20,46 @@ function isStandalonePwa(): boolean {
     return (
       window.matchMedia("(display-mode: standalone)").matches ||
       window.matchMedia("(display-mode: fullscreen)").matches ||
-      window.matchMedia("(display-mode: minimal-ui)").matches
+      window.matchMedia("(display-mode: minimal-ui)").matches ||
+      window.matchMedia("(display-mode: window-controls-overlay)").matches
     );
   } catch {
     return (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
   }
 }
 
-/** Quitar bandera antigua que impedía volver a mostrar el banner al reabrir la PWA. */
-function clearLegacyBannerDismissFlag() {
+function isCoarsePointer(): boolean {
   try {
-    sessionStorage.removeItem("feg_push_banner_dismissed");
+    return window.matchMedia("(pointer: coarse)").matches;
   } catch {
-    /* ignore */
+    return false;
   }
 }
 
-async function registerAndPostSubscription(): Promise<boolean> {
-  const vapid = process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY;
+function shouldOfferPushUi(): boolean {
+  if (Notification.permission !== "default") return false;
+  return isStandalonePwa() || isCoarsePointer();
+}
+
+const RESHOW_AFTER_HIDDEN_SEC = 45;
+
+async function resolveVapidPublicKey(): Promise<string | null> {
+  const fromEnv = process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY?.trim();
+  if (fromEnv) return fromEnv;
+  try {
+    const r = await fetch("/api/push/vapid-public");
+    if (!r.ok) return null;
+    const j = (await r.json()) as { publicKey?: string | null };
+    const k = j.publicKey?.trim();
+    return k || null;
+  } catch {
+    return null;
+  }
+}
+
+async function registerAndPostSubscription(vapid: string): Promise<{ ok: boolean; error?: string }> {
   if (!vapid || !("serviceWorker" in navigator) || !("PushManager" in window)) {
-    return false;
+    return { ok: false, error: "Navegador incompatible" };
   }
 
   const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
@@ -56,7 +75,7 @@ async function registerAndPostSubscription(): Promise<boolean> {
 
   const j = sub.toJSON();
   if (!j.endpoint || !j.keys?.auth || !j.keys?.p256dh) {
-    return false;
+    return { ok: false, error: "Suscripción incompleta" };
   }
 
   const res = await fetch("/api/push/subscribe", {
@@ -68,28 +87,40 @@ async function registerAndPostSubscription(): Promise<boolean> {
     }),
   });
 
-  return res.ok;
+  if (!res.ok) {
+    const errBody = await res.text().catch(() => "");
+    return { ok: false, error: errBody || res.statusText || "Error al guardar" };
+  }
+
+  return { ok: true };
 }
 
-/** Segundos en segundo plano tras los cuales volvemos a ofrecer el banner (reabrir desde inicio / multitarea). */
-const RESHOW_AFTER_HIDDEN_SEC = 45;
-
 export function PwaPushRegister() {
+  const [vapidKey, setVapidKey] = useState<string | null>(null);
   const [showBanner, setShowBanner] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [subscribeError, setSubscribeError] = useState<string | null>(null);
   const lastHiddenAtRef = useRef<number | null>(null);
 
   useEffect(() => {
-    clearLegacyBannerDismissFlag();
-    if (!process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY) return;
-
     let cancelled = false;
-
-    const offerBannerIfEligible = () => {
-      if (Notification.permission !== "default") return;
-      if (!isStandalonePwa()) return;
-      setShowBanner(true);
+    void resolveVapidPublicKey().then((k) => {
+      if (!cancelled) setVapidKey(k);
+    });
+    return () => {
+      cancelled = true;
     };
+  }, []);
+
+  const tryOfferBanner = useCallback(() => {
+    if (!vapidKey) return;
+    if (!shouldOfferPushUi()) return;
+    setShowBanner(true);
+  }, [vapidKey]);
+
+  useEffect(() => {
+    if (!vapidKey) return;
+    let cancelled = false;
 
     const onVisibilityChange = () => {
       if (document.visibilityState === "hidden") {
@@ -100,18 +131,18 @@ export function PwaPushRegister() {
       lastHiddenAtRef.current = null;
       const hiddenSec = at != null ? (Date.now() - at) / 1000 : 0;
       if (hiddenSec >= RESHOW_AFTER_HIDDEN_SEC) {
-        offerBannerIfEligible();
+        tryOfferBanner();
       }
     };
 
     const onPageShow = () => {
-      offerBannerIfEligible();
+      tryOfferBanner();
     };
 
     document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("pageshow", onPageShow);
 
-    (async () => {
+    void (async () => {
       if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
 
       try {
@@ -124,13 +155,14 @@ export function PwaPushRegister() {
       if (cancelled) return;
 
       if (Notification.permission === "granted") {
-        await registerAndPostSubscription().catch((e) =>
-          console.error("[PwaPushRegister] sync subscription", e)
-        );
+        const r = await registerAndPostSubscription(vapidKey);
+        if (!r.ok && r.error) {
+          console.error("[PwaPushRegister] sync", r.error);
+        }
         return;
       }
 
-      offerBannerIfEligible();
+      tryOfferBanner();
     })();
 
     return () => {
@@ -138,9 +170,11 @@ export function PwaPushRegister() {
       document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("pageshow", onPageShow);
     };
-  }, []);
+  }, [vapidKey, tryOfferBanner]);
 
   const onEnable = useCallback(async () => {
+    if (!vapidKey) return;
+    setSubscribeError(null);
     setBusy(true);
     try {
       const perm = await Notification.requestPermission();
@@ -148,17 +182,22 @@ export function PwaPushRegister() {
         setShowBanner(false);
         return;
       }
-      const ok = await registerAndPostSubscription();
-      setShowBanner(!ok);
+      const r = await registerAndPostSubscription(vapidKey);
+      if (!r.ok) {
+        setSubscribeError(r.error ?? "No se pudo activar");
+        return;
+      }
+      setShowBanner(false);
     } catch (e) {
       console.error("[PwaPushRegister] activar", e);
+      setSubscribeError(e instanceof Error ? e.message : "Error");
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [vapidKey]);
 
-  /** Solo oculta en esta visita; al reabrir la PWA o volver tras un rato en segundo plano se vuelve a ofrecer. */
   const onDismiss = () => {
+    setSubscribeError(null);
     setShowBanner(false);
   };
 
@@ -172,10 +211,17 @@ export function PwaPushRegister() {
       style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
     >
       <div className="mx-auto flex max-w-lg flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-[var(--feg-ink)]">
-          <span className="font-semibold">Recibí avisos cuando haya noticias nuevas.</span>{" "}
-          Tocá Activar y aceptá las notificaciones cuando te lo pida el sistema.
-        </p>
+        <div className="text-sm text-[var(--feg-ink)]">
+          <p>
+            <span className="font-semibold">Recibí avisos cuando haya noticias nuevas.</span>{" "}
+            Tocá Activar y aceptá cuando el sistema pregunte (en iPhone, desde la app en el inicio).
+          </p>
+          {subscribeError && (
+            <p className="mt-2 text-xs text-red-800" role="alert">
+              {subscribeError}
+            </p>
+          )}
+        </div>
         <div className="flex shrink-0 gap-2">
           <button
             type="button"

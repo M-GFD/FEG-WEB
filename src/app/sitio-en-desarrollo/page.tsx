@@ -1,29 +1,19 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { FegLogo } from "@/components/layout/FegLogo";
+import { useSearchParams } from "next/navigation";
 
-function safeRedirect(path: string): string {
-  if (!path.startsWith("/") || path.startsWith("//")) return "/";
-  return path;
-}
-
-function SitioEnDesarrolloInner() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = safeRedirect(searchParams.get("redirect") ?? "/");
-
+function GateInner() {
+  const sp = useSearchParams();
+  const redirect = sp.get("redirect") ?? "/";
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const fd = new FormData(e.currentTarget);
-    const password = String(fd.get("password") ?? "");
-
-    setPending(true);
+    setBusy(true);
     try {
       const res = await fetch("/api/preview-gate", {
         method: "POST",
@@ -31,50 +21,46 @@ function SitioEnDesarrolloInner() {
         body: JSON.stringify({ password }),
       });
       if (!res.ok) {
-        setError("Contraseña incorrecta.");
+        const j = await res.json().catch(() => ({}));
+        setError(j.error === "disabled" ? "Acceso directo disponible." : "Contraseña incorrecta.");
         return;
       }
-      router.replace(redirectTo);
-      router.refresh();
+      window.location.href = redirect.startsWith("/") ? redirect : "/";
     } catch {
       setError("No se pudo verificar. Intentá de nuevo.");
     } finally {
-      setPending(false);
+      setBusy(false);
     }
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--feg-bg)] px-6 py-12">
-      <div className="flex w-full max-w-sm flex-col items-center text-center">
-        <FegLogo size="footer" className="mx-auto h-24 object-contain object-center sm:h-28" />
-        <p className="mt-8 font-heading text-xl font-semibold uppercase tracking-tight text-[var(--feg-ink)] sm:text-2xl">
-          Sitio en desarrollo
-        </p>
-        <form onSubmit={handleSubmit} className="mt-8 w-full space-y-4">
-          <label htmlFor="preview-password" className="sr-only">
-            Contraseña de acceso
-          </label>
-          <input
-            id="preview-password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            placeholder="Contraseña"
-            className="w-full rounded-xl border border-[var(--feg-green)]/25 bg-white px-4 py-3 text-[var(--feg-ink)] shadow-sm outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
-          />
-          {error && (
-            <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-          )}
-          <button
-            type="submit"
-            disabled={pending}
-            className="w-full rounded-xl bg-[var(--feg-ink)] py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
-          >
-            {pending ? "Comprobando…" : "Entrar al sitio"}
-          </button>
-        </form>
-      </div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-stone-900 px-4 py-12 text-stone-100">
+      <h1 className="font-heading text-xl font-semibold uppercase tracking-tight">Sitio en desarrollo</h1>
+      <p className="mt-2 max-w-sm text-center text-sm text-stone-400">
+        Ingresá la clave de acceso para continuar.
+      </p>
+      <form onSubmit={onSubmit} className="mt-8 w-full max-w-xs space-y-4">
+        <input
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(ev) => setPassword(ev.target.value)}
+          className="w-full rounded-xl border border-stone-600 bg-stone-800 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+          placeholder="Contraseña"
+        />
+        {error && (
+          <p className="text-sm text-red-400" role="alert">
+            {error}
+          </p>
+        )}
+        <button
+          type="submit"
+          disabled={busy || !password}
+          className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {busy ? "…" : "Entrar"}
+        </button>
+      </form>
     </div>
   );
 }
@@ -83,12 +69,10 @@ export default function SitioEnDesarrolloPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[var(--feg-bg)] text-[var(--feg-green)]">
-          Cargando…
-        </div>
+        <div className="flex min-h-screen items-center justify-center bg-stone-900 text-stone-400">Cargando…</div>
       }
     >
-      <SitioEnDesarrolloInner />
+      <GateInner />
     </Suspense>
   );
 }
