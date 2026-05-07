@@ -28,6 +28,13 @@ function isStandalonePwa(): boolean {
   }
 }
 
+function isIosLike(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent || "";
+  if (/iPad|iPhone|iPod/i.test(ua)) return true;
+  return navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+}
+
 function isCoarsePointer(): boolean {
   try {
     return window.matchMedia("(pointer: coarse)").matches;
@@ -36,12 +43,28 @@ function isCoarsePointer(): boolean {
   }
 }
 
-function shouldOfferPushUi(): boolean {
+/**
+ * Ofrecer el flujo real de Web Push solo donde tiene sentido:
+ * - iOS / iPad: solo en PWA instalada (standalone). En Safari el permiso no es el de la “app” del inicio.
+ * - Android y resto: PWA o Chrome móvil en pestaña (push sí aplica al origen).
+ */
+function canOfferRealPushOptIn(): boolean {
   if (Notification.permission !== "default") return false;
+  if (isIosLike()) {
+    return isStandalonePwa();
+  }
   return isStandalonePwa() || isCoarsePointer();
 }
 
+/** Safari iOS sin PWA: instrucciones; no llamamos requestPermission aquí. */
+function canShowIosInstallHint(): boolean {
+  if (!isIosLike()) return false;
+  if (isStandalonePwa()) return false;
+  return Notification.permission === "default";
+}
+
 const RESHOW_AFTER_HIDDEN_SEC = 45;
+const IOS_HINT_DISMISS_KEY = "feg_ios_pwa_push_hint_dismissed";
 
 async function resolveVapidPublicKey(): Promise<string | null> {
   const fromEnv =
@@ -69,10 +92,15 @@ async function registerAndPostSubscription(vapid: string): Promise<{ ok: boolean
 
   let sub = await reg.pushManager.getSubscription();
   if (!sub) {
-    sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(vapid),
-    });
+    try {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapid),
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "No se pudo suscribir al servicio push";
+      return { ok: false, error: msg };
+    }
   }
 
   const j = sub.toJSON();
@@ -97,9 +125,11 @@ async function registerAndPostSubscription(vapid: string): Promise<{ ok: boolean
   return { ok: true };
 }
 
+type OfferMode = "none" | "ios-hint" | "push";
+
 export function PwaPushRegister() {
   const [vapidKey, setVapidKey] = useState<string | null>(null);
-  const [showBanner, setShowBanner] = useState(false);
+  const [mode, setMode] = useState<OfferMode>("none");
   const [busy, setBusy] = useState(false);
   const [subscribeError, setSubscribeError] = useState<string | null>(null);
   const lastHiddenAtRef = useRef<number | null>(null);
@@ -114,11 +144,28 @@ export function PwaPushRegister() {
     };
   }, []);
 
-  const tryOfferBanner = useCallback(() => {
-    if (!vapidKey) return;
-    if (!shouldOfferPushUi()) return;
-    setShowBanner(true);
+  const computeOfferMode = useCallback((): OfferMode => {
+    if (!vapidKey) return "none";
+    let iosHintDismissed = false;
+    try {
+      iosHintDismissed = sessionStorage.getItem(IOS_HINT_DISMISS_KEY) === "1";
+    } catch {
+      /* ignore */
+    }
+
+    if (canShowIosInstallHint() && !iosHintDismissed) {
+      return "ios-hint";
+    }
+    if (canOfferRealPushOptIn()) {
+      return "push";
+    }
+    return "none";
   }, [vapidKey]);
+
+  const tryOffer = useCallback(() => {
+    if (!vapidKey) return;
+    setMode(computeOfferMode());
+  }, [vapidKey, computeOfferMode]);
 
   useEffect(() => {
     if (!vapidKey) return;
@@ -133,12 +180,12 @@ export function PwaPushRegister() {
       lastHiddenAtRef.current = null;
       const hiddenSec = at != null ? (Date.now() - at) / 1000 : 0;
       if (hiddenSec >= RESHOW_AFTER_HIDDEN_SEC) {
-        tryOfferBanner();
+        tryOffer();
       }
     };
 
     const onPageShow = () => {
-      tryOfferBanner();
+      tryOffer();
     };
 
     document.addEventListener("visibilitychange", onVisibilityChange);
@@ -157,6 +204,9 @@ export function PwaPushRegister() {
       if (cancelled) return;
 
       if (Notification.permission === "granted") {
+        if (isIosLike() && !isStandalonePwa()) {
+          return;
+        }
         const r = await registerAndPostSubscription(vapidKey);
         if (!r.ok && r.error) {
           console.error("[PwaPushRegister] sync", r.error);
@@ -164,7 +214,7 @@ export function PwaPushRegister() {
         return;
       }
 
-      tryOfferBanner();
+      tryOffer();
     })();
 
     return () => {
@@ -172,38 +222,89 @@ export function PwaPushRegister() {
       document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("pageshow", onPageShow);
     };
-  }, [vapidKey, tryOfferBanner]);
+  }, [vapidKey, tryOffer]);
 
-  const onEnable = useCallback(async () => {
+  /**
+   * requestPermission() debe ejecutarse en el mismo gesto del clic; no hace falta setState antes
+   * (en Safari puede anular el permiso real).
+   */
+  const onEnablePush = useCallback(() => {
     if (!vapidKey) return;
-    setSubscribeError(null);
-    setBusy(true);
-    try {
-      const perm = await Notification.requestPermission();
-      if (perm !== "granted") {
-        setShowBanner(false);
-        return;
-      }
-      const r = await registerAndPostSubscription(vapidKey);
-      if (!r.ok) {
-        setSubscribeError(r.error ?? "No se pudo activar");
-        return;
-      }
-      setShowBanner(false);
-    } catch (e) {
-      console.error("[PwaPushRegister] activar", e);
-      setSubscribeError(e instanceof Error ? e.message : "Error");
-    } finally {
-      setBusy(false);
+    if (isIosLike() && !isStandalonePwa()) {
+      setSubscribeError(
+        "Abrí la FEG desde el ícono en tu inicio. En Safari solamente el permiso no aplica a la app instalada."
+      );
+      return;
     }
+
+    setSubscribeError(null);
+    const permPromise = Notification.requestPermission();
+
+    void permPromise.then(async (perm) => {
+      setBusy(true);
+      try {
+        if (perm !== "granted") {
+          setMode("none");
+          return;
+        }
+        const r = await registerAndPostSubscription(vapidKey);
+        if (!r.ok) {
+          setSubscribeError(r.error ?? "No se pudo activar");
+          return;
+        }
+        setMode("none");
+      } catch (e) {
+        console.error("[PwaPushRegister] activar", e);
+        setSubscribeError(e instanceof Error ? e.message : "Error");
+      } finally {
+        setBusy(false);
+      }
+    });
   }, [vapidKey]);
 
-  const onDismiss = () => {
+  const onDismissPush = () => {
     setSubscribeError(null);
-    setShowBanner(false);
+    setMode("none");
   };
 
-  if (!showBanner) return null;
+  const onDismissIosHint = () => {
+    try {
+      sessionStorage.setItem(IOS_HINT_DISMISS_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+    setMode("none");
+  };
+
+  if (mode === "ios-hint") {
+    return (
+      <div
+        role="dialog"
+        aria-label="Cómo activar notificaciones en iPhone"
+        className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[var(--feg-green)]/20 bg-[var(--feg-bg)]/95 p-4 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] backdrop-blur-sm"
+        style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
+      >
+        <div className="mx-auto max-w-lg text-sm text-[var(--feg-ink)]">
+          <p className="font-semibold">Avisos en iPhone / iPad</p>
+          <p className="mt-2 text-[var(--feg-green)]">
+            Las notificaciones push solo se pueden activar si abrís la FEG desde el{" "}
+            <strong>ícono en tu pantalla de inicio</strong>, no desde Safari. Si aún no la agregaste:{" "}
+            <strong>Compartir</strong> → <strong>Agregar a inicio</strong>, abrí esa app y tocá Activar
+            ahí.
+          </p>
+          <button
+            type="button"
+            onClick={onDismissIosHint}
+            className="mt-4 w-full rounded-xl border border-[var(--feg-green)]/25 py-2.5 text-sm font-medium text-[var(--feg-green)] sm:w-auto sm:px-6"
+          >
+            Entendido
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (mode !== "push") return null;
 
   return (
     <div
@@ -216,7 +317,7 @@ export function PwaPushRegister() {
         <div className="text-sm text-[var(--feg-ink)]">
           <p>
             <span className="font-semibold">Recibí avisos cuando haya noticias nuevas.</span>{" "}
-            Tocá Activar y aceptá cuando el sistema pregunte (en iPhone, desde la app en el inicio).
+            Tocá Activar y aceptá en el cuadro del sistema (no solo en esta barra).
           </p>
           {subscribeError && (
             <p className="mt-2 text-xs text-red-800" role="alert">
@@ -227,14 +328,14 @@ export function PwaPushRegister() {
         <div className="flex shrink-0 gap-2">
           <button
             type="button"
-            onClick={onDismiss}
+            onClick={onDismissPush}
             className="rounded-xl border border-[var(--feg-green)]/25 px-4 py-2 text-sm font-medium text-[var(--feg-green)]"
           >
             Ahora no
           </button>
           <button
             type="button"
-            onClick={onEnable}
+            onClick={onEnablePush}
             disabled={busy}
             className="rounded-xl bg-[var(--feg-green-2)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
           >
