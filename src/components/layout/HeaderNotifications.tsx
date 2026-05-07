@@ -1,6 +1,6 @@
 "use client";
 
-import { getSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { parseApiJson } from "@/lib/parse-api-response";
@@ -35,6 +35,7 @@ function formatShortDate(iso: string) {
 }
 
 export function HeaderNotifications({ theme = "light", className = "" }: Props) {
+  const { status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -47,13 +48,17 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/site-notifications", { credentials: "same-origin" });
+      const res = await fetch("/api/site-notifications", {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
       const data = await parseApiJson<{ ok: boolean; notifications?: SiteNotificationDTO[] }>(res);
       if (data.ok && Array.isArray(data.notifications)) {
-        const session = await getSession();
-        const list = session?.user
-          ? data.notifications
-          : applyGuestNotificationState(data.notifications);
+        /** Solo invitados reales: con `loading`, getSession() suele ser null y el GET ya trae `read` vía cookie (auth()). */
+        const list =
+          status === "unauthenticated"
+            ? applyGuestNotificationState(data.notifications)
+            : data.notifications;
         setItems(list);
       }
     } catch {
@@ -61,7 +66,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [status]);
 
   useEffect(() => {
     void load();
@@ -92,8 +97,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
     const hasRead = items.some((n) => n.read);
     if (!hasRead || dismissingReads) return;
 
-    const session = await getSession();
-    if (!session?.user) {
+    if (status === "unauthenticated") {
       guestDismissReadIds(items.filter((n) => n.read).map((n) => n.id));
       await load();
       return;
@@ -111,11 +115,8 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
         return;
       }
       if (res.status === 401 || res.status === 403) {
-        const s = await getSession();
-        if (!s?.user) {
-          guestDismissReadIds(items.filter((n) => n.read).map((n) => n.id));
-          await load();
-        }
+        guestDismissReadIds(items.filter((n) => n.read).map((n) => n.id));
+        await load();
       }
     } catch {
       /* noop */
@@ -138,8 +139,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
 
     setMarkingAllRead(true);
     try {
-      const session = await getSession();
-      if (!session?.user) {
+      if (status === "unauthenticated") {
         guestMarkAllReadIds(unreadIds);
         await load();
         return;
@@ -165,12 +165,9 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       }
 
       if (res.status === 401 || res.status === 403) {
-        const s = await getSession();
-        if (!s?.user) {
-          guestMarkAllReadIds(unreadIds);
-          await load();
-          return;
-        }
+        guestMarkAllReadIds(unreadIds);
+        await load();
+        return;
       }
 
       setItems(snapshot);
@@ -187,8 +184,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
     };
 
-    const session = await getSession();
-    if (!session?.user) {
+    if (status === "unauthenticated") {
       applyGuestRead();
       return true;
     }
@@ -206,11 +202,8 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
         return true;
       }
       if (res.status === 401 || res.status === 403) {
-        const s = await getSession();
-        if (!s?.user) {
-          applyGuestRead();
-          return true;
-        }
+        applyGuestRead();
+        return true;
       }
     } catch {
       /* noop */
