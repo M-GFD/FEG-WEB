@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { parseApiJson } from "@/lib/parse-api-response";
@@ -34,7 +34,6 @@ function formatShortDate(iso: string) {
 }
 
 export function HeaderNotifications({ theme = "light", className = "" }: Props) {
-  const { status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -49,10 +48,10 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       const res = await fetch("/api/site-notifications", { credentials: "same-origin" });
       const data = await parseApiJson<{ ok: boolean; notifications?: SiteNotificationDTO[] }>(res);
       if (data.ok && Array.isArray(data.notifications)) {
-        const list =
-          status === "unauthenticated"
-            ? applyGuestNotificationState(data.notifications)
-            : data.notifications;
+        const session = await getSession();
+        const list = session?.user
+          ? data.notifications
+          : applyGuestNotificationState(data.notifications);
         setItems(list);
       }
     } catch {
@@ -60,7 +59,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
     } finally {
       setLoading(false);
     }
-  }, [status]);
+  }, []);
 
   useEffect(() => {
     void load();
@@ -83,18 +82,21 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
         setOpen(false);
       }
     }
-    document.addEventListener("pointerdown", onDocPointerDown, true);
-    return () => document.removeEventListener("pointerdown", onDocPointerDown, true);
+    document.addEventListener("pointerdown", onDocPointerDown);
+    return () => document.removeEventListener("pointerdown", onDocPointerDown);
   }, [open]);
 
   async function dismissReadNotifications() {
     const hasRead = items.some((n) => n.read);
     if (!hasRead || dismissingReads) return;
-    if (status === "unauthenticated") {
+
+    const session = await getSession();
+    if (!session?.user) {
       guestDismissReadIds(items.filter((n) => n.read).map((n) => n.id));
       await load();
       return;
     }
+
     setDismissingReads(true);
     try {
       const res = await fetch("/api/site-notifications/dismiss-read", {
@@ -104,6 +106,14 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       const data = await parseApiJson<{ ok: boolean }>(res);
       if (data.ok) {
         await load();
+        return;
+      }
+      if (res.status === 401 || res.status === 403) {
+        const s = await getSession();
+        if (!s?.user) {
+          guestDismissReadIds(items.filter((n) => n.read).map((n) => n.id));
+          await load();
+        }
       }
     } catch {
       /* noop */
@@ -113,11 +123,17 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   }
 
   async function markRead(id: string): Promise<boolean> {
-    if (status === "unauthenticated") {
+    const applyGuestRead = () => {
       guestMarkReadId(id);
       setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    };
+
+    const session = await getSession();
+    if (!session?.user) {
+      applyGuestRead();
       return true;
     }
+
     try {
       const res = await fetch("/api/site-notifications/read", {
         method: "POST",
@@ -130,10 +146,27 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
         setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
         return true;
       }
+      if (res.status === 401 || res.status === 403) {
+        const s = await getSession();
+        if (!s?.user) {
+          applyGuestRead();
+          return true;
+        }
+      }
     } catch {
       /* noop */
     }
     return false;
+  }
+
+  function openNotificationLink(href: string) {
+    const h = href.trim();
+    if (!h) return;
+    if (h.startsWith("/")) {
+      router.push(h);
+    } else {
+      window.open(h, "_blank", "noopener,noreferrer");
+    }
   }
 
   const unread = items.filter((n) => !n.read).length;
@@ -190,35 +223,54 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
               <p className="px-3 py-6 text-center text-sm text-neutral-500">No hay notificaciones</p>
             ) : null}
 
-            {items.map((n) => (
-              <div key={n.id} role="none" className="border-b border-black/[0.04] last:border-b-0">
-                <button
-                  type="button"
-                  role="menuitem"
-                  className={`flex w-full flex-col gap-0.5 px-3 py-2.5 text-left text-sm transition hover:bg-black/[0.04] touch-manipulation ${n.read ? "text-neutral-700" : "bg-emerald-50/80 font-medium text-[var(--feg-ink)]"}`}
-                  onClick={async () => {
-                    await markRead(n.id);
-                    setOpen(false);
-                    const href = n.linkUrl?.trim();
-                    if (!href) return;
-                    if (href.startsWith("/")) {
-                      router.push(href);
-                    } else {
-                      window.open(href, "_blank", "noopener,noreferrer");
-                    }
-                  }}
+            {items.map((n) => {
+              const href = n.linkUrl?.trim() ?? "";
+              return (
+                <div
+                  key={n.id}
+                  role="none"
+                  className="flex gap-2 border-b border-black/[0.04] px-3 py-2.5 last:border-b-0"
                 >
-                  <span className="line-clamp-2">{n.title}</span>
-                  {n.body ? (
-                    <span className="line-clamp-2 text-xs font-normal text-neutral-500">{n.body}</span>
-                  ) : null}
-                  <span className="text-[10px] font-normal uppercase tracking-wide text-neutral-400">
-                    {formatShortDate(n.createdAt)}
-                    {n.linkUrl?.trim() ? " · Ver enlace" : ""}
-                  </span>
-                </button>
-              </div>
-            ))}
+                  <div className="flex w-4 shrink-0 justify-center pt-1.5" aria-hidden>
+                    {!n.read ? (
+                      <span className="h-2 w-2 rounded-full bg-red-500 ring-1 ring-red-500/30" />
+                    ) : (
+                      <span className="h-2 w-2 rounded-full bg-transparent" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      aria-label={
+                        n.read
+                          ? `${n.title}. Marcada como leída.`
+                          : `${n.title}. Sin leer. Pulsar para marcar como leída.`
+                      }
+                      className={`flex w-full flex-col gap-0.5 rounded-md px-0 py-1 text-left text-sm transition hover:bg-black/[0.04] touch-manipulation ${n.read ? "text-neutral-700" : "bg-emerald-50/80 font-medium text-[var(--feg-ink)]"}`}
+                      onClick={() => void markRead(n.id)}
+                    >
+                      <span className="line-clamp-2">{n.title}</span>
+                      {n.body ? (
+                        <span className="line-clamp-2 text-xs font-normal text-neutral-500">{n.body}</span>
+                      ) : null}
+                      <span className="text-[10px] font-normal uppercase tracking-wide text-neutral-400">
+                        {formatShortDate(n.createdAt)}
+                      </span>
+                    </button>
+                    {href ? (
+                      <button
+                        type="button"
+                        className="mt-1.5 text-left text-[11px] font-semibold text-[var(--feg-green-2)] hover:underline"
+                        onClick={() => openNotificationLink(href)}
+                      >
+                        Abrir enlace
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           <div className="border-t border-black/5 px-3 py-2 text-center">
