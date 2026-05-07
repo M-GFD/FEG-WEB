@@ -108,7 +108,30 @@ function mapNotificationsWithReads(
   return out;
 }
 
-export async function fetchSiteNotificationsForUser(userId: string): Promise<SiteNotificationDTO[]> {
+function mapRecentToGuestBaseDto(
+  notifs: Array<{
+    id: string;
+    title: string;
+    body: string | null;
+    linkUrl: string | null;
+    createdAt: string | Date;
+  }>
+): SiteNotificationDTO[] {
+  return notifs.map((n) => ({
+    id: n.id,
+    title: n.title,
+    body: n.body,
+    linkUrl: n.linkUrl,
+    createdAt: typeof n.createdAt === "string" ? n.createdAt : n.createdAt.toISOString(),
+    read: false,
+  }));
+}
+
+/**
+ * Listado de avisos: con `userId` aplica lecturas y “Quitar leídas” en servidor;
+ * sin usuario devuelve todas las recientes como no leídas (estado local en el cliente).
+ */
+export async function fetchSiteNotificationsList(userId: string | null): Promise<SiteNotificationDTO[]> {
   await purgeExpiredSiteNotifications();
 
   const supabase = getSupabaseAdmin();
@@ -120,19 +143,23 @@ export async function fetchSiteNotificationsForUser(userId: string): Promise<Sit
       .limit(LIST_LIMIT);
 
     if (!notifErr && notifs) {
+      const typed = notifs as Array<{
+        id: string;
+        title: string;
+        body: string | null;
+        linkUrl: string | null;
+        createdAt: string;
+      }>;
+      if (!userId) {
+        return mapRecentToGuestBaseDto(typed);
+      }
       const { data: reads } = await supabase
         .from("SiteNotificationRead")
         .select("notificationId, dismissedAt")
         .eq("userId", userId);
 
       return mapNotificationsWithReads(
-        notifs as Array<{
-          id: string;
-          title: string;
-          body: string | null;
-          linkUrl: string | null;
-          createdAt: string;
-        }>,
+        typed,
         (reads ?? []) as Array<{ notificationId: string; dismissedAt: string | null }>
       );
     }
@@ -156,6 +183,10 @@ export async function fetchSiteNotificationsForUser(userId: string): Promise<Sit
 
     if (notifs.length === 0) {
       return [];
+    }
+
+    if (!userId) {
+      return mapRecentToGuestBaseDto(notifs);
     }
 
     const reads = await prisma.siteNotificationRead.findMany({
