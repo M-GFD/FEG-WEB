@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 function urlBase64ToUint8Array(base64String: string): BufferSource {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -13,11 +13,28 @@ function urlBase64ToUint8Array(base64String: string): BufferSource {
   return outputArray;
 }
 
+/** true si la app corre como PWA instalada (varía entre Android, iOS y modo pantalla). */
 function isStandalonePwa(): boolean {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    (window.navigator as Navigator & { standalone?: boolean }).standalone === true
-  );
+  try {
+    const nav = window.navigator as Navigator & { standalone?: boolean };
+    if (nav.standalone === true) return true;
+    return (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.matchMedia("(display-mode: fullscreen)").matches ||
+      window.matchMedia("(display-mode: minimal-ui)").matches
+    );
+  } catch {
+    return (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+  }
+}
+
+/** Quitar bandera antigua que impedía volver a mostrar el banner al reabrir la PWA. */
+function clearLegacyBannerDismissFlag() {
+  try {
+    sessionStorage.removeItem("feg_push_banner_dismissed");
+  } catch {
+    /* ignore */
+  }
 }
 
 async function registerAndPostSubscription(): Promise<boolean> {
@@ -54,15 +71,45 @@ async function registerAndPostSubscription(): Promise<boolean> {
   return res.ok;
 }
 
-/** Banner + registro de Web Push para usuarios con PWA instalada (sin requerir cuenta). */
+/** Segundos en segundo plano tras los cuales volvemos a ofrecer el banner (reabrir desde inicio / multitarea). */
+const RESHOW_AFTER_HIDDEN_SEC = 45;
+
 export function PwaPushRegister() {
   const [showBanner, setShowBanner] = useState(false);
   const [busy, setBusy] = useState(false);
+  const lastHiddenAtRef = useRef<number | null>(null);
 
   useEffect(() => {
+    clearLegacyBannerDismissFlag();
     if (!process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY) return;
 
     let cancelled = false;
+
+    const offerBannerIfEligible = () => {
+      if (Notification.permission !== "default") return;
+      if (!isStandalonePwa()) return;
+      setShowBanner(true);
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        lastHiddenAtRef.current = Date.now();
+        return;
+      }
+      const at = lastHiddenAtRef.current;
+      lastHiddenAtRef.current = null;
+      const hiddenSec = at != null ? (Date.now() - at) / 1000 : 0;
+      if (hiddenSec >= RESHOW_AFTER_HIDDEN_SEC) {
+        offerBannerIfEligible();
+      }
+    };
+
+    const onPageShow = () => {
+      offerBannerIfEligible();
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pageshow", onPageShow);
 
     (async () => {
       if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
@@ -83,21 +130,13 @@ export function PwaPushRegister() {
         return;
       }
 
-      const dismissed = (() => {
-        try {
-          return sessionStorage.getItem("feg_push_banner_dismissed") === "1";
-        } catch {
-          return false;
-        }
-      })();
-
-      if (isStandalonePwa() && Notification.permission === "default" && !dismissed) {
-        setShowBanner(true);
-      }
+      offerBannerIfEligible();
     })();
 
     return () => {
       cancelled = true;
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pageshow", onPageShow);
     };
   }, []);
 
@@ -118,12 +157,8 @@ export function PwaPushRegister() {
     }
   }, []);
 
+  /** Solo oculta en esta visita; al reabrir la PWA o volver tras un rato en segundo plano se vuelve a ofrecer. */
   const onDismiss = () => {
-    try {
-      sessionStorage.setItem("feg_push_banner_dismissed", "1");
-    } catch {
-      /* ignore */
-    }
     setShowBanner(false);
   };
 
@@ -139,7 +174,7 @@ export function PwaPushRegister() {
       <div className="mx-auto flex max-w-lg flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-[var(--feg-ink)]">
           <span className="font-semibold">Recibí avisos cuando haya noticias nuevas.</span>{" "}
-          Activá las notificaciones del navegador para esta app.
+          Tocá Activar y aceptá las notificaciones cuando te lo pida el sistema.
         </p>
         <div className="flex shrink-0 gap-2">
           <button
