@@ -14,6 +14,8 @@ export type PublishNewsFormInput = {
   content: string;
   imageUrl: string;
   galleryUrls: string[];
+  /** Enviar notificación push a PWA suscriptores al publicar. */
+  notifyPush?: boolean;
 };
 
 export async function publishNewsFromGestion(
@@ -36,6 +38,7 @@ export async function publishNewsFromGestion(
       content: input.content,
       imageUrl: input.imageUrl,
       galleryUrls: input.galleryUrls,
+      notifyPush: Boolean(input.notifyPush),
     });
   } catch (e) {
     console.error("[publishNewsFromGestion]", e);
