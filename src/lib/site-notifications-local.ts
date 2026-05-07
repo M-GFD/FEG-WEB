@@ -50,6 +50,15 @@ export function guestMarkReadId(id: string): void {
   persistGuestReadIds(s);
 }
 
+export function guestMarkAllReadIds(ids: string[]): void {
+  if (ids.length === 0) return;
+  const s = loadGuestReadIds();
+  for (const id of ids) {
+    if (id) s.add(id);
+  }
+  persistGuestReadIds(s);
+}
+
 /** Igual que “Quitar leídas” en servidor: oculta ítems ya marcados como leídos. */
 export function guestDismissReadIds(readIds: string[]): void {
   if (readIds.length === 0) return;
