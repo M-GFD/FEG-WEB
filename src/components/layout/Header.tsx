@@ -30,7 +30,8 @@ export function Header() {
           <HeaderDesktopRail navLinks={navLinks} />
 
           {/* Mobile: grid para que el sobre no quede fuera de vista (p. ej. iOS Safari). */}
-          <div className="grid w-full grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto_auto] items-center gap-2 md:hidden">
+          {/* Columnas 3–4 con ancho fijo (2.75rem): aunque el sobre no renderice, la búsqueda no invade ese hueco (iOS). */}
+          <div className="grid w-full grid-cols-[minmax(0,auto)_minmax(0,1fr)_2.75rem_2.75rem] items-center gap-2 md:hidden">
             <div className="min-w-0">
               <FegLogoLink size="nav" />
             </div>
@@ -41,7 +42,7 @@ export function Header() {
               </div>
             </div>
 
-            <HeaderNotifications theme="light" className="min-w-[2.5rem] justify-self-end" />
+            <HeaderNotifications theme="light" className="flex h-11 w-full max-w-[2.75rem] justify-center justify-self-center" />
 
             <MobileHeaderMenu links={navLinks} />
           </div>

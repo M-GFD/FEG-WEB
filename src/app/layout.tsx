@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { FooterPublicOnly } from "@/components/layout/FooterPublicOnly";
 import { FEG_LOGO_MIME, FEG_LOGO_PUBLIC_PATH } from "@/lib/feegBrand";
+import { auth } from "@/lib/auth";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -27,17 +28,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="es">
       <body
         className={`${oswald.variable} ${urbanist.variable} flex min-h-screen flex-col font-sans antialiased`}
       >
-        <Providers>
+        <Providers session={session}>
           <div className="flex flex-1 flex-col">{children}</div>
           <FooterPublicOnly />
         </Providers>
