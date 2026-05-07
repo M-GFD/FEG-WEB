@@ -118,8 +118,24 @@ async function registerAndPostSubscription(vapid: string): Promise<{ ok: boolean
   });
 
   if (!res.ok) {
-    const errBody = await res.text().catch(() => "");
-    return { ok: false, error: errBody || res.statusText || "Error al guardar" };
+    const text = await res.text().catch(() => "");
+    let message = res.statusText?.trim() || "Error al guardar";
+    const trimmed = text.trim();
+    if (trimmed.startsWith("{")) {
+      try {
+        const parsed = JSON.parse(trimmed) as { error?: string };
+        if (typeof parsed.error === "string" && parsed.error) {
+          message = parsed.error;
+        }
+      } catch {
+        if (trimmed.length > 0 && trimmed.length < 500) {
+          message = trimmed;
+        }
+      }
+    } else if (trimmed.length > 0 && trimmed.length < 500) {
+      message = trimmed;
+    }
+    return { ok: false, error: message };
   }
 
   return { ok: true };
