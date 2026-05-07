@@ -2,17 +2,20 @@ import webpush from "web-push";
 import { prisma } from "@/lib/db";
 import { getBaseUrl } from "@/lib/app-url";
 import { FEG_LOGO_PUBLIC_PATH } from "@/lib/feegBrand";
-import { getWebPushVapidPublicKey } from "@/lib/web-push-vapid";
+import {
+  getWebPushVapidPrivateKey,
+  getWebPushVapidPublicKey,
+  getWebPushVapidSubject,
+} from "@/lib/web-push-vapid";
 
 let vapidConfigured = false;
 
 function ensureVapidConfigured(): boolean {
   if (vapidConfigured) return true;
   const publicKey = getWebPushVapidPublicKey();
-  const privateKey = process.env.WEB_PUSH_VAPID_PRIVATE_KEY?.trim() || "";
+  const privateKey = getWebPushVapidPrivateKey();
   const subject =
-    process.env.WEB_PUSH_VAPID_SUBJECT?.trim() ||
-    "mailto:feg-notificaciones@localhost";
+    getWebPushVapidSubject() || "mailto:feg-notificaciones@localhost";
 
   if (!publicKey || !privateKey) {
     return false;
@@ -40,7 +43,7 @@ export async function broadcastNewsPublishedPush(params: {
 }): Promise<{ sent: number; failed: number; removedStale: number; skippedConfig: boolean }> {
   if (!ensureVapidConfigured()) {
     console.warn(
-      "[broadcastNewsPublishedPush] Configura WEB_PUSH_VAPID_PUBLIC_KEY + WEB_PUSH_VAPID_PRIVATE_KEY (y la pública también como NEXT_PUBLIC_ o solo en servidor; GET /api/push/vapid-public sirve al cliente)."
+      "[broadcastNewsPublishedPush] Configura clave pública (WEB_PUSH_VAPID_PUBLIC_KEY, VAPID_PUBLIC_KEY, …) y privada (WEB_PUSH_VAPID_PRIVATE_KEY, VAPID_PRIVATE_KEY, …). Ver src/lib/web-push-vapid.ts"
     );
     return { sent: 0, failed: 0, removedStale: 0, skippedConfig: true };
   }
