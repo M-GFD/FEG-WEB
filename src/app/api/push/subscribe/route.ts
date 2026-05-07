@@ -12,7 +12,8 @@ const schema = z.object({
 });
 
 /**
- * Registra la suscripción Web Push (PWA). No exige sesión: userId solo si hay login.
+ * Registra Web Push. No exige cuenta: `userId` solo si hay sesión.
+ * Sin sesión: solo actualiza `keys`; no pisa `userId` existente.
  */
 export async function POST(req: Request) {
   const session = await auth();

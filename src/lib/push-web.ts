@@ -2,17 +2,16 @@ import webpush from "web-push";
 import { prisma } from "@/lib/db";
 import { getBaseUrl } from "@/lib/app-url";
 import { FEG_LOGO_PUBLIC_PATH } from "@/lib/feegBrand";
+import { getWebPushVapidPublicKey } from "@/lib/web-push-vapid";
 
 let vapidConfigured = false;
 
 function ensureVapidConfigured(): boolean {
   if (vapidConfigured) return true;
-  const publicKey =
-    process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY || process.env.WEB_PUSH_VAPID_PUBLIC_KEY;
-  const privateKey = process.env.WEB_PUSH_VAPID_PRIVATE_KEY;
+  const publicKey = getWebPushVapidPublicKey();
+  const privateKey = process.env.WEB_PUSH_VAPID_PRIVATE_KEY?.trim() || "";
   const subject =
     process.env.WEB_PUSH_VAPID_SUBJECT?.trim() ||
-    process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_SUBJECT?.trim() ||
     "mailto:feg-notificaciones@localhost";
 
   if (!publicKey || !privateKey) {
@@ -34,10 +33,6 @@ function isPushKeys(v: unknown): v is PushKeys {
 
 const CHUNK = 40;
 
-/**
- * Envía a todas las suscripciones guardadas (PWA + permiso de notificaciones).
- * No requiere cuenta en la plataforma; `userId` en BD es opcional.
- */
 export async function broadcastNewsPublishedPush(params: {
   title: string;
   slug: string;
@@ -45,7 +40,7 @@ export async function broadcastNewsPublishedPush(params: {
 }): Promise<{ sent: number; failed: number; removedStale: number; skippedConfig: boolean }> {
   if (!ensureVapidConfigured()) {
     console.warn(
-      "[broadcastNewsPublishedPush] Faltan NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY (o WEB_PUSH_VAPID_PUBLIC_KEY) y WEB_PUSH_VAPID_PRIVATE_KEY; no se envían pushes."
+      "[broadcastNewsPublishedPush] Configura WEB_PUSH_VAPID_PUBLIC_KEY + WEB_PUSH_VAPID_PRIVATE_KEY (y la pública también como NEXT_PUBLIC_ o solo en servidor; GET /api/push/vapid-public sirve al cliente)."
     );
     return { sent: 0, failed: 0, removedStale: 0, skippedConfig: true };
   }
@@ -98,7 +93,7 @@ export async function broadcastNewsPublishedPush(params: {
               await prisma.pushSubscription.delete({ where: { id: row.id } });
               removedStale += 1;
             } catch {
-              /* ya borrada u otro error */
+              /* ignore */
             }
           } else {
             failed += 1;
