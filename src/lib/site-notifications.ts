@@ -164,6 +164,32 @@ function mapRecentToGuestBaseDto(
 export async function fetchSiteNotificationsList(userId: string | null): Promise<SiteNotificationDTO[]> {
   await purgeExpiredSiteNotifications();
 
+  if (userId) {
+    try {
+      const notifs = await prisma.siteNotification.findMany({
+        orderBy: { createdAt: "desc" },
+        take: LIST_LIMIT,
+        select: {
+          id: true,
+          title: true,
+          body: true,
+          linkUrl: true,
+          createdAt: true,
+        },
+      });
+
+      if (notifs.length > 0) {
+        const reads = await prisma.siteNotificationRead.findMany({
+          where: { userId },
+          select: { notificationId: true, dismissedAt: true },
+        });
+        return mapNotificationsWithReads(notifs, reads);
+      }
+    } catch (e) {
+      console.error("[SiteNotification] prisma fetch (usuario logueado)", e);
+    }
+  }
+
   const supabase = getSupabaseAdmin();
   if (supabase) {
     const { data: notifs, error: notifErr } = await supabase
@@ -296,43 +322,57 @@ export async function insertSiteNotification(params: {
   }
 }
 
+async function upsertSiteNotificationReadViaSupabase(
+  userId: string,
+  notificationId: string,
+  readAtIso: string
+): Promise<boolean> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return false;
+
+  const { data: existing, error: selErr } = await supabase
+    .from("SiteNotificationRead")
+    .select("id")
+    .eq("userId", userId)
+    .eq("notificationId", notificationId)
+    .maybeSingle();
+
+  if (selErr) {
+    console.error("[SiteNotificationRead] supabase select (fallback)", selErr);
+    return false;
+  }
+
+  if (existing?.id) {
+    const { error: upErr } = await supabase
+      .from("SiteNotificationRead")
+      .update({ readAt: readAtIso, dismissedAt: null })
+      .eq("id", existing.id as string);
+    if (upErr) {
+      console.error("[SiteNotificationRead] supabase update (fallback)", upErr);
+      return false;
+    }
+    return true;
+  }
+
+  const { error: insErr } = await supabase.from("SiteNotificationRead").insert({
+    id: randomUUID(),
+    userId,
+    notificationId,
+    readAt: readAtIso,
+  });
+  if (insErr) {
+    console.error("[SiteNotificationRead] supabase insert (fallback)", insErr);
+    return false;
+  }
+  return true;
+}
+
 export async function markSiteNotificationReadForUser(
   userId: string,
   notificationId: string
 ): Promise<{ ok: boolean; error?: string }> {
-  const readAt = new Date().toISOString();
-  const supabase = getSupabaseAdmin();
-
-  if (supabase) {
-    const { data: existing, error: selErr } = await supabase
-      .from("SiteNotificationRead")
-      .select("id")
-      .eq("userId", userId)
-      .eq("notificationId", notificationId)
-      .maybeSingle();
-
-    if (!selErr) {
-      if (existing?.id) {
-        const { error: upErr } = await supabase
-          .from("SiteNotificationRead")
-          .update({ readAt, dismissedAt: null })
-          .eq("id", existing.id as string);
-        if (!upErr) return { ok: true };
-        console.error("[SiteNotificationRead] supabase update", upErr);
-      } else {
-        const { error: insErr } = await supabase.from("SiteNotificationRead").insert({
-          id: randomUUID(),
-          userId,
-          notificationId,
-          readAt,
-        });
-        if (!insErr) return { ok: true };
-        console.error("[SiteNotificationRead] supabase insert", insErr);
-      }
-    } else {
-      console.error("[SiteNotificationRead] supabase select", selErr);
-    }
-  }
+  const readAt = new Date();
+  const readAtIso = readAt.toISOString();
 
   try {
     await prisma.siteNotificationRead.upsert({
@@ -347,32 +387,74 @@ export async function markSiteNotificationReadForUser(
         notificationId,
       },
       update: {
-        readAt: new Date(readAt),
+        readAt,
         dismissedAt: null,
       },
     });
     return { ok: true };
   } catch (e) {
     console.error("[SiteNotificationRead] prisma upsert", e);
+    const synced = await upsertSiteNotificationReadViaSupabase(userId, notificationId, readAtIso);
+    if (synced) return { ok: true };
     return { ok: false, error: "Error al marcar como leída" };
   }
 }
 
-/** Marca como leídas varias notificaciones (orden de la lista actual). */
+/** Marca como leídas varias notificaciones: una transacción Prisma (fuente de verdad), sync opcional a Supabase REST. */
 export async function markSiteNotificationIdsReadForUser(
   userId: string,
   notificationIds: string[]
 ): Promise<{ ok: boolean; error?: string }> {
   const seen = new Set<string>();
+  const ids: string[] = [];
   for (const raw of notificationIds) {
     const notificationId = String(raw ?? "").trim();
     if (!notificationId || seen.has(notificationId)) continue;
     seen.add(notificationId);
-    const r = await markSiteNotificationReadForUser(userId, notificationId);
-    if (!r.ok) {
-      return { ok: false, error: r.error ?? "Error al marcar como leídas" };
+    ids.push(notificationId);
+  }
+  if (ids.length === 0) return { ok: true };
+
+  const existing = await prisma.siteNotification.findMany({
+    where: { id: { in: ids } },
+    select: { id: true },
+  });
+  const validIds = existing.map((r) => r.id);
+  if (validIds.length === 0) return { ok: true };
+
+  const readAt = new Date();
+
+  try {
+    await prisma.$transaction(
+      validIds.map((notificationId) =>
+        prisma.siteNotificationRead.upsert({
+          where: {
+            userId_notificationId: { userId, notificationId },
+          },
+          create: { userId, notificationId },
+          update: {
+            readAt,
+            dismissedAt: null,
+          },
+        })
+      )
+    );
+  } catch (e) {
+    console.error("[SiteNotificationRead] prisma batch upsert", e);
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      return { ok: false, error: `Error al marcar (${e.code}): ${e.message}` };
+    }
+    return { ok: false, error: "Error al marcar como leídas" };
+  }
+
+  const readAtIso = readAt.toISOString();
+  for (const notificationId of validIds) {
+    const synced = await upsertSiteNotificationReadViaSupabase(userId, notificationId, readAtIso);
+    if (!synced) {
+      console.warn("[SiteNotificationRead] supabase sync tras prisma batch", notificationId);
     }
   }
+
   return { ok: true };
 }
 
@@ -382,13 +464,7 @@ export async function markAllRecentSiteNotificationsReadForUser(
 ): Promise<{ ok: boolean; error?: string }> {
   await purgeExpiredSiteNotifications();
   const ids = await getRecentSiteNotificationIds();
-  for (const notificationId of ids) {
-    const r = await markSiteNotificationReadForUser(userId, notificationId);
-    if (!r.ok) {
-      return { ok: false, error: r.error ?? "Error al marcar todas como leídas" };
-    }
-  }
-  return { ok: true };
+  return markSiteNotificationIdsReadForUser(userId, ids);
 }
 
 /** Marca como ocultas (solo este usuario) todas las notificaciones que ya tenía leídas. */

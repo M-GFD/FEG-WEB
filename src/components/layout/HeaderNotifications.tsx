@@ -42,21 +42,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   const [loading, setLoading] = useState(false);
   const [dismissingReads, setDismissingReads] = useState(false);
   const [markingAllRead, setMarkingAllRead] = useState(false);
-  /** Tras “Marcar como leídas”, el botón queda desactivado hasta que llegue una notificación nueva (id desconocido). */
-  const [markAllLockedUntilNew, setMarkAllLockedUntilNew] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
-  const markAllLockedRef = useRef(false);
-  /** Ids visibles en el panel en el momento de marcar todas (para detectar avisos nuevos). */
-  const idsSnapshotAtMarkAllRef = useRef<Set<string>>(new Set());
-  /** Ids que el usuario marcó como leídas: el servidor puede devolver read:false; forzamos read en cliente. */
-  const forcedReadIdsRef = useRef<Set<string>>(new Set());
-
-  function clearMarkAllLock() {
-    markAllLockedRef.current = false;
-    idsSnapshotAtMarkAllRef.current = new Set();
-    forcedReadIdsRef.current = new Set();
-    setMarkAllLockedUntilNew(false);
-  }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -64,30 +50,10 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       const res = await fetch("/api/site-notifications", { credentials: "same-origin" });
       const data = await parseApiJson<{ ok: boolean; notifications?: SiteNotificationDTO[] }>(res);
       if (data.ok && Array.isArray(data.notifications)) {
-        const raw = data.notifications;
-        const fetchedIds = new Set(raw.map((n) => n.id));
-
-        if (markAllLockedRef.current && idsSnapshotAtMarkAllRef.current.size > 0) {
-          if (fetchedIds.size === 0) {
-            clearMarkAllLock();
-          } else {
-            const hasNewNotification = [...fetchedIds].some(
-              (id) => !idsSnapshotAtMarkAllRef.current.has(id)
-            );
-            if (hasNewNotification) {
-              clearMarkAllLock();
-            }
-          }
-        }
-
         const session = await getSession();
-        let list = session?.user ? raw : applyGuestNotificationState(raw);
-
-        if (markAllLockedRef.current && forcedReadIdsRef.current.size > 0) {
-          const forced = forcedReadIdsRef.current;
-          list = list.map((n) => (forced.has(n.id) ? { ...n, read: true } : n));
-        }
-
+        const list = session?.user
+          ? data.notifications
+          : applyGuestNotificationState(data.notifications);
         setItems(list);
       }
     } catch {
@@ -160,30 +126,21 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
 
   async function markAllAsRead() {
     const unreadIds = items.filter((n) => !n.read).map((n) => n.id);
-    if (unreadIds.length === 0 || markingAllRead || dismissingReads || markAllLockedUntilNew) {
+    if (unreadIds.length === 0 || markingAllRead || dismissingReads) {
       return;
     }
 
     const snapshot = items.map((n) => ({ ...n }));
-    const idsSnapshotAtClick = new Set(items.map((n) => n.id));
 
     setItems((prev) =>
       prev.map((n) => (unreadIds.includes(n.id) ? { ...n, read: true } : n))
     );
-
-    const activateMarkAllLock = () => {
-      idsSnapshotAtMarkAllRef.current = idsSnapshotAtClick;
-      forcedReadIdsRef.current = new Set(unreadIds);
-      markAllLockedRef.current = true;
-      setMarkAllLockedUntilNew(true);
-    };
 
     setMarkingAllRead(true);
     try {
       const session = await getSession();
       if (!session?.user) {
         guestMarkAllReadIds(unreadIds);
-        activateMarkAllLock();
         await load();
         return;
       }
@@ -203,7 +160,6 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       }
 
       if (data.ok) {
-        activateMarkAllLock();
         await load();
         return;
       }
@@ -212,7 +168,6 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
         const s = await getSession();
         if (!s?.user) {
           guestMarkAllReadIds(unreadIds);
-          activateMarkAllLock();
           await load();
           return;
         }
@@ -373,7 +328,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
             <button
               type="button"
               title="Marcar todas como leídas en este listado"
-              disabled={unread === 0 || markingAllRead || dismissingReads || markAllLockedUntilNew}
+              disabled={unread === 0 || markingAllRead || dismissingReads}
               onClick={() => void markAllAsRead()}
               className="min-h-[44px] min-w-0 flex-1 touch-manipulation rounded-xl bg-[var(--feg-green)] px-2 py-2 text-center text-[11px] font-semibold uppercase leading-tight text-white shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-45"
             >
