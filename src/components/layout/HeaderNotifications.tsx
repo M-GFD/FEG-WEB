@@ -4,6 +4,11 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { parseApiJson } from "@/lib/parse-api-response";
+import {
+  applyGuestNotificationState,
+  guestDismissReadIds,
+  guestMarkReadId,
+} from "@/lib/site-notifications-local";
 import type { SiteNotificationDTO } from "@/lib/site-notifications";
 
 type HeaderTheme = "dark" | "light";
@@ -29,7 +34,7 @@ function formatShortDate(iso: string) {
 }
 
 export function HeaderNotifications({ theme = "light", className = "" }: Props) {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -38,29 +43,28 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   const [dismissingReads, setDismissingReads] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
-  const sessionReady = status === "authenticated" && Boolean(session?.user);
-
   const load = useCallback(async () => {
-    if (!sessionReady || !session?.user) return;
     setLoading(true);
     try {
       const res = await fetch("/api/site-notifications", { credentials: "same-origin" });
       const data = await parseApiJson<{ ok: boolean; notifications?: SiteNotificationDTO[] }>(res);
       if (data.ok && Array.isArray(data.notifications)) {
-        setItems(data.notifications);
+        const list =
+          status === "unauthenticated"
+            ? applyGuestNotificationState(data.notifications)
+            : data.notifications;
+        setItems(list);
       }
     } catch {
       /* silencioso: sin bloquear UI */
     } finally {
       setLoading(false);
     }
-  }, [session?.user, sessionReady]);
+  }, [status]);
 
   useEffect(() => {
-    if (sessionReady) {
-      void load();
-    }
-  }, [sessionReady, load]);
+    void load();
+  }, [load]);
 
   useEffect(() => {
     if (!open) return;
@@ -86,6 +90,11 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   async function dismissReadNotifications() {
     const hasRead = items.some((n) => n.read);
     if (!hasRead || dismissingReads) return;
+    if (status === "unauthenticated") {
+      guestDismissReadIds(items.filter((n) => n.read).map((n) => n.id));
+      await load();
+      return;
+    }
     setDismissingReads(true);
     try {
       const res = await fetch("/api/site-notifications/dismiss-read", {
@@ -104,6 +113,11 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   }
 
   async function markRead(id: string): Promise<boolean> {
+    if (status === "unauthenticated") {
+      guestMarkReadId(id);
+      setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+      return true;
+    }
     try {
       const res = await fetch("/api/site-notifications/read", {
         method: "POST",
@@ -122,11 +136,6 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
     return false;
   }
 
-  /** Sin usuario: no mostrar el sobre (evita hueco en iOS durante loading). */
-  if (status === "unauthenticated") {
-    return null;
-  }
-
   const unread = items.filter((n) => !n.read).length;
   const hasReadVisible = items.some((n) => n.read);
 
@@ -135,21 +144,16 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       ? "text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.35)]"
       : "text-[var(--feg-green)]";
 
-  const openDisabled = status === "loading" || !sessionReady;
-
   return (
     <div ref={wrapRef} className={`relative z-[70] shrink-0 ${className}`}>
       <button
         type="button"
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-busy={status === "loading"}
+        aria-busy={loading}
         aria-label={unread ? `Notificaciones, ${unread} sin leer` : "Notificaciones"}
-        disabled={openDisabled}
-        onClick={() => {
-          if (!openDisabled) setOpen((v) => !v);
-        }}
-        className={`relative flex h-11 w-11 touch-manipulation items-center justify-center rounded-full bg-white/70 text-lg leading-none backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition hover:bg-white/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123c15]/40 focus-visible:ring-offset-2 disabled:opacity-60 md:h-9 md:w-9 ${iconClass}`}
+        onClick={() => setOpen((v) => !v)}
+        className={`relative flex h-11 w-11 touch-manipulation items-center justify-center rounded-full bg-white/70 text-lg leading-none backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition hover:bg-white/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123c15]/40 focus-visible:ring-offset-2 md:h-9 md:w-9 ${iconClass}`}
       >
         <span aria-hidden>✉️</span>
         {unread > 0 ? (
@@ -157,7 +161,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
         ) : null}
       </button>
 
-      {open && sessionReady ? (
+      {open ? (
         <div
           role="menu"
           className="absolute right-0 top-[calc(100%+0.5rem)] z-[80] w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-black/10 bg-white py-1 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-md"
