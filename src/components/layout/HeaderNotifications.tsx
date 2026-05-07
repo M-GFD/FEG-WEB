@@ -38,8 +38,10 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   const [dismissingReads, setDismissingReads] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
+  const sessionReady = status === "authenticated" && Boolean(session?.user);
+
   const load = useCallback(async () => {
-    if (status !== "authenticated" || !session?.user) return;
+    if (!sessionReady || !session?.user) return;
     setLoading(true);
     try {
       const res = await fetch("/api/site-notifications", { credentials: "same-origin" });
@@ -52,13 +54,13 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
     } finally {
       setLoading(false);
     }
-  }, [session?.user, status]);
+  }, [session?.user, sessionReady]);
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (sessionReady) {
       void load();
     }
-  }, [status, load]);
+  }, [sessionReady, load]);
 
   useEffect(() => {
     if (!open) return;
@@ -71,14 +73,14 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
 
   useEffect(() => {
     if (!open) return;
-    function onDocMouseDown(e: MouseEvent) {
+    function onDocPointerDown(e: PointerEvent) {
       const el = wrapRef.current;
       if (!el?.contains(e.target as Node)) {
         setOpen(false);
       }
     }
-    document.addEventListener("mousedown", onDocMouseDown);
-    return () => document.removeEventListener("mousedown", onDocMouseDown);
+    document.addEventListener("pointerdown", onDocPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onDocPointerDown, true);
   }, [open]);
 
   async function dismissReadNotifications() {
@@ -101,7 +103,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
     }
   }
 
-  async function markRead(id: string) {
+  async function markRead(id: string): Promise<boolean> {
     try {
       const res = await fetch("/api/site-notifications/read", {
         method: "POST",
@@ -112,29 +114,16 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       const data = await parseApiJson<{ ok: boolean }>(res);
       if (data.ok) {
         setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+        return true;
       }
     } catch {
       /* noop */
     }
+    return false;
   }
 
-  function onItemActivate(n: SiteNotificationDTO) {
-    void markRead(n.id);
-    setOpen(false);
-    const href = n.linkUrl?.trim();
-    if (!href) return;
-    if (href.startsWith("/")) {
-      router.push(href);
-    } else {
-      window.open(href, "_blank", "noopener,noreferrer");
-    }
-  }
-
-  if (status === "loading") {
-    return <div className={`h-9 w-9 shrink-0 ${className}`} aria-hidden />;
-  }
-
-  if (status !== "authenticated" || !session?.user) {
+  /** Sin usuario: no mostrar el sobre (evita hueco en iOS durante loading). */
+  if (status === "unauthenticated") {
     return null;
   }
 
@@ -146,15 +135,21 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       ? "text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.35)]"
       : "text-[var(--feg-green)]";
 
+  const openDisabled = status === "loading" || !sessionReady;
+
   return (
     <div ref={wrapRef} className={`relative z-[70] shrink-0 ${className}`}>
       <button
         type="button"
         aria-expanded={open}
         aria-haspopup="menu"
+        aria-busy={status === "loading"}
         aria-label={unread ? `Notificaciones, ${unread} sin leer` : "Notificaciones"}
-        onClick={() => setOpen((v) => !v)}
-        className={`relative flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-lg leading-none backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition hover:bg-white/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123c15]/40 focus-visible:ring-offset-2 ${iconClass}`}
+        disabled={openDisabled}
+        onClick={() => {
+          if (!openDisabled) setOpen((v) => !v);
+        }}
+        className={`relative flex h-11 w-11 touch-manipulation items-center justify-center rounded-full bg-white/70 text-lg leading-none backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition hover:bg-white/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123c15]/40 focus-visible:ring-offset-2 disabled:opacity-60 md:h-9 md:w-9 ${iconClass}`}
       >
         <span aria-hidden>✉️</span>
         {unread > 0 ? (
@@ -162,7 +157,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
         ) : null}
       </button>
 
-      {open ? (
+      {open && sessionReady ? (
         <div
           role="menu"
           className="absolute right-0 top-[calc(100%+0.5rem)] z-[80] w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-black/10 bg-white py-1 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-md"
@@ -196,15 +191,18 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
                 <button
                   type="button"
                   role="menuitem"
-                  onClick={() => {
-                    if (n.linkUrl?.trim()) {
-                      onItemActivate(n);
+                  className={`flex w-full flex-col gap-0.5 px-3 py-2.5 text-left text-sm transition hover:bg-black/[0.04] touch-manipulation ${n.read ? "text-neutral-700" : "bg-emerald-50/80 font-medium text-[var(--feg-ink)]"}`}
+                  onClick={async () => {
+                    await markRead(n.id);
+                    setOpen(false);
+                    const href = n.linkUrl?.trim();
+                    if (!href) return;
+                    if (href.startsWith("/")) {
+                      router.push(href);
                     } else {
-                      void markRead(n.id);
-                      setOpen(false);
+                      window.open(href, "_blank", "noopener,noreferrer");
                     }
                   }}
-                  className={`flex w-full flex-col gap-0.5 px-3 py-2.5 text-left text-sm transition hover:bg-black/[0.04] ${n.read ? "text-neutral-700" : "bg-emerald-50/80 font-medium text-[var(--feg-ink)]"}`}
                 >
                   <span className="line-clamp-2">{n.title}</span>
                   {n.body ? (

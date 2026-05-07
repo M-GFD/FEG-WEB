@@ -29,19 +29,19 @@ export function Header() {
                 logo+wordmark (sincronizado por JS, capado para no superponerse) */}
           <HeaderDesktopRail navLinks={navLinks} />
 
-          {/* Mobile: logo izquierda, search al centro, menú derecha */}
-          <div className="flex h-full items-center justify-between gap-3 md:hidden">
-            <div className="min-w-0 shrink">
+          {/* Mobile: grid para que el sobre no quede fuera de vista (p. ej. iOS Safari). */}
+          <div className="grid w-full grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto_auto] items-center gap-2 md:hidden">
+            <div className="min-w-0">
               <FegLogoLink size="nav" />
             </div>
 
-            <div className="min-w-0 flex-1 overflow-hidden">
+            <div className="min-w-0 overflow-hidden">
               <div className="flex min-w-0 max-w-full items-center overflow-hidden rounded-full bg-white/70 px-2.5 py-1.5 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
                 <NavSearch variant="mobile" className="w-full min-w-0 max-w-full" />
               </div>
             </div>
 
-            <HeaderNotifications theme="light" />
+            <HeaderNotifications theme="light" className="min-w-[2.5rem] justify-self-end" />
 
             <MobileHeaderMenu links={navLinks} />
           </div>

@@ -14,6 +14,30 @@ export type SiteNotificationDTO = {
 
 const LIST_LIMIT = 40;
 
+/** Notificaciones del sitio se borran de la base tras 7 días (lecturas en cascada). */
+export const SITE_NOTIFICATION_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+
+export async function purgeExpiredSiteNotifications(): Promise<void> {
+  const cutoff = new Date(Date.now() - SITE_NOTIFICATION_RETENTION_MS);
+  const supabase = getSupabaseAdmin();
+  if (supabase) {
+    const { error } = await supabase
+      .from("SiteNotification")
+      .delete()
+      .lt("createdAt", cutoff.toISOString());
+    if (error) {
+      console.error("[SiteNotification] purge supabase", error);
+    }
+  }
+  try {
+    await prisma.siteNotification.deleteMany({
+      where: { createdAt: { lt: cutoff } },
+    });
+  } catch (e) {
+    console.error("[SiteNotification] purge prisma", e);
+  }
+}
+
 type PostgrestishError = {
   code?: string;
   message?: string;
@@ -85,6 +109,8 @@ function mapNotificationsWithReads(
 }
 
 export async function fetchSiteNotificationsForUser(userId: string): Promise<SiteNotificationDTO[]> {
+  await purgeExpiredSiteNotifications();
+
   const supabase = getSupabaseAdmin();
   if (supabase) {
     const { data: notifs, error: notifErr } = await supabase
@@ -150,6 +176,8 @@ export async function insertSiteNotification(params: {
   linkUrl: string | null;
   createdByUserId: string;
 }): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
+  await purgeExpiredSiteNotifications();
+
   const supabase = getSupabaseAdmin();
   if (supabase) {
     const id = randomUUID();
