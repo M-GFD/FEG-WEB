@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { FegLogo } from "@/components/layout/FegLogo";
 import { NavLinks } from "@/components/layout/NavLinks";
 import { NavSearch } from "@/components/layout/NavSearch";
+import { HeaderNotifications } from "@/components/layout/HeaderNotifications";
 
 type HeaderTheme = "dark" | "light";
 
@@ -13,6 +14,9 @@ type NavLink = { href: string; label: string };
 
 /** Espacio mínimo entre la cápsula de rutas y los grupos laterales. */
 const SAFE_GAP_PX = 16;
+
+/** Botón ✉️ + gap reservados entre rutas y la cápsula de búsqueda. */
+const NOTIFICATIONS_RAIL_RESERVE_PX = 48;
 
 type Props = {
   navLinks: NavLink[];
@@ -24,14 +28,15 @@ type Props = {
  * Layout:
  * - Logo + wordmark (izquierda)
  * - Cápsula de rutas (absolutamente centrada al viewport)
- * - Cápsula de búsqueda (derecha)
+ * - Notificaciones ✉️ + cápsula de búsqueda (derecha)
  *
  * Reglas:
  * - Los tres grupos NUNCA se superponen: se calcula `sideMax = (anchoRail - anchoRutas) / 2 - gap`
  *   y se aplica como `max-width` a los grupos laterales.
  * - El wordmark puede pasar a 2–3 renglones como máximo (dinámico según viewport), alineado a la izquierda.
  * - La cápsula de rutas no hace wrap de los botones (`flex-nowrap`).
- * - La cápsula de búsqueda toma el ancho renderizado del bloque logo+wordmark (tope = sideMax).
+ * - La cápsula de búsqueda comparte el bloque derecho con el botón ✉️; el ancho útil
+ *   de la búsqueda descuenta el espacio reservado para notificaciones.
  * - El color del wordmark se ajusta al fondo (claro/oscuro) bajo el header.
  */
 export function HeaderDesktopRail({ navLinks }: Props) {
@@ -132,9 +137,11 @@ export function HeaderDesktopRail({ navLinks }: Props) {
 
   // Ancho de la cápsula de búsqueda: replica el ancho real del bloque
   // logo+wordmark, capado a sideMax para evitar overlapping.
+  const cappedSearchSide =
+    sideMax != null ? Math.max(0, sideMax - NOTIFICATIONS_RAIL_RESERVE_PX) : null;
   const searchWidth =
-    leftWidth != null && sideMax != null
-      ? Math.min(leftWidth, sideMax)
+    leftWidth != null && cappedSearchSide != null
+      ? Math.min(leftWidth, cappedSearchSide)
       : leftWidth ?? null;
 
   return (
@@ -172,15 +179,24 @@ export function HeaderDesktopRail({ navLinks }: Props) {
       </div>
 
       <div
-        className="min-w-0 shrink-0 overflow-hidden"
+        className="flex min-w-0 shrink-0 items-center justify-end gap-2 overflow-hidden"
         style={
-          searchWidth != null
-            ? { width: `${searchWidth}px`, maxWidth: sideMax ? `${sideMax}px` : undefined }
+          searchWidth != null && sideMax != null
+            ? {
+                width: `${searchWidth + NOTIFICATIONS_RAIL_RESERVE_PX}px`,
+                maxWidth: `${sideMax}px`,
+              }
             : undefined
         }
       >
-        <div className="flex w-full min-w-0 max-w-full items-center overflow-hidden rounded-full bg-white/70 px-2.5 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-          <NavSearch variant="desktop" className="w-full min-w-0 max-w-full" />
+        <HeaderNotifications theme={theme} />
+        <div
+          className="min-w-0 flex-1 overflow-hidden"
+          style={searchWidth != null ? { width: `${searchWidth}px`, minWidth: 0 } : undefined}
+        >
+          <div className="flex w-full min-w-0 max-w-full items-center overflow-hidden rounded-full bg-white/70 px-2.5 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+            <NavSearch variant="desktop" className="w-full min-w-0 max-w-full" />
+          </div>
         </div>
       </div>
     </div>

@@ -339,3 +339,27 @@ model PushSubscription {
   userId    String?
   createdAt DateTime @default(now())
 }
+
+/// Avisos internos en el sitio (panel Prensa). Distinto de notificaciones Web Push.
+model SiteNotification {
+  id               String   @id @default(cuid())
+  title            String
+  body             String?
+  linkUrl          String?
+  createdByUserId  String?
+  createdAt        DateTime @default(now())
+  reads            SiteNotificationRead[]
+
+  @@index([createdAt(sort: Desc)])
+}
+
+model SiteNotificationRead {
+  id             String   @id @default(cuid())
+  userId         String
+  notificationId String
+  readAt         DateTime @default(now())
+  notification   SiteNotification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, notificationId])
+  @@index([userId])
+}

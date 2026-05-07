@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
-import { getPendingPhotos, getPublishedNewsForGestion } from "@/lib/data";
+import { getPendingPhotos } from "@/lib/data";
 import { redirect } from "next/navigation";
 import { requireGestionArea } from "@/lib/gestion-access";
 import { PhotoModeration } from "./PhotoModeration";
-import { PublishedNewsManager } from "./PublishedNewsManager";
 
 export default async function PrensaPage() {
   const session = await auth();
@@ -12,7 +11,6 @@ export default async function PrensaPage() {
   requireGestionArea(session.user.role, "prensa");
 
   const pendingPhotos = await getPendingPhotos();
-  const publishedNews = await getPublishedNewsForGestion();
 
   return (
     <div>
@@ -25,12 +23,20 @@ export default async function PrensaPage() {
             Moderación de fotos y publicación de noticias.
           </p>
         </div>
-        <Link
-          href="/gestion/prensa/noticias/nueva"
-          className="rounded-xl bg-[var(--feg-green-2)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-95"
-        >
-          Publicar noticia
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/gestion/prensa/notificaciones/nueva"
+            className="rounded-xl border border-[var(--feg-green-2)]/35 bg-white px-4 py-2.5 text-sm font-semibold text-[var(--feg-green-2)] transition hover:bg-black/[0.03]"
+          >
+            Crear notificación
+          </Link>
+          <Link
+            href="/gestion/prensa/noticias/nueva"
+            className="rounded-xl bg-[var(--feg-green-2)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-95"
+          >
+            Publicar noticia
+          </Link>
+        </div>
       </div>
 
       <div>
@@ -42,13 +48,6 @@ export default async function PrensaPage() {
           <strong>torneo</strong>, al aprobar aparecen en la ficha de ese torneo.
         </p>
         <PhotoModeration photos={pendingPhotos} />
-      </div>
-
-      <div className="mt-14">
-        <h2 className="mb-4 font-heading text-lg font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
-          Noticias publicadas
-        </h2>
-        <PublishedNewsManager items={publishedNews} />
       </div>
     </div>
   );

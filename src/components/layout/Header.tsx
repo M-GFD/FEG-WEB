@@ -1,4 +1,5 @@
 import { FegLogoLink } from "@/components/layout/FegLogo";
+import { HeaderNotifications } from "@/components/layout/HeaderNotifications";
 import { MobileHeaderMenu } from "@/components/layout/MobileHeaderMenu";
 import { NavSearch } from "@/components/layout/NavSearch";
 import { HeaderDesktopRail } from "@/components/layout/HeaderDesktopRail";
@@ -39,6 +40,8 @@ export function Header() {
                 <NavSearch variant="mobile" className="w-full min-w-0 max-w-full" />
               </div>
             </div>
+
+            <HeaderNotifications theme="light" />
 
             <MobileHeaderMenu links={navLinks} />
           </div>
