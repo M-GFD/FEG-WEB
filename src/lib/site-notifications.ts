@@ -51,6 +51,39 @@ function mapPrismaInsertError(e: unknown): string {
   return e instanceof Error ? e.message : "Error desconocido con Prisma";
 }
 
+function mapNotificationsWithReads(
+  notifs: Array<{
+    id: string;
+    title: string;
+    body: string | null;
+    linkUrl: string | null;
+    createdAt: string | Date;
+  }>,
+  readRows: Array<{ notificationId: string; dismissedAt: string | Date | null | undefined }>
+): SiteNotificationDTO[] {
+  const byNotif = new Map<string, { dismissedAt?: string | Date | null }>();
+  for (const r of readRows) {
+    byNotif.set(r.notificationId, { dismissedAt: r.dismissedAt });
+  }
+
+  const out: SiteNotificationDTO[] = [];
+  for (const n of notifs) {
+    const meta = byNotif.get(n.id);
+    if (meta?.dismissedAt) continue;
+    const createdAt =
+      typeof n.createdAt === "string" ? n.createdAt : n.createdAt.toISOString();
+    out.push({
+      id: n.id,
+      title: n.title,
+      body: n.body,
+      linkUrl: n.linkUrl,
+      createdAt,
+      read: meta != null,
+    });
+  }
+  return out;
+}
+
 export async function fetchSiteNotificationsForUser(userId: string): Promise<SiteNotificationDTO[]> {
   const supabase = getSupabaseAdmin();
   if (supabase) {
@@ -63,18 +96,19 @@ export async function fetchSiteNotificationsForUser(userId: string): Promise<Sit
     if (!notifErr && notifs) {
       const { data: reads } = await supabase
         .from("SiteNotificationRead")
-        .select("notificationId")
+        .select("notificationId, dismissedAt")
         .eq("userId", userId);
 
-      const readSet = new Set((reads ?? []).map((r: { notificationId: string }) => r.notificationId));
-      return notifs.map((n) => ({
-        id: n.id as string,
-        title: n.title as string,
-        body: (n.body as string | null) ?? null,
-        linkUrl: (n.linkUrl as string | null) ?? null,
-        createdAt: n.createdAt as string,
-        read: readSet.has(n.id as string),
-      }));
+      return mapNotificationsWithReads(
+        notifs as Array<{
+          id: string;
+          title: string;
+          body: string | null;
+          linkUrl: string | null;
+          createdAt: string;
+        }>,
+        (reads ?? []) as Array<{ notificationId: string; dismissedAt: string | null }>
+      );
     }
     if (notifErr) {
       console.error("[SiteNotification] supabase fetch", notifErr);
@@ -100,18 +134,10 @@ export async function fetchSiteNotificationsForUser(userId: string): Promise<Sit
 
     const reads = await prisma.siteNotificationRead.findMany({
       where: { userId },
-      select: { notificationId: true },
+      select: { notificationId: true, dismissedAt: true },
     });
-    const readSet = new Set(reads.map((r) => r.notificationId));
 
-    return notifs.map((n) => ({
-      id: n.id,
-      title: n.title,
-      body: n.body,
-      linkUrl: n.linkUrl,
-      createdAt: n.createdAt.toISOString(),
-      read: readSet.has(n.id),
-    }));
+    return mapNotificationsWithReads(notifs, reads);
   } catch (e) {
     console.error("[SiteNotification] prisma fetch", e);
     return [];
@@ -200,7 +226,7 @@ export async function markSiteNotificationReadForUser(
       if (existing?.id) {
         const { error: upErr } = await supabase
           .from("SiteNotificationRead")
-          .update({ readAt })
+          .update({ readAt, dismissedAt: null })
           .eq("id", existing.id as string);
         if (!upErr) return { ok: true };
         console.error("[SiteNotificationRead] supabase update", upErr);
@@ -233,11 +259,65 @@ export async function markSiteNotificationReadForUser(
       },
       update: {
         readAt: new Date(readAt),
+        dismissedAt: null,
       },
     });
     return { ok: true };
   } catch (e) {
     console.error("[SiteNotificationRead] prisma upsert", e);
     return { ok: false, error: "Error al marcar como leída" };
+  }
+}
+
+/** Marca como ocultas (solo este usuario) todas las notificaciones que ya tenía leídas. */
+export async function dismissReadSiteNotificationsForUser(
+  userId: string
+): Promise<{ ok: boolean; dismissed?: number; error?: string }> {
+  const now = new Date().toISOString();
+  const supabase = getSupabaseAdmin();
+
+  if (supabase) {
+    const { data: rows, error: selErr } = await supabase
+      .from("SiteNotificationRead")
+      .select("id")
+      .eq("userId", userId)
+      .is("dismissedAt", null);
+
+    if (selErr) {
+      console.error("[SiteNotificationRead] dismiss select", selErr);
+    } else if (rows?.length) {
+      const { error: upErr } = await supabase
+        .from("SiteNotificationRead")
+        .update({ dismissedAt: now })
+        .eq("userId", userId)
+        .is("dismissedAt", null);
+
+      if (!upErr) {
+        return { ok: true, dismissed: rows.length };
+      }
+      console.error("[SiteNotificationRead] dismiss update supabase", upErr);
+    } else {
+      return { ok: true, dismissed: 0 };
+    }
+  }
+
+  try {
+    const result = await prisma.siteNotificationRead.updateMany({
+      where: {
+        userId,
+        dismissedAt: null,
+      },
+      data: { dismissedAt: new Date(now) },
+    });
+    return { ok: true, dismissed: result.count };
+  } catch (e) {
+    console.error("[SiteNotificationRead] dismiss prisma", e);
+    return {
+      ok: false,
+      error:
+        e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2021"
+          ? "Falta la columna dismissedAt. Ejecutá la migración en la base de datos."
+          : "No se pudo limpiar las leídas",
+    };
   }
 }
