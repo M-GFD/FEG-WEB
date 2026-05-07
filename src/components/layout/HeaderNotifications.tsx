@@ -126,35 +126,51 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
 
   async function markAllAsRead() {
     const unreadIds = items.filter((n) => !n.read).map((n) => n.id);
-    if (unreadIds.length === 0 || markingAllRead) return;
+    if (unreadIds.length === 0 || markingAllRead || dismissingReads) return;
 
-    const session = await getSession();
-    if (!session?.user) {
-      guestMarkAllReadIds(unreadIds);
-      setItems((prev) => prev.map((n) => ({ ...n, read: true })));
-      return;
-    }
+    const snapshot = items.map((n) => ({ ...n }));
+    setItems((prev) =>
+      prev.map((n) => (unreadIds.includes(n.id) ? { ...n, read: true } : n))
+    );
 
     setMarkingAllRead(true);
     try {
+      const session = await getSession();
+      if (!session?.user) {
+        guestMarkAllReadIds(unreadIds);
+        return;
+      }
+
       const res = await fetch("/api/site-notifications/read-all", {
         method: "POST",
         credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificationIds: unreadIds }),
       });
-      const data = await parseApiJson<{ ok: boolean }>(res);
+
+      let data: { ok?: boolean };
+      try {
+        data = await parseApiJson<{ ok: boolean }>(res);
+      } catch {
+        data = { ok: false };
+      }
+
       if (data.ok) {
         await load();
         return;
       }
+
       if (res.status === 401 || res.status === 403) {
         const s = await getSession();
         if (!s?.user) {
           guestMarkAllReadIds(unreadIds);
-          setItems((prev) => prev.map((n) => ({ ...n, read: true })));
+          return;
         }
       }
+
+      setItems(snapshot);
     } catch {
-      /* noop */
+      setItems(snapshot);
     } finally {
       setMarkingAllRead(false);
     }
@@ -235,32 +251,13 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       {open ? (
         <div
           role="menu"
+          onPointerDown={(e) => e.stopPropagation()}
           className="absolute right-0 top-[calc(100%+0.5rem)] z-[80] w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-black/10 bg-white py-1 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-md"
         >
-          <div className="flex flex-wrap items-start justify-between gap-x-2 gap-y-1.5 border-b border-black/5 px-3 py-2">
-            <p className="min-w-0 shrink text-xs font-semibold uppercase tracking-wide text-[var(--feg-green)]">
+          <div className="border-b border-black/5 px-3 py-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--feg-green)]">
               Notificaciones
             </p>
-            <div className="flex max-w-full flex-wrap justify-end gap-1">
-              <button
-                type="button"
-                title="Marcar todas las notificaciones del listado como leídas"
-                disabled={unread === 0 || markingAllRead || loading || dismissingReads}
-                onClick={() => void markAllAsRead()}
-                className="shrink-0 rounded-md px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--feg-green-2)] transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {markingAllRead ? "…" : "Todas leídas"}
-              </button>
-              <button
-                type="button"
-                title="Ocultar del listado las notificaciones que ya marcaste como leídas"
-                disabled={!hasReadVisible || dismissingReads || loading || markingAllRead}
-                onClick={() => void dismissReadNotifications()}
-                className="shrink-0 rounded-md px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-neutral-500 transition hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                {dismissingReads ? "…" : "Quitar leídas"}
-              </button>
-            </div>
           </div>
 
           <div className="max-h-[min(22rem,50vh)] overflow-y-auto">
@@ -322,16 +319,24 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
             })}
           </div>
 
-          <div className="border-t border-black/5 px-3 py-2 text-center">
+          <div className="flex gap-2 border-t border-black/5 px-3 py-2.5">
             <button
               type="button"
-              className="text-[11px] font-medium text-[var(--feg-green-2)] hover:underline"
-              onClick={() => {
-                setOpen(false);
-                void load();
-              }}
+              title="Marcar todas como leídas en este listado"
+              disabled={unread === 0 || markingAllRead || dismissingReads}
+              onClick={() => void markAllAsRead()}
+              className="min-h-[44px] min-w-0 flex-1 touch-manipulation rounded-xl bg-[var(--feg-green)] px-2 py-2 text-center text-[11px] font-semibold uppercase leading-tight text-white shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-45"
             >
-              Actualizar
+              {markingAllRead ? "…" : "Marcar como leídas"}
+            </button>
+            <button
+              type="button"
+              title="Quitar del listado las notificaciones ya leídas (no las borra del sistema)"
+              disabled={!hasReadVisible || dismissingReads || markingAllRead}
+              onClick={() => void dismissReadNotifications()}
+              className="min-h-[44px] min-w-0 flex-1 touch-manipulation rounded-xl border border-neutral-300 bg-white px-2 py-2 text-center text-[11px] font-semibold uppercase leading-tight text-neutral-700 transition hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              {dismissingReads ? "…" : "Borrar notificaciones"}
             </button>
           </div>
         </div>
