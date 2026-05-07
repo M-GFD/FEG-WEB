@@ -11,13 +11,20 @@ const schema = z.object({
   }),
 });
 
+/**
+ * Registra la suscripción Web Push (PWA). No exige sesión: userId solo si hay login.
+ */
 export async function POST(req: Request) {
   const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  const userId = session?.user?.id ?? null;
+
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Cuerpo inválido" }, { status: 400 });
   }
 
-  const body = await req.json();
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
@@ -31,11 +38,11 @@ export async function POST(req: Request) {
     create: {
       endpoint: parsed.data.endpoint,
       keys: parsed.data.keys,
-      userId: session.user.id,
+      userId,
     },
     update: {
       keys: parsed.data.keys,
-      userId: session.user.id,
+      ...(userId ? { userId } : {}),
     },
   });
 
