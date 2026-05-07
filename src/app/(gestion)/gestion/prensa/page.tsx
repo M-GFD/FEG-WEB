@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
-import { getPendingPhotos } from "@/lib/data";
+import { getPendingPhotos, getPublishedNewsForGestion } from "@/lib/data";
 import { redirect } from "next/navigation";
 import { requireGestionArea } from "@/lib/gestion-access";
 import { PhotoModeration } from "./PhotoModeration";
+import { PublishedNewsManager } from "./PublishedNewsManager";
 
 export default async function PrensaPage() {
   const session = await auth();
@@ -11,6 +12,7 @@ export default async function PrensaPage() {
   requireGestionArea(session.user.role, "prensa");
 
   const pendingPhotos = await getPendingPhotos();
+  const publishedNews = await getPublishedNewsForGestion();
 
   return (
     <div>
@@ -48,6 +50,13 @@ export default async function PrensaPage() {
           <strong>torneo</strong>, al aprobar aparecen en la ficha de ese torneo.
         </p>
         <PhotoModeration photos={pendingPhotos} />
+      </div>
+
+      <div className="mt-14">
+        <h2 className="mb-4 font-heading text-lg font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
+          Noticias publicadas
+        </h2>
+        <PublishedNewsManager items={publishedNews} />
       </div>
     </div>
   );
