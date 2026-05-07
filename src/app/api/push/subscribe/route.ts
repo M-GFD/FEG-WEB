@@ -11,8 +11,34 @@ const schema = z.object({
   }),
 });
 
+function flatErrorMessage(error: unknown): string {
+  const parts: string[] = [];
+  let cur: unknown = error;
+  let depth = 0;
+  while (cur != null && depth < 8) {
+    if (cur instanceof Error) {
+      if (cur.message) parts.push(cur.message);
+      cur = cur.cause;
+    } else if (typeof cur === "object" && "message" in cur && typeof (cur as { message: unknown }).message === "string") {
+      parts.push((cur as { message: string }).message);
+      break;
+    } else {
+      break;
+    }
+    depth++;
+  }
+  return parts.join(" ");
+}
+
 function prismaErrorMessage(error: unknown): string {
-  const msg = error instanceof Error ? error.message : "";
+  const msg = flatErrorMessage(error);
+  if (/tenant or user not found/i.test(msg)) {
+    return (
+      "La base de datos rechazó el usuario de la conexión (típico de Supabase). Revisá en Vercel que DATABASE_URL sea el string del panel " +
+      "de Supabase → Database: si usás el pooler (puerto 6543), el usuario debe ser postgres.TU_REF_DE_PROYECTO, no solo postgres; " +
+      "comprobá la contraseña y que el proyecto no esté pausado."
+    );
+  }
   if (
     /relation .*PushSubscription.* does not exist/i.test(msg) ||
     /42P01/i.test(msg)
@@ -29,7 +55,7 @@ function prismaErrorMessage(error: unknown): string {
     }
   }
   if (error instanceof Error) {
-    return error.message;
+    return flatErrorMessage(error) || "Error al guardar la suscripción";
   }
   return "Error al guardar la suscripción";
 }
