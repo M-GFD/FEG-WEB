@@ -44,7 +44,9 @@ function shouldOfferPushUi(): boolean {
 const RESHOW_AFTER_HIDDEN_SEC = 45;
 
 async function resolveVapidPublicKey(): Promise<string | null> {
-  const fromEnv = process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY?.trim();
+  const fromEnv =
+    process.env.NEXT_PUBLIC_WEB_PUSH_VAPID_PUBLIC_KEY?.trim() ||
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim();
   if (fromEnv) return fromEnv;
   try {
     const r = await fetch("/api/push/vapid-public");
