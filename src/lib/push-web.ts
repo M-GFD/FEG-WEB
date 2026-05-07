@@ -59,9 +59,15 @@ export async function broadcastNewsPublishedPush(params: {
     badge: icon,
   });
 
-  const rows = await prisma.pushSubscription.findMany({
-    select: { id: true, endpoint: true, keys: true },
-  });
+  let rows: { id: string; endpoint: string; keys: unknown }[] = [];
+  try {
+    rows = await prisma.pushSubscription.findMany({
+      select: { id: true, endpoint: true, keys: true },
+    });
+  } catch (e) {
+    console.error("[broadcastNewsPublishedPush] findMany", e);
+    return { sent: 0, failed: 0, removedStale: 0, skippedConfig: false };
+  }
 
   let sent = 0;
   let failed = 0;
