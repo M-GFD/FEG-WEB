@@ -108,6 +108,36 @@ function mapNotificationsWithReads(
   return out;
 }
 
+async function getRecentSiteNotificationIds(): Promise<string[]> {
+  const supabase = getSupabaseAdmin();
+  if (supabase) {
+    const { data: notifs, error: notifErr } = await supabase
+      .from("SiteNotification")
+      .select("id")
+      .order("createdAt", { ascending: false })
+      .limit(LIST_LIMIT);
+
+    if (!notifErr && notifs) {
+      return (notifs as { id: string }[]).map((n) => n.id);
+    }
+    if (notifErr) {
+      console.error("[SiteNotification] supabase ids", notifErr);
+    }
+  }
+
+  try {
+    const rows = await prisma.siteNotification.findMany({
+      orderBy: { createdAt: "desc" },
+      take: LIST_LIMIT,
+      select: { id: true },
+    });
+    return rows.map((r) => r.id);
+  } catch (e) {
+    console.error("[SiteNotification] prisma ids", e);
+    return [];
+  }
+}
+
 function mapRecentToGuestBaseDto(
   notifs: Array<{
     id: string;
@@ -326,6 +356,21 @@ export async function markSiteNotificationReadForUser(
     console.error("[SiteNotificationRead] prisma upsert", e);
     return { ok: false, error: "Error al marcar como leída" };
   }
+}
+
+/** Marca como leídas (en servidor) todas las notificaciones recientes del listado. */
+export async function markAllRecentSiteNotificationsReadForUser(
+  userId: string
+): Promise<{ ok: boolean; error?: string }> {
+  await purgeExpiredSiteNotifications();
+  const ids = await getRecentSiteNotificationIds();
+  for (const notificationId of ids) {
+    const r = await markSiteNotificationReadForUser(userId, notificationId);
+    if (!r.ok) {
+      return { ok: false, error: r.error ?? "Error al marcar todas como leídas" };
+    }
+  }
+  return { ok: true };
 }
 
 /** Marca como ocultas (solo este usuario) todas las notificaciones que ya tenía leídas. */
