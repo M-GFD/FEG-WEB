@@ -24,6 +24,7 @@ self.addEventListener("push", (event) => {
   const origin = self.location.origin;
   const icon = payload.icon || `${origin}/LOGO_FEG%201.svg`;
   const badge = payload.badge || icon;
+  const tag = typeof payload.tag === "string" && payload.tag.length > 0 ? payload.tag : "feg-push";
 
   event.waitUntil(
     self.registration.showNotification(payload.title, {
@@ -32,7 +33,7 @@ self.addEventListener("push", (event) => {
       badge,
       data: { url: payload.url || "/" },
       vibrate: [120, 60, 120],
-      tag: "feg-news",
+      tag,
       renotify: true,
     })
   );

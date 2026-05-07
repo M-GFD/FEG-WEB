@@ -34,43 +34,41 @@ function isPushKeys(v: unknown): v is PushKeys {
   return typeof o.p256dh === "string" && typeof o.auth === "string";
 }
 
+export type WebPushBroadcastStats = {
+  sent: number;
+  failed: number;
+  removedStale: number;
+  skippedConfig: boolean;
+};
+
 const CHUNK = 40;
 
-export async function broadcastNewsPublishedPush(params: {
-  title: string;
-  slug: string;
-  excerpt?: string | null;
-}): Promise<{ sent: number; failed: number; removedStale: number; skippedConfig: boolean }> {
+/**
+ * Envía el mismo JSON payload a todas las filas de PushSubscription (PWA).
+ */
+async function broadcastPayloadToAllSubscribers(
+  payload: string,
+  logLabel: string
+): Promise<WebPushBroadcastStats> {
   if (!ensureVapidConfigured()) {
     console.warn(
-      "[broadcastNewsPublishedPush] Configura clave pública (WEB_PUSH_VAPID_PUBLIC_KEY, VAPID_PUBLIC_KEY, …) y privada (WEB_PUSH_VAPID_PRIVATE_KEY, VAPID_PRIVATE_KEY, …). Ver src/lib/web-push-vapid.ts"
+      `[${logLabel}] Configura clave pública (WEB_PUSH_VAPID_PUBLIC_KEY, VAPID_PUBLIC_KEY, …) y privada (WEB_PUSH_VAPID_PRIVATE_KEY, VAPID_PRIVATE_KEY, …). Ver src/lib/web-push-vapid.ts`
     );
     return { sent: 0, failed: 0, removedStale: 0, skippedConfig: true };
   }
 
   const supabase = getSupabaseAdmin();
   if (!supabase) {
-    console.warn("[broadcastNewsPublishedPush] Sin Supabase admin");
+    console.warn(`[${logLabel}] Sin Supabase admin`);
     return { sent: 0, failed: 0, removedStale: 0, skippedConfig: false };
   }
-
-  const base = getBaseUrl().replace(/\/+$/, "");
-  const articleUrl = `${base}/noticias/${encodeURIComponent(params.slug)}`;
-  const icon = `${base}${FEG_LOGO_PUBLIC_PATH}`;
-  const payload = JSON.stringify({
-    title: "Nueva noticia · FEG",
-    body: (params.excerpt?.trim() || params.title).slice(0, 240),
-    url: articleUrl,
-    icon,
-    badge: icon,
-  });
 
   const { data: rows, error: findErr } = await supabase
     .from("PushSubscription")
     .select("id, endpoint, keys");
 
   if (findErr) {
-    console.error("[broadcastNewsPublishedPush] select", findErr);
+    console.error(`[${logLabel}] select PushSubscription`, findErr);
     return { sent: 0, failed: 0, removedStale: 0, skippedConfig: false };
   }
 
@@ -112,7 +110,7 @@ export async function broadcastNewsPublishedPush(params: {
             if (!delErr) removedStale += 1;
           } else {
             failed += 1;
-            console.error("[broadcastNewsPublishedPush] send", row.endpoint.slice(0, 48), err);
+            console.error(`[${logLabel}] send`, row.endpoint.slice(0, 48), err);
           }
         }
       })
@@ -120,4 +118,55 @@ export async function broadcastNewsPublishedPush(params: {
   }
 
   return { sent, failed, removedStale, skippedConfig: false };
+}
+
+export async function broadcastNewsPublishedPush(params: {
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+}): Promise<WebPushBroadcastStats> {
+  const base = getBaseUrl().replace(/\/+$/, "");
+  const articleUrl = `${base}/noticias/${encodeURIComponent(params.slug)}`;
+  const icon = `${base}${FEG_LOGO_PUBLIC_PATH}`;
+  const payload = JSON.stringify({
+    title: "Nueva noticia · FEG",
+    body: (params.excerpt?.trim() || params.title).slice(0, 240),
+    url: articleUrl,
+    icon,
+    badge: icon,
+    tag: `feg-noticia-${encodeURIComponent(params.slug)}`,
+  });
+
+  return broadcastPayloadToAllSubscribers(payload, "broadcastNewsPublishedPush");
+}
+
+/** Aviso interno creado desde gestión Prensa: mismo canal que la noticia (PushSubscription). */
+export async function broadcastSiteNotificationPush(params: {
+  title: string;
+  body: string | null;
+  linkUrl: string | null;
+}): Promise<WebPushBroadcastStats> {
+  const base = getBaseUrl().replace(/\/+$/, "");
+  const icon = `${base}${FEG_LOGO_PUBLIC_PATH}`;
+
+  let targetUrl = `${base}/`;
+  const link = params.linkUrl?.trim();
+  if (link) {
+    if (/^https?:\/\//i.test(link)) {
+      targetUrl = link;
+    } else {
+      targetUrl = `${base}${link.startsWith("/") ? link : `/${link}`}`;
+    }
+  }
+
+  const payload = JSON.stringify({
+    title: params.title.slice(0, 80),
+    body: (params.body?.trim() || "Nuevo aviso de la Federación").slice(0, 240),
+    url: targetUrl,
+    icon,
+    badge: icon,
+    tag: `feg-aviso-${Date.now()}`,
+  });
+
+  return broadcastPayloadToAllSubscribers(payload, "broadcastSiteNotificationPush");
 }

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
+import { broadcastSiteNotificationPush } from "@/lib/push";
 import { insertSiteNotification } from "@/lib/site-notifications";
 import { canModeratePress } from "@/lib/rbac";
 
@@ -56,6 +57,14 @@ export async function createSiteNotificationFromGestion(input: {
   if (!result.ok) {
     return { ok: false, error: result.error };
   }
+
+  void broadcastSiteNotificationPush({
+    title,
+    body: body || null,
+    linkUrl,
+  }).catch((err) => {
+    console.error("[createSiteNotificationFromGestion] push", err);
+  });
 
   revalidatePath("/gestion/prensa");
   revalidatePath("/");

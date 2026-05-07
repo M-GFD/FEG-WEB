@@ -179,7 +179,7 @@ export function HeaderDesktopRail({ navLinks }: Props) {
       </div>
 
       <div
-        className="flex min-w-0 shrink-0 items-center justify-end gap-2 overflow-hidden"
+        className="flex min-w-0 shrink-0 items-center justify-end gap-2"
         style={
           searchWidth != null && sideMax != null
             ? {
