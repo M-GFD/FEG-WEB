@@ -34,9 +34,11 @@ function prismaErrorMessage(error: unknown): string {
   const msg = flatErrorMessage(error);
   if (/tenant or user not found/i.test(msg)) {
     return (
-      "La base de datos rechazó el usuario de la conexión (típico de Supabase). Revisá en Vercel que DATABASE_URL sea el string del panel " +
-      "de Supabase → Database: si usás el pooler (puerto 6543), el usuario debe ser postgres.TU_REF_DE_PROYECTO, no solo postgres; " +
-      "comprobá la contraseña y que el proyecto no esté pausado."
+      "Supabase rechazó la conexión del pooler (muy frecuente con Prisma). Revisá: " +
+      "(1) En DATABASE_URL con puerto 6543 debe ir al final ?pgbouncer=true (o copiá de nuevo desde el modal Conectar → Transaction pooler). " +
+      "(2) DIRECT_URL para migraciones suele ser el Session pooler en puerto 5432 con usuario postgres.TU_REF (mismo modal). " +
+      "(3) Si la contraseña tiene símbolos (! @ # etc.), codificá la contraseña en la URL (ej. ! → %21). " +
+      "(4) En el dashboard: botón Conectar arriba del proyecto → pestañas URI. Si el fallo sigue, reseteá la contraseña de la base en Database settings."
     );
   }
   if (
