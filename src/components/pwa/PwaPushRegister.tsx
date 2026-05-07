@@ -297,21 +297,21 @@ export function PwaPushRegister() {
       <div
         role="dialog"
         aria-label="Cómo activar notificaciones en iPhone"
-        className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[var(--feg-green)]/20 bg-[var(--feg-bg)]/95 p-4 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] backdrop-blur-sm"
+        className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[var(--feg-green)]/20 bg-[var(--feg-green)] p-4 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
         style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
       >
-        <div className="mx-auto max-w-lg text-sm text-[var(--feg-ink)]">
+        <div className="mx-auto max-w-lg text-sm text-[#FFFFFF]">
           <p className="font-semibold">Avisos en iPhone / iPad</p>
-          <p className="mt-2 text-[var(--feg-green)]">
+          <p className="mt-2 text-[#FFFFFF]/90">
             Las notificaciones push solo se pueden activar si abrís la FEG desde el{" "}
-            <strong>ícono en tu pantalla de inicio</strong>, no desde Safari. Si aún no la agregaste:{" "}
-            <strong>Compartir</strong> → <strong>Agregar a inicio</strong>, abrí esa app y tocá Activar
+            <strong className="text-[#FFFFFF]">ícono en tu pantalla de inicio</strong>, no desde Safari. Si aún no la agregaste:{" "}
+            <strong className="text-[#FFFFFF]">Compartir</strong> → <strong className="text-[#FFFFFF]">Agregar a inicio</strong>, abrí esa app y tocá Activar
             ahí.
           </p>
           <button
             type="button"
             onClick={onDismissIosHint}
-            className="mt-4 w-full rounded-xl border border-[var(--feg-green)]/25 py-2.5 text-sm font-medium text-[var(--feg-green)] sm:w-auto sm:px-6"
+            className="mt-4 w-full rounded-xl border border-white/40 py-2.5 text-sm font-medium text-[#FFFFFF] sm:w-auto sm:px-6"
           >
             Entendido
           </button>
@@ -326,17 +326,17 @@ export function PwaPushRegister() {
     <div
       role="dialog"
       aria-label="Activar notificaciones"
-      className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[var(--feg-green)]/20 bg-[var(--feg-bg)]/95 p-4 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] backdrop-blur-sm"
+      className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/10 bg-[var(--feg-green)] p-4 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
       style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
     >
       <div className="mx-auto flex max-w-lg flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-sm text-[var(--feg-ink)]">
+        <div className="text-sm text-[#FFFFFF]">
           <p>
             <span className="font-semibold">Recibí avisos cuando haya noticias nuevas.</span>{" "}
             Tocá Activar y aceptá en el cuadro del sistema (no solo en esta barra).
           </p>
           {subscribeError && (
-            <p className="mt-2 text-xs text-red-800" role="alert">
+            <p className="mt-2 text-xs text-red-200" role="alert">
               {subscribeError}
             </p>
           )}
