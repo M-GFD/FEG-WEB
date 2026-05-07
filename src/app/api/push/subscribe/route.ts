@@ -1,6 +1,7 @@
+import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import { z } from "zod";
 
 const schema = z.object({
@@ -11,65 +12,33 @@ const schema = z.object({
   }),
 });
 
-function flatErrorMessage(error: unknown): string {
-  const parts: string[] = [];
-  let cur: unknown = error;
-  let depth = 0;
-  while (cur != null && depth < 8) {
-    if (cur instanceof Error) {
-      if (cur.message) parts.push(cur.message);
-      cur = cur.cause;
-    } else if (typeof cur === "object" && "message" in cur && typeof (cur as { message: unknown }).message === "string") {
-      parts.push((cur as { message: string }).message);
-      break;
-    } else {
-      break;
-    }
-    depth++;
+function supabasePushErrorMessage(error: { message?: string; code?: string }): string {
+  const msg = error.message ?? "";
+  if (/permission denied|row-level security|rls/i.test(msg)) {
+    return "No se pudo guardar la suscripción. Revisá SUPABASE_SERVICE_ROLE_KEY en Vercel.";
   }
-  return parts.join(" ");
-}
-
-function prismaErrorMessage(error: unknown): string {
-  const msg = flatErrorMessage(error);
-  if (/tenant or user not found/i.test(msg)) {
-    return (
-      "Supabase rechazó la conexión del pooler (muy frecuente con Prisma). Revisá: " +
-      "(1) En DATABASE_URL con puerto 6543 debe ir al final ?pgbouncer=true (o copiá de nuevo desde el modal Conectar → Transaction pooler). " +
-      "(2) DIRECT_URL para migraciones suele ser el Session pooler en puerto 5432 con usuario postgres.TU_REF (mismo modal). " +
-      "(3) Si la contraseña tiene símbolos (! @ # etc.), codificá la contraseña en la URL (ej. ! → %21). " +
-      "(4) En el dashboard: botón Conectar arriba del proyecto → pestañas URI. Si el fallo sigue, reseteá la contraseña de la base en Database settings."
-    );
+  if (/relation|does not exist|42P01|Could not find/i.test(msg)) {
+    return "La tabla PushSubscription no existe. Ejecutá prisma/migrations/20260508_push_subscription.sql en el SQL Editor de Supabase.";
   }
-  if (
-    /relation .*PushSubscription.* does not exist/i.test(msg) ||
-    /42P01/i.test(msg)
-  ) {
-    return "La tabla de suscripciones no existe en la base de datos. Ejecutá prisma/migrations/20260508_push_subscription.sql en el mismo Postgres que usa DATABASE_URL (p. ej. SQL Editor de Supabase), o `npx prisma db push` desde entorno con acceso.";
-  }
-  if (error && typeof error === "object" && "code" in error) {
-    const code = (error as { code?: string }).code;
-    if (code === "P2021") {
-      return "La tabla de suscripciones no existe en la base de datos. Ejecutá prisma/migrations/20260508_push_subscription.sql en el mismo Postgres que usa DATABASE_URL (p. ej. SQL Editor de Supabase), o `npx prisma db push` desde entorno con acceso.";
-    }
-    if (code === "P1001") {
-      return "No se pudo conectar a la base de datos (verificá DATABASE_URL en Vercel).";
-    }
-  }
-  if (error instanceof Error) {
-    return flatErrorMessage(error) || "Error al guardar la suscripción";
-  }
-  return "Error al guardar la suscripción";
+  return msg || "Error al guardar la suscripción";
 }
 
 /**
- * Registra Web Push. No exige cuenta: `userId` solo si hay sesión.
- * Sin sesión: solo actualiza `keys`; no pisa `userId` existente.
+ * Registra Web Push vía Supabase REST (misma credencial que el resto de la app).
+ * Evita depender de DATABASE_URL / pooler de Prisma para este flujo.
  */
 export async function POST(req: Request) {
   try {
     const session = await auth();
     const userId = session?.user?.id ?? null;
+
+    const supabase = getSupabaseAdmin();
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Configuración incompleta: faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY." },
+        { status: 503 }
+      );
+    }
 
     let body: unknown;
     try {
@@ -86,23 +55,47 @@ export async function POST(req: Request) {
       );
     }
 
-    await prisma.pushSubscription.upsert({
-      where: { endpoint: parsed.data.endpoint },
-      create: {
-        endpoint: parsed.data.endpoint,
-        keys: parsed.data.keys,
+    const { endpoint, keys } = parsed.data;
+
+    const { data: existing, error: selErr } = await supabase
+      .from("PushSubscription")
+      .select("id")
+      .eq("endpoint", endpoint)
+      .maybeSingle();
+
+    if (selErr) {
+      console.error("[api/push/subscribe] select", selErr);
+      return NextResponse.json({ error: supabasePushErrorMessage(selErr) }, { status: 500 });
+    }
+
+    if (existing?.id) {
+      const patch: { keys: typeof keys; userId?: string } = { keys };
+      if (userId) patch.userId = userId;
+      const { error: upErr } = await supabase
+        .from("PushSubscription")
+        .update(patch)
+        .eq("id", existing.id);
+      if (upErr) {
+        console.error("[api/push/subscribe] update", upErr);
+        return NextResponse.json({ error: supabasePushErrorMessage(upErr) }, { status: 500 });
+      }
+    } else {
+      const { error: insErr } = await supabase.from("PushSubscription").insert({
+        id: randomUUID(),
+        endpoint,
+        keys,
         userId,
-      },
-      update: {
-        keys: parsed.data.keys,
-        ...(userId ? { userId } : {}),
-      },
-    });
+      });
+      if (insErr) {
+        console.error("[api/push/subscribe] insert", insErr);
+        return NextResponse.json({ error: supabasePushErrorMessage(insErr) }, { status: 500 });
+      }
+    }
 
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("[api/push/subscribe]", e);
-    const message = prismaErrorMessage(e);
+    const message = e instanceof Error ? e.message : "Error al guardar la suscripción";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
