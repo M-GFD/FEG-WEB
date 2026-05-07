@@ -35,25 +35,23 @@ function isIosLike(): boolean {
   return navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
 }
 
-function isCoarsePointer(): boolean {
-  try {
-    return window.matchMedia("(pointer: coarse)").matches;
-  } catch {
-    return false;
-  }
+function supportsWebPushInBrowser(): boolean {
+  if (typeof window === "undefined") return false;
+  return "serviceWorker" in navigator && "PushManager" in window;
 }
 
 /**
  * Ofrecer el flujo real de Web Push solo donde tiene sentido:
  * - iOS / iPad: solo en PWA instalada (standalone). En Safari el permiso no es el de la “app” del inicio.
- * - Android y resto: PWA o Chrome móvil en pestaña (push sí aplica al origen).
+ * - Escritorio (Chrome, Edge, etc.), Android y resto: pestaña normal o PWA si el navegador expone Push API.
  */
 function canOfferRealPushOptIn(): boolean {
   if (Notification.permission !== "default") return false;
+  if (!supportsWebPushInBrowser()) return false;
   if (isIosLike()) {
     return isStandalonePwa();
   }
-  return isStandalonePwa() || isCoarsePointer();
+  return true;
 }
 
 /** Safari iOS sin PWA: instrucciones; no llamamos requestPermission aquí. */
@@ -333,7 +331,7 @@ export function PwaPushRegister() {
         <div className="text-sm text-[#FFFFFF]">
           <p>
             <span className="font-semibold">Recibí avisos cuando haya noticias nuevas.</span>{" "}
-            Tocá Activar y aceptá en el cuadro del sistema (no solo en esta barra).
+            Pulsá o hacé clic en Activar y aceptá en el cuadro del sistema (no solo en esta barra).
           </p>
           {subscribeError && (
             <p className="mt-2 text-xs text-red-200" role="alert">
