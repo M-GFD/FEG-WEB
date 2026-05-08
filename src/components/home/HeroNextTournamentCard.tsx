@@ -31,12 +31,14 @@ export function HeroNextTournamentCard() {
 
             {next ? (
               <>
-                <div className="mt-3 text-xl font-semibold leading-snug text-white">
+                <p
+                  className="mt-3 min-w-0 truncate text-xl font-semibold leading-snug text-white"
+                  title={`${next.sede} – ${formatFechaTitle(next.fecha)}`}
+                >
                   {next.sede}
-                </div>
-                <div className="mt-1 text-xl font-bold text-[var(--feg-yellow)]">
-                  {formatFechaTitle(next.fecha)}
-                </div>
+                  <span className="font-normal text-white/85"> – </span>
+                  <span className="font-bold text-[var(--feg-yellow)]">{formatFechaTitle(next.fecha)}</span>
+                </p>
                 <div className="mt-3 flex items-center gap-2">
                   <div className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white">
                     {next.modalidad}
