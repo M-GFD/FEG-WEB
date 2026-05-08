@@ -127,8 +127,62 @@ function mapRecentToGuestBaseDto(
   }));
 }
 
+async function fetchSiteNotificationsListViaSupabase(
+  userId: string | null
+): Promise<SiteNotificationDTO[] | null> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+
+  const { data: notifs, error: notifErr } = await supabase
+    .from("SiteNotification")
+    .select("id, title, body, linkUrl, createdAt")
+    .order("createdAt", { ascending: false })
+    .limit(LIST_LIMIT);
+
+  if (notifErr || !notifs) {
+    console.error("[SiteNotification] supabase fetch list", notifErr);
+    return null;
+  }
+
+  const typed = notifs as Array<{
+    id: string;
+    title: string;
+    body: string | null;
+    linkUrl: string | null;
+    createdAt: string;
+  }>;
+
+  if (!userId) {
+    return mapRecentToGuestBaseDto(typed);
+  }
+
+  const { data: reads, error: readsErr } = await supabase
+    .from("SiteNotificationRead")
+    .select("notificationId, dismissedAt")
+    .eq("userId", userId);
+
+  if (readsErr) {
+    console.error("[SiteNotificationRead] supabase fetch reads", readsErr);
+    return mapRecentToGuestBaseDto(typed);
+  }
+
+  const readRows = (reads ?? []) as Array<{
+    notificationId: string;
+    dismissedAt: string | null;
+  }>;
+
+  return mapNotificationsWithReads(
+    typed,
+    readRows.map((r) => ({
+      notificationId: r.notificationId,
+      dismissedAt: r.dismissedAt,
+    }))
+  );
+}
+
 /**
  * Listado reciente. Sin sesión: avisos como no leídos (estado leído/oculto solo en el dispositivo).
+ * Si Prisma no conecta pero Supabase sí (p. ej. push OK, listado vacío), se usa Supabase como respaldo.
  */
 export async function fetchSiteNotificationsList(userId: string | null): Promise<SiteNotificationDTO[]> {
   await purgeExpiredSiteNotifications();
@@ -157,9 +211,11 @@ export async function fetchSiteNotificationsList(userId: string | null): Promise
 
     return mapNotificationsWithReads(notifs, reads);
   } catch (e) {
-    console.error("[SiteNotification] fetch", e);
-    return [];
+    console.error("[SiteNotification] fetch prisma", e);
   }
+
+  const fallback = await fetchSiteNotificationsListViaSupabase(userId);
+  return fallback ?? [];
 }
 
 export async function insertSiteNotification(params: {
