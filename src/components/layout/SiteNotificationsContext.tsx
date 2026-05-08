@@ -13,21 +13,19 @@ import {
 import { parseApiJson } from "@/lib/parse-api-response";
 import {
   applyGuestNotificationState,
-  guestDismissReadIds,
-  guestMarkAllReadIds,
-  guestMarkReadId,
+  guestHideNotificationId,
+  guestMarkReadIds,
 } from "@/lib/site-notifications-local";
 import type { SiteNotificationDTO } from "@/lib/site-notifications";
 
 type Ctx = {
   items: SiteNotificationDTO[];
   loading: boolean;
-  dismissingReads: boolean;
-  markingAllRead: boolean;
   load: () => Promise<void>;
-  dismissReadNotifications: () => Promise<void>;
-  markAllAsRead: () => Promise<void>;
-  markRead: (id: string) => Promise<boolean>;
+  /** Marca como leídas en servidor (o localStorage si invitado). */
+  markAsReadByIds: (ids: string[]) => Promise<void>;
+  /** Quita un aviso del listado para este usuario / dispositivo. */
+  dismissNotification: (id: string) => Promise<void>;
 };
 
 const SiteNotificationsContext = createContext<Ctx | null>(null);
@@ -40,13 +38,13 @@ export function useSiteNotifications(): Ctx {
   return v;
 }
 
-/** Un único estado para todos los botones ✉️ (hay dos componentes montados: móvil + desktop). */
+/**
+ * Un solo estado compartido: hay dos campanas ✉️ montadas (móvil + desktop).
+ */
 export function SiteNotificationsProvider({ children }: { children: React.ReactNode }) {
   const { status } = useSession();
   const [items, setItems] = useState<SiteNotificationDTO[]>([]);
   const [loading, setLoading] = useState(false);
-  const [dismissingReads, setDismissingReads] = useState(false);
-  const [markingAllRead, setMarkingAllRead] = useState(false);
   const loadSeq = useRef(0);
 
   const load = useCallback(async () => {
@@ -79,145 +77,91 @@ export function SiteNotificationsProvider({ children }: { children: React.ReactN
     void load();
   }, [load]);
 
-  const dismissReadNotifications = useCallback(async () => {
-    const hasRead = items.some((n) => n.read);
-    if (!hasRead || dismissingReads) return;
+  const markAsReadByIds = useCallback(
+    async (ids: string[]) => {
+      const unique = [...new Set(ids.filter(Boolean))];
+      if (unique.length === 0) return;
 
-    if (status === "unauthenticated") {
-      guestDismissReadIds(items.filter((n) => n.read).map((n) => n.id));
-      await load();
-      return;
-    }
+      setItems((prev) => prev.map((n) => (unique.includes(n.id) ? { ...n, read: true } : n)));
 
-    setDismissingReads(true);
-    try {
-      const res = await fetch("/api/site-notifications/dismiss-read", {
-        method: "POST",
-        credentials: "same-origin",
-      });
-      const data = await parseApiJson<{ ok: boolean }>(res);
-      if (data.ok) {
-        await load();
-        return;
-      }
-      if (res.status === 401 || res.status === 403) {
-        guestDismissReadIds(items.filter((n) => n.read).map((n) => n.id));
-        await load();
-      }
-    } catch {
-      /* noop */
-    } finally {
-      setDismissingReads(false);
-    }
-  }, [items, dismissingReads, load, status]);
-
-  const markAllAsRead = useCallback(async () => {
-    const unreadIds = items.filter((n) => !n.read).map((n) => n.id);
-    if (unreadIds.length === 0 || markingAllRead || dismissingReads) {
-      return;
-    }
-
-    const snapshot = items.map((n) => ({ ...n }));
-
-    setItems((prev) =>
-      prev.map((n) => (unreadIds.includes(n.id) ? { ...n, read: true } : n))
-    );
-
-    setMarkingAllRead(true);
-    try {
       if (status === "unauthenticated") {
-        guestMarkAllReadIds(unreadIds);
-        await load();
+        guestMarkReadIds(unique);
         return;
       }
 
-      const res = await fetch("/api/site-notifications/read-all", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ notificationIds: unreadIds }),
-      });
-
-      let data: { ok?: boolean };
       try {
-        data = await parseApiJson<{ ok: boolean }>(res);
+        const res = await fetch("/api/site-notifications/mark-read", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notificationIds: unique }),
+        });
+        let data: { ok?: boolean };
+        try {
+          data = await parseApiJson<{ ok: boolean }>(res);
+        } catch {
+          data = { ok: false };
+        }
+        if (data.ok) return;
+        if (res.status === 401 || res.status === 403) {
+          guestMarkReadIds(unique);
+          return;
+        }
+        await load();
       } catch {
-        data = { ok: false };
-      }
-
-      if (data.ok) {
         await load();
+      }
+    },
+    [status, load]
+  );
+
+  const dismissNotification = useCallback(
+    async (notificationId: string) => {
+      const id = notificationId.trim();
+      if (!id) return;
+
+      setItems((prev) => prev.filter((n) => n.id !== id));
+
+      if (status === "unauthenticated") {
+        guestHideNotificationId(id);
         return;
       }
 
-      if (res.status === 401 || res.status === 403) {
-        guestMarkAllReadIds(unreadIds);
+      try {
+        const res = await fetch("/api/site-notifications/dismiss", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notificationId: id }),
+        });
+        let data: { ok?: boolean };
+        try {
+          data = await parseApiJson<{ ok: boolean }>(res);
+        } catch {
+          data = { ok: false };
+        }
+        if (data.ok) return;
+        if (res.status === 401 || res.status === 403) {
+          guestHideNotificationId(id);
+          return;
+        }
         await load();
-        return;
+      } catch {
+        await load();
       }
-
-      setItems(snapshot);
-    } catch {
-      setItems(snapshot);
-    } finally {
-      setMarkingAllRead(false);
-    }
-  }, [items, markingAllRead, dismissingReads, load, status]);
-
-  const markRead = useCallback(async (id: string): Promise<boolean> => {
-    const applyGuestRead = () => {
-      guestMarkReadId(id);
-      setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-    };
-
-    if (status === "unauthenticated") {
-      applyGuestRead();
-      return true;
-    }
-
-    try {
-      const res = await fetch("/api/site-notifications/read", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ notificationId: id }),
-      });
-      const data = await parseApiJson<{ ok: boolean }>(res);
-      if (data.ok) {
-        setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-        return true;
-      }
-      if (res.status === 401 || res.status === 403) {
-        applyGuestRead();
-        return true;
-      }
-    } catch {
-      /* noop */
-    }
-    return false;
-  }, [status]);
+    },
+    [status, load]
+  );
 
   const value = useMemo<Ctx>(
     () => ({
       items,
       loading,
-      dismissingReads,
-      markingAllRead,
       load,
-      dismissReadNotifications,
-      markAllAsRead,
-      markRead,
+      markAsReadByIds,
+      dismissNotification,
     }),
-    [
-      items,
-      loading,
-      dismissingReads,
-      markingAllRead,
-      load,
-      dismissReadNotifications,
-      markAllAsRead,
-      markRead,
-    ]
+    [items, loading, load, markAsReadByIds, dismissNotification]
   );
 
   return (

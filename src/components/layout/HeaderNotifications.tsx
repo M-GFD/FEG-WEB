@@ -7,10 +7,11 @@ import { useSiteNotifications } from "@/components/layout/SiteNotificationsConte
 type HeaderTheme = "dark" | "light";
 
 type Props = {
-  /** Tema bajo el header (desktop); en móvil se usa variante fija legible sobre la cápsula. */
   theme?: HeaderTheme;
   className?: string;
 };
+
+const AUTO_READ_MS = 3000;
 
 function formatShortDate(iso: string) {
   try {
@@ -29,19 +30,22 @@ function formatShortDate(iso: string) {
 export function HeaderNotifications({ theme = "light", className = "" }: Props) {
   const router = useRouter();
   const pathname = usePathname();
-  const {
-    items,
-    loading,
-    dismissingReads,
-    markingAllRead,
-    load,
-    dismissReadNotifications,
-    markAllAsRead,
-    markRead,
-  } = useSiteNotifications();
+  const { items, loading, load, markAsReadByIds, dismissNotification } = useSiteNotifications();
 
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
+
+  /** Una sola vez por apertura: a los 3 s marca como leídas las que sigan sin leer. */
+  useEffect(() => {
+    if (!open) return;
+    const t = window.setTimeout(() => {
+      const unreadIds = itemsRef.current.filter((n) => !n.read).map((n) => n.id);
+      if (unreadIds.length > 0) void markAsReadByIds(unreadIds);
+    }, AUTO_READ_MS);
+    return () => window.clearTimeout(t);
+  }, [open, markAsReadByIds]);
 
   useEffect(() => {
     if (!open) return;
@@ -75,7 +79,6 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   }
 
   const unread = items.filter((n) => !n.read).length;
-  const hasReadVisible = items.some((n) => n.read);
 
   const iconClass =
     theme === "dark"
@@ -109,6 +112,9 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--feg-green)]">
               Notificaciones
             </p>
+            <p className="mt-0.5 text-[10px] text-neutral-500">
+              Se marcan como leídas automáticamente a los {AUTO_READ_MS / 1000} s de abrir el menú.
+            </p>
           </div>
 
           <div className="max-h-[min(22rem,50vh)] overflow-y-auto">
@@ -136,16 +142,8 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <button
-                      type="button"
-                      role="menuitem"
-                      aria-label={
-                        n.read
-                          ? `${n.title}. Marcada como leída.`
-                          : `${n.title}. Sin leer. Pulsar para marcar como leída.`
-                      }
-                      className={`flex w-full flex-col gap-0.5 rounded-md px-0 py-1 text-left text-sm transition hover:bg-black/[0.04] touch-manipulation ${n.read ? "text-neutral-700" : "bg-emerald-50/80 font-medium text-[var(--feg-ink)]"}`}
-                      onClick={() => void markRead(n.id)}
+                    <div
+                      className={`flex flex-col gap-0.5 rounded-md px-0 py-1 text-sm ${n.read ? "text-neutral-700" : "bg-emerald-50/80 font-medium text-[var(--feg-ink)]"}`}
                     >
                       <span className="line-clamp-2">{n.title}</span>
                       {n.body ? (
@@ -154,41 +152,29 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
                       <span className="text-[10px] font-normal uppercase tracking-wide text-neutral-400">
                         {formatShortDate(n.createdAt)}
                       </span>
-                    </button>
-                    {href ? (
+                    </div>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                      {href ? (
+                        <button
+                          type="button"
+                          className="text-left text-[11px] font-semibold text-[var(--feg-green-2)] hover:underline"
+                          onClick={() => openNotificationLink(href)}
+                        >
+                          Abrir enlace
+                        </button>
+                      ) : null}
                       <button
                         type="button"
-                        className="mt-1.5 text-left text-[11px] font-semibold text-[var(--feg-green-2)] hover:underline"
-                        onClick={() => openNotificationLink(href)}
+                        className="ml-auto text-[11px] font-semibold text-red-600 hover:underline"
+                        onClick={() => void dismissNotification(n.id)}
                       >
-                        Abrir enlace
+                        Eliminar
                       </button>
-                    ) : null}
+                    </div>
                   </div>
                 </div>
               );
             })}
-          </div>
-
-          <div className="flex gap-2 border-t border-black/5 px-3 py-2.5">
-            <button
-              type="button"
-              title="Marcar todas como leídas en este listado"
-              disabled={unread === 0 || markingAllRead || dismissingReads}
-              onClick={() => void markAllAsRead()}
-              className="min-h-[44px] min-w-0 flex-1 touch-manipulation rounded-xl bg-[var(--feg-green)] px-2 py-2 text-center text-[11px] font-semibold uppercase leading-tight text-white shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              {markingAllRead ? "…" : "Marcar como leídas"}
-            </button>
-            <button
-              type="button"
-              title="Quitar del listado las notificaciones ya leídas (no las borra del sistema)"
-              disabled={!hasReadVisible || dismissingReads || markingAllRead}
-              onClick={() => void dismissReadNotifications()}
-              className="min-h-[44px] min-w-0 flex-1 touch-manipulation rounded-xl border border-neutral-300 bg-white px-2 py-2 text-center text-[11px] font-semibold uppercase leading-tight text-neutral-700 transition hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              {dismissingReads ? "…" : "Borrar notificaciones"}
-            </button>
           </div>
         </div>
       ) : null}

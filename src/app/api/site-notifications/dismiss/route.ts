@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { markSiteNotificationReadForUser } from "@/lib/site-notifications";
+import { dismissSiteNotificationForUser } from "@/lib/site-notifications";
 
 export const runtime = "nodejs";
 
@@ -26,14 +26,20 @@ export async function POST(request: Request) {
       return Response.json({ ok: false, error: "notificationId requerido" }, { status: 400 });
     }
 
-    const result = await markSiteNotificationReadForUser(session.user.id, notificationId);
+    const result = await dismissSiteNotificationForUser(session.user.id, notificationId);
     if (!result.ok) {
-      return Response.json({ ok: false, error: result.error ?? "Error" }, { status: 500 });
+      return Response.json(
+        { ok: false, error: result.error ?? "Error" },
+        { status: 500 }
+      );
     }
 
-    return Response.json({ ok: true });
+    return Response.json(
+      { ok: true },
+      { headers: { "Cache-Control": "private, no-store" } }
+    );
   } catch (e) {
-    console.error("[api/site-notifications/read POST]", e);
+    console.error("[api/site-notifications/dismiss POST]", e);
     return Response.json(
       { ok: false, error: e instanceof Error ? e.message : "Error interno" },
       { status: 500 }
