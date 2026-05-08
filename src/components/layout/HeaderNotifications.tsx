@@ -30,7 +30,7 @@ function formatShortDate(iso: string) {
 export function HeaderNotifications({ theme = "light", className = "" }: Props) {
   const router = useRouter();
   const pathname = usePathname();
-  const { items, loading, load, markAsReadByIds, dismissNotification } = useSiteNotifications();
+  const { items, loading, load, markAsReadByIds } = useSiteNotifications();
 
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -165,10 +165,10 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
                       ) : null}
                       <button
                         type="button"
-                        className="ml-auto text-[11px] font-semibold text-red-600 hover:underline"
-                        onClick={() => void dismissNotification(n.id)}
+                        className="ml-auto text-[11px] font-semibold text-[var(--feg-green-2)] hover:underline"
+                        onClick={() => void markAsReadByIds([n.id])}
                       >
-                        Eliminar
+                        Marcar como leído
                       </button>
                     </div>
                   </div>
