@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import type { Session } from "next-auth";
 
 import { PwaPushRegister } from "@/components/pwa/PwaPushRegister";
+import { SiteNotificationsProvider } from "@/components/layout/SiteNotificationsContext";
 
 export function Providers({
   children,
@@ -15,8 +16,10 @@ export function Providers({
 }) {
   return (
     <SessionProvider refetchOnWindowFocus={false} session={session}>
-      {children}
-      <PwaPushRegister />
+      <SiteNotificationsProvider>
+        {children}
+        <PwaPushRegister />
+      </SiteNotificationsProvider>
     </SessionProvider>
   );
 }

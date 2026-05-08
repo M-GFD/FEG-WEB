@@ -1,16 +1,8 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { parseApiJson } from "@/lib/parse-api-response";
-import {
-  applyGuestNotificationState,
-  guestDismissReadIds,
-  guestMarkAllReadIds,
-  guestMarkReadId,
-} from "@/lib/site-notifications-local";
-import type { SiteNotificationDTO } from "@/lib/site-notifications";
+import { useSiteNotifications } from "@/components/layout/SiteNotificationsContext";
 
 type HeaderTheme = "dark" | "light";
 
@@ -35,42 +27,21 @@ function formatShortDate(iso: string) {
 }
 
 export function HeaderNotifications({ theme = "light", className = "" }: Props) {
-  const { status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  const {
+    items,
+    loading,
+    dismissingReads,
+    markingAllRead,
+    load,
+    dismissReadNotifications,
+    markAllAsRead,
+    markRead,
+  } = useSiteNotifications();
+
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<SiteNotificationDTO[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [dismissingReads, setDismissingReads] = useState(false);
-  const [markingAllRead, setMarkingAllRead] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/site-notifications", {
-        credentials: "same-origin",
-        cache: "no-store",
-      });
-      const data = await parseApiJson<{ ok: boolean; notifications?: SiteNotificationDTO[] }>(res);
-      if (data.ok && Array.isArray(data.notifications)) {
-        /** Solo invitados reales: con `loading`, getSession() suele ser null y el GET ya trae `read` vía cookie (auth()). */
-        const list =
-          status === "unauthenticated"
-            ? applyGuestNotificationState(data.notifications)
-            : data.notifications;
-        setItems(list);
-      }
-    } catch {
-      /* silencioso: sin bloquear UI */
-    } finally {
-      setLoading(false);
-    }
-  }, [status]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
 
   useEffect(() => {
     if (!open) return;
@@ -92,124 +63,6 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
     document.addEventListener("pointerdown", onDocPointerDown);
     return () => document.removeEventListener("pointerdown", onDocPointerDown);
   }, [open]);
-
-  async function dismissReadNotifications() {
-    const hasRead = items.some((n) => n.read);
-    if (!hasRead || dismissingReads) return;
-
-    if (status === "unauthenticated") {
-      guestDismissReadIds(items.filter((n) => n.read).map((n) => n.id));
-      await load();
-      return;
-    }
-
-    setDismissingReads(true);
-    try {
-      const res = await fetch("/api/site-notifications/dismiss-read", {
-        method: "POST",
-        credentials: "same-origin",
-      });
-      const data = await parseApiJson<{ ok: boolean }>(res);
-      if (data.ok) {
-        await load();
-        return;
-      }
-      if (res.status === 401 || res.status === 403) {
-        guestDismissReadIds(items.filter((n) => n.read).map((n) => n.id));
-        await load();
-      }
-    } catch {
-      /* noop */
-    } finally {
-      setDismissingReads(false);
-    }
-  }
-
-  async function markAllAsRead() {
-    const unreadIds = items.filter((n) => !n.read).map((n) => n.id);
-    if (unreadIds.length === 0 || markingAllRead || dismissingReads) {
-      return;
-    }
-
-    const snapshot = items.map((n) => ({ ...n }));
-
-    setItems((prev) =>
-      prev.map((n) => (unreadIds.includes(n.id) ? { ...n, read: true } : n))
-    );
-
-    setMarkingAllRead(true);
-    try {
-      if (status === "unauthenticated") {
-        guestMarkAllReadIds(unreadIds);
-        await load();
-        return;
-      }
-
-      const res = await fetch("/api/site-notifications/read-all", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ notificationIds: unreadIds }),
-      });
-
-      let data: { ok?: boolean };
-      try {
-        data = await parseApiJson<{ ok: boolean }>(res);
-      } catch {
-        data = { ok: false };
-      }
-
-      if (data.ok) {
-        await load();
-        return;
-      }
-
-      if (res.status === 401 || res.status === 403) {
-        guestMarkAllReadIds(unreadIds);
-        await load();
-        return;
-      }
-
-      setItems(snapshot);
-    } catch {
-      setItems(snapshot);
-    } finally {
-      setMarkingAllRead(false);
-    }
-  }
-
-  async function markRead(id: string): Promise<boolean> {
-    const applyGuestRead = () => {
-      guestMarkReadId(id);
-      setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-    };
-
-    if (status === "unauthenticated") {
-      applyGuestRead();
-      return true;
-    }
-
-    try {
-      const res = await fetch("/api/site-notifications/read", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ notificationId: id }),
-      });
-      const data = await parseApiJson<{ ok: boolean }>(res);
-      if (data.ok) {
-        setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-        return true;
-      }
-      if (res.status === 401 || res.status === 403) {
-        applyGuestRead();
-        return true;
-      }
-    } catch {
-      /* noop */
-    }
-    return false;
-  }
 
   function openNotificationLink(href: string) {
     const h = href.trim();
