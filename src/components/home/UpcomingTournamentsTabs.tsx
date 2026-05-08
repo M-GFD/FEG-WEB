@@ -16,8 +16,7 @@ const PLACEHOLDER_IMAGES = [
 ];
 
 export function UpcomingTournamentsTabs() {
-  // Recalcula al montar (cliente) y cada cambio de día relevante,
-  // usando la fecha REAL del navegador.
+  // “Hoy” para el calendario según Argentina (GMT−3), ver FEG_TIME_ZONE en calendario-feg.
   const [now, setNow] = useState<Date>(() => new Date());
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000 * 60 * 60); // cada hora

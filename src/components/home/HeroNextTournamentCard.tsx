@@ -6,8 +6,8 @@ import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { formatFechaTitle, getNextFegDate } from "@/lib/calendario-feg";
 
 /**
- * Card del Hero con el próximo torneo del calendario FEG, calculado
- * dinámicamente con la fecha real del navegador.
+ * Card del Hero con el próximo torneo del calendario FEG. La comparación de fechas
+ * usa siempre la zona horaria de Argentina (GMT−3, `FEG_TIME_ZONE` en calendario-feg).
  */
 export function HeroNextTournamentCard() {
   const [now, setNow] = useState<Date>(() => new Date());
@@ -31,13 +31,12 @@ export function HeroNextTournamentCard() {
 
             {next ? (
               <>
-                <p
-                  className="mt-3 min-w-0 truncate text-xl font-semibold leading-snug text-white"
-                  title={`${next.sede} – ${formatFechaTitle(next.fecha)}`}
-                >
-                  {next.sede}
-                  <span className="font-normal text-white/85"> – </span>
-                  <span className="font-bold text-[var(--feg-yellow)]">{formatFechaTitle(next.fecha)}</span>
+                <p className="mt-3 min-w-0 truncate text-xl font-semibold leading-snug">
+                  <span className="text-white">{next.sede}</span>
+                  <span className="text-white/75"> – </span>
+                  <span className="font-bold text-[var(--feg-yellow)]">
+                    {formatFechaTitle(next.fecha)}
+                  </span>
                 </p>
                 <div className="mt-3 flex items-center gap-2">
                   <div className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white">

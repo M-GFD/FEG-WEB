@@ -3,8 +3,9 @@
  * Hero del Home y la sección "Próximos torneos" lo consumen para
  * mostrar las fechas que se van actualizando con el correr del año.
  *
- * La “fecha de hoy” para comparar eventos usa siempre GMT−3 (Argentina, sin DST).
+ * Criterio de “hoy” y comparación de fechas: siempre en Argentina (UTC−3, sin horario de verano).
  */
+export const FEG_TIME_ZONE = "America/Argentina/Buenos_Aires";
 
 export type CalendarEntry = {
   fecha: string;       // Texto humano (mes en Title Case): "28 de Marzo", "15/16 de Mayo"
@@ -15,9 +16,6 @@ export type CalendarEntry = {
 };
 
 const SEASON_YEAR = 2026;
-
-/** Zona horaria fija UTC−3 para FEG (Entre Ríos / Argentina). */
-export const FEG_TIMEZONE = "America/Argentina/Buenos_Aires";
 
 export const CALENDARIO_FEG: CalendarEntry[] = [
   { fecha: "28 de Marzo",     sede: "Villa Elisa",                     modalidad: "18H Mayores", year: SEASON_YEAR },
@@ -41,44 +39,38 @@ const MONTH_MAP: Record<string, number> = {
   noviembre: 10, diciembre: 11,
 };
 
-/**
- * Parsea la fecha textual ("28 de marzo", "15/16 de mayo") al primer día
- * del rango como Date. Considera el `year` indicado (default temporada).
- */
-function parseEntryDate(entry: CalendarEntry): Date {
+/** Y/M/D del torneo según el texto del calendario (mes 0–11). */
+function parseEntryYmd(entry: CalendarEntry): { y: number; m: number; d: number } {
   const parts = entry.fecha.split(" de ");
   const dayStr = parts[0]?.split("/")[0]?.trim();
   const monthStr = parts[1]?.trim().toLowerCase();
-  const day = parseInt(dayStr ?? "1", 10);
-  const month = MONTH_MAP[monthStr ?? ""] ?? 0;
-  return new Date(entry.year ?? SEASON_YEAR, month, Number.isFinite(day) ? day : 1);
+  const d = parseInt(dayStr ?? "1", 10);
+  const m = MONTH_MAP[monthStr ?? ""] ?? 0;
+  const y = entry.year ?? SEASON_YEAR;
+  return { y, m, d: Number.isFinite(d) ? d : 1 };
 }
 
-/** `YYYY-MM-DD` del reloj “actual” en zona FEG (GMT−3). */
-function getTodayYmdFeg(now: Date): string {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: FEG_TIMEZONE,
+function ymdToComparable(y: number, m: number, d: number): number {
+  return y * 10_000 + (m + 1) * 100 + d;
+}
+
+function getTodayYmdInFeG(now: Date): { y: number; m: number; d: number } {
+  const str = new Intl.DateTimeFormat("en-CA", {
+    timeZone: FEG_TIME_ZONE,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).formatToParts(now);
-  const y = parts.find((p) => p.type === "year")?.value ?? "1970";
-  const mo = parts.find((p) => p.type === "month")?.value ?? "01";
-  const da = parts.find((p) => p.type === "day")?.value ?? "01";
-  return `${y}-${mo}-${da}`;
+  }).format(now);
+  const [y, mo, day] = str.split("-").map((x) => parseInt(x, 10));
+  return { y, m: mo - 1, d: day };
 }
 
-/** Primer día del torneo en `YYYY-MM-DD` para ordenar frente a “hoy” FEG. */
-function entryFirstDayYmd(entry: CalendarEntry): string {
-  const parts = entry.fecha.split(" de ");
-  const dayPart = parts[0]?.trim() ?? "1";
-  const dayStr = dayPart.split("/")[0]?.trim() ?? "1";
-  const monthStr = parts[1]?.trim().toLowerCase() ?? "enero";
-  const day = parseInt(dayStr, 10);
-  const monthIndex = MONTH_MAP[monthStr] ?? 0;
-  const year = entry.year ?? SEASON_YEAR;
-  const month = monthIndex + 1;
-  return `${year}-${String(month).padStart(2, "0")}-${String(Number.isFinite(day) ? day : 1).padStart(2, "0")}`;
+/**
+ * Representación estable del día del torneo (mediodía UTC del calendario gregoriano).
+ */
+function parseEntryDate(entry: CalendarEntry): Date {
+  const { y, m, d } = parseEntryYmd(entry);
+  return new Date(Date.UTC(y, m, d, 12, 0, 0));
 }
 
 export type CalendarEntryWithDate = CalendarEntry & { _parsed: Date };
@@ -88,14 +80,20 @@ function withParsedDates(): CalendarEntryWithDate[] {
 }
 
 /**
- * Devuelve las próximas `count` fechas (>= hoy en GMT−3 / FEG).
+ * Devuelve las próximas `count` fechas (>= hoy).
  * Si ya pasaron todas las del año, devuelve las primeras del calendario
  * (fallback: arrancan los próximos en el siguiente arranque de temporada).
  */
 export function getUpcomingFegDates(count: number, now: Date = new Date()): CalendarEntryWithDate[] {
   const all = withParsedDates();
-  const todayYmd = getTodayYmdFeg(now);
-  const upcoming = all.filter((e) => entryFirstDayYmd(e) >= todayYmd).slice(0, count);
+  const today = getTodayYmdInFeG(now);
+  const todayCmp = ymdToComparable(today.y, today.m, today.d);
+  const upcoming = all
+    .filter((e) => {
+      const { y, m, d } = parseEntryYmd(e);
+      return ymdToComparable(y, m, d) >= todayCmp;
+    })
+    .slice(0, count);
   if (upcoming.length >= count) return upcoming;
   if (upcoming.length > 0) return upcoming;
   return all.slice(0, count);
