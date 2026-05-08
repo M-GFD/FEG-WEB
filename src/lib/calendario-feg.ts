@@ -2,6 +2,8 @@
  * Calendario anual de torneos (data fuente única).
  * Hero del Home y la sección "Próximos torneos" lo consumen para
  * mostrar las fechas que se van actualizando con el correr del año.
+ *
+ * La “fecha de hoy” para comparar eventos usa siempre GMT−3 (Argentina, sin DST).
  */
 
 export type CalendarEntry = {
@@ -13,6 +15,9 @@ export type CalendarEntry = {
 };
 
 const SEASON_YEAR = 2026;
+
+/** Zona horaria fija UTC−3 para FEG (Entre Ríos / Argentina). */
+export const FEG_TIMEZONE = "America/Argentina/Buenos_Aires";
 
 export const CALENDARIO_FEG: CalendarEntry[] = [
   { fecha: "28 de Marzo",     sede: "Villa Elisa",                     modalidad: "18H Mayores", year: SEASON_YEAR },
@@ -49,6 +54,33 @@ function parseEntryDate(entry: CalendarEntry): Date {
   return new Date(entry.year ?? SEASON_YEAR, month, Number.isFinite(day) ? day : 1);
 }
 
+/** `YYYY-MM-DD` del reloj “actual” en zona FEG (GMT−3). */
+function getTodayYmdFeg(now: Date): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: FEG_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const y = parts.find((p) => p.type === "year")?.value ?? "1970";
+  const mo = parts.find((p) => p.type === "month")?.value ?? "01";
+  const da = parts.find((p) => p.type === "day")?.value ?? "01";
+  return `${y}-${mo}-${da}`;
+}
+
+/** Primer día del torneo en `YYYY-MM-DD` para ordenar frente a “hoy” FEG. */
+function entryFirstDayYmd(entry: CalendarEntry): string {
+  const parts = entry.fecha.split(" de ");
+  const dayPart = parts[0]?.trim() ?? "1";
+  const dayStr = dayPart.split("/")[0]?.trim() ?? "1";
+  const monthStr = parts[1]?.trim().toLowerCase() ?? "enero";
+  const day = parseInt(dayStr, 10);
+  const monthIndex = MONTH_MAP[monthStr] ?? 0;
+  const year = entry.year ?? SEASON_YEAR;
+  const month = monthIndex + 1;
+  return `${year}-${String(month).padStart(2, "0")}-${String(Number.isFinite(day) ? day : 1).padStart(2, "0")}`;
+}
+
 export type CalendarEntryWithDate = CalendarEntry & { _parsed: Date };
 
 function withParsedDates(): CalendarEntryWithDate[] {
@@ -56,14 +88,14 @@ function withParsedDates(): CalendarEntryWithDate[] {
 }
 
 /**
- * Devuelve las próximas `count` fechas (>= hoy).
+ * Devuelve las próximas `count` fechas (>= hoy en GMT−3 / FEG).
  * Si ya pasaron todas las del año, devuelve las primeras del calendario
  * (fallback: arrancan los próximos en el siguiente arranque de temporada).
  */
 export function getUpcomingFegDates(count: number, now: Date = new Date()): CalendarEntryWithDate[] {
   const all = withParsedDates();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const upcoming = all.filter((e) => e._parsed >= today).slice(0, count);
+  const todayYmd = getTodayYmdFeg(now);
+  const upcoming = all.filter((e) => entryFirstDayYmd(e) >= todayYmd).slice(0, count);
   if (upcoming.length >= count) return upcoming;
   if (upcoming.length > 0) return upcoming;
   return all.slice(0, count);
