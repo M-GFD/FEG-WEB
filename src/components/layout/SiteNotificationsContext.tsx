@@ -77,6 +77,16 @@ export function SiteNotificationsProvider({ children }: { children: React.ReactN
     void load();
   }, [load]);
 
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState === "visible") {
+        void load();
+      }
+    }
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [load]);
+
   const markAsReadByIds = useCallback(
     async (ids: string[]) => {
       const unique = [...new Set(ids.filter(Boolean))];
