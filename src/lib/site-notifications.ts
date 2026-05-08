@@ -283,6 +283,150 @@ export async function insertSiteNotification(params: {
   }
 }
 
+async function resolveExistingSiteNotificationIds(ids: string[]): Promise<string[]> {
+  if (ids.length === 0) return [];
+  try {
+    const rows = await prisma.siteNotification.findMany({
+      where: { id: { in: ids } },
+      select: { id: true },
+    });
+    return rows.map((r) => r.id);
+  } catch (e) {
+    console.error("[SiteNotification] prisma resolve ids", e);
+    const supabase = getSupabaseAdmin();
+    if (!supabase) return [];
+    const { data, error } = await supabase.from("SiteNotification").select("id").in("id", ids);
+    if (error || !data) {
+      console.error("[SiteNotification] supabase resolve ids", error);
+      return [];
+    }
+    return (data as { id: string }[]).map((r) => r.id);
+  }
+}
+
+async function markReadsViaSupabase(
+  userId: string,
+  notificationIds: string[],
+  readAt: Date
+): Promise<boolean> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return false;
+
+  const readAtIso = readAt.toISOString();
+
+  for (const notificationId of notificationIds) {
+    const { data: existing, error: selErr } = await supabase
+      .from("SiteNotificationRead")
+      .select("id")
+      .eq("userId", userId)
+      .eq("notificationId", notificationId)
+      .maybeSingle();
+
+    if (selErr) {
+      console.error("[SiteNotificationRead] supabase mark-read select", selErr);
+      return false;
+    }
+
+    if (existing?.id) {
+      const { error: upErr } = await supabase
+        .from("SiteNotificationRead")
+        .update({ readAt: readAtIso, dismissedAt: null })
+        .eq("id", existing.id as string);
+      if (upErr) {
+        console.error("[SiteNotificationRead] supabase mark-read update", upErr);
+        return false;
+      }
+    } else {
+      const { error: insErr } = await supabase.from("SiteNotificationRead").insert({
+        id: randomUUID(),
+        userId,
+        notificationId,
+        readAt: readAtIso,
+      });
+      if (insErr) {
+        console.error("[SiteNotificationRead] supabase mark-read insert", insErr);
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+async function dismissViaSupabase(
+  userId: string,
+  notificationId: string,
+  now: Date
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return { ok: false, error: "Sin cliente Supabase" };
+  }
+
+  const nowIso = now.toISOString();
+
+  const { data: existing, error: selErr } = await supabase
+    .from("SiteNotificationRead")
+    .select("id")
+    .eq("userId", userId)
+    .eq("notificationId", notificationId)
+    .maybeSingle();
+
+  if (selErr) {
+    console.error("[SiteNotificationRead] supabase dismiss select", selErr);
+    return { ok: false, error: "Error al eliminar del listado" };
+  }
+
+  if (existing?.id) {
+    const { error: upErr } = await supabase
+      .from("SiteNotificationRead")
+      .update({ dismissedAt: nowIso })
+      .eq("id", existing.id as string);
+    if (upErr) {
+      console.error("[SiteNotificationRead] supabase dismiss update", upErr);
+      return { ok: false, error: "Error al eliminar del listado" };
+    }
+    return { ok: true };
+  }
+
+  const { error: insErr } = await supabase.from("SiteNotificationRead").insert({
+    id: randomUUID(),
+    userId,
+    notificationId,
+    readAt: nowIso,
+    dismissedAt: nowIso,
+  });
+  if (insErr) {
+    console.error("[SiteNotificationRead] supabase dismiss insert", insErr);
+    return { ok: false, error: "Error al eliminar del listado" };
+  }
+  return { ok: true };
+}
+
+async function siteNotificationExists(notificationId: string): Promise<boolean> {
+  try {
+    const row = await prisma.siteNotification.findFirst({
+      where: { id: notificationId },
+      select: { id: true },
+    });
+    return !!row;
+  } catch (e) {
+    console.error("[SiteNotification] prisma exists", e);
+    const supabase = getSupabaseAdmin();
+    if (!supabase) return false;
+    const { data, error } = await supabase
+      .from("SiteNotification")
+      .select("id")
+      .eq("id", notificationId)
+      .maybeSingle();
+    if (error) {
+      console.error("[SiteNotification] supabase exists", error);
+      return false;
+    }
+    return !!data;
+  }
+}
+
 /** Marca como leídas (sin quitar del listado) los ids indicados, si existen como avisos. */
 export async function markSiteNotificationIdsReadForUser(
   userId: string,
@@ -298,12 +442,7 @@ export async function markSiteNotificationIdsReadForUser(
   }
   if (ids.length === 0) return { ok: true };
 
-  const existing = await prisma.siteNotification.findMany({
-    where: { id: { in: ids } },
-    select: { id: true },
-  });
-  const validIds = existing.map((r) => r.id);
-
+  const validIds = await resolveExistingSiteNotificationIds(ids);
   if (validIds.length === 0) {
     return { ok: true };
   }
@@ -325,30 +464,33 @@ export async function markSiteNotificationIdsReadForUser(
         "readAt" = EXCLUDED."readAt",
         "dismissedAt" = NULL
     `;
+    return { ok: true };
   } catch (e) {
     console.error("[SiteNotificationRead] prisma batch upsert (raw)", e);
-    try {
-      for (const notificationId of validIds) {
-        await prisma.siteNotificationRead.upsert({
-          where: {
-            userId_notificationId: { userId, notificationId },
-          },
-          create: { userId, notificationId },
-          update: {
-            readAt,
-            dismissedAt: null,
-          },
-        });
-      }
-    } catch (e2) {
-      console.error("[SiteNotificationRead] prisma secuencial fallback", e2);
-      if (e2 instanceof Prisma.PrismaClientKnownRequestError) {
-        return { ok: false, error: `Error al marcar (${e2.code}): ${e2.message}` };
-      }
-      return { ok: false, error: "Error al marcar como leídas" };
-    }
   }
 
+  try {
+    for (const notificationId of validIds) {
+      await prisma.siteNotificationRead.upsert({
+        where: {
+          userId_notificationId: { userId, notificationId },
+        },
+        create: { userId, notificationId },
+        update: {
+          readAt,
+          dismissedAt: null,
+        },
+      });
+    }
+    return { ok: true };
+  } catch (e2) {
+    console.error("[SiteNotificationRead] prisma secuencial", e2);
+  }
+
+  const supabaseOk = await markReadsViaSupabase(userId, validIds, readAt);
+  if (!supabaseOk) {
+    return { ok: false, error: "Error al marcar como leídas" };
+  }
   return { ok: true };
 }
 
@@ -360,10 +502,7 @@ export async function dismissSiteNotificationForUser(
   const id = String(notificationId ?? "").trim();
   if (!id) return { ok: false, error: "notificationId requerido" };
 
-  const exists = await prisma.siteNotification.findFirst({
-    where: { id },
-    select: { id: true },
-  });
+  const exists = await siteNotificationExists(id);
   if (!exists) return { ok: true };
 
   const now = new Date();
@@ -384,7 +523,8 @@ export async function dismissSiteNotificationForUser(
     });
     return { ok: true };
   } catch (e) {
-    console.error("[SiteNotificationRead] dismiss one", e);
-    return { ok: false, error: "No se pudo eliminar del listado" };
+    console.error("[SiteNotificationRead] dismiss prisma", e);
   }
+
+  return dismissViaSupabase(userId, id, now);
 }
