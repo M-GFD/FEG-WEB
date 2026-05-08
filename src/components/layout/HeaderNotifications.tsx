@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSiteNotifications } from "@/components/layout/SiteNotificationsContext";
 
@@ -33,9 +33,27 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   const { items, loading, load, markAsReadByIds } = useSiteNotifications();
 
   const [open, setOpen] = useState(false);
+  const [menuTopPx, setMenuTopPx] = useState(0);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const itemsRef = useRef(items);
   itemsRef.current = items;
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    function positionUnderTrigger() {
+      const el = wrapRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      setMenuTopPx(r.bottom + 8);
+    }
+    positionUnderTrigger();
+    window.addEventListener("resize", positionUnderTrigger);
+    window.addEventListener("scroll", positionUnderTrigger, true);
+    return () => {
+      window.removeEventListener("resize", positionUnderTrigger);
+      window.removeEventListener("scroll", positionUnderTrigger, true);
+    };
+  }, [open]);
 
   /** Una sola vez por apertura: a los 3 s marca como leídas las que sigan sin leer. */
   useEffect(() => {
@@ -85,6 +103,80 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       ? "text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.35)]"
       : "text-[var(--feg-green)]";
 
+  const menuCard = (
+    <div
+      className="w-full max-w-[20rem] overflow-hidden rounded-2xl border border-black/10 bg-white py-1 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-md"
+      role="menu"
+      onPointerDown={(e) => e.stopPropagation()}
+    >
+      <div className="border-b border-black/5 px-3 py-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--feg-green)]">
+          Notificaciones
+        </p>
+      </div>
+
+      <div className="max-h-[min(22rem,50vh)] overflow-y-auto">
+        {loading && items.length === 0 ? (
+          <p className="px-3 py-6 text-center text-sm text-neutral-500">Cargando…</p>
+        ) : null}
+
+        {!loading && items.length === 0 ? (
+          <p className="px-3 py-6 text-center text-sm text-neutral-500">No hay notificaciones</p>
+        ) : null}
+
+        {items.map((n) => {
+          const href = n.linkUrl?.trim() ?? "";
+          return (
+            <div
+              key={n.id}
+              role="none"
+              className="flex gap-2 border-b border-black/[0.04] px-3 py-2.5 last:border-b-0"
+            >
+              <div className="flex w-4 shrink-0 justify-center pt-1.5" aria-hidden>
+                {!n.read ? (
+                  <span className="h-2 w-2 rounded-full bg-red-500 ring-1 ring-red-500/30" />
+                ) : (
+                  <span className="h-2 w-2 rounded-full bg-transparent" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div
+                  className={`flex flex-col gap-0.5 rounded-md px-0 py-1 text-sm ${n.read ? "text-neutral-700" : "bg-emerald-50/80 font-medium text-[var(--feg-ink)]"}`}
+                >
+                  <span className="line-clamp-2">{n.title}</span>
+                  {n.body ? (
+                    <span className="line-clamp-2 text-xs font-normal text-neutral-500">{n.body}</span>
+                  ) : null}
+                  <span className="text-[10px] font-normal uppercase tracking-wide text-neutral-400">
+                    {formatShortDate(n.createdAt)}
+                  </span>
+                </div>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                  {href ? (
+                    <button
+                      type="button"
+                      className="text-left text-[11px] font-semibold text-[var(--feg-green-2)] hover:underline"
+                      onClick={() => openNotificationLink(href)}
+                    >
+                      Abrir enlace
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="ml-auto text-[11px] font-semibold text-[var(--feg-green-2)] hover:underline"
+                    onClick={() => void markAsReadByIds([n.id])}
+                  >
+                    Marcar como leído
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   return (
     <div ref={wrapRef} className={`relative z-[70] shrink-0 ${className}`}>
       <button
@@ -103,80 +195,25 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
       </button>
 
       {open ? (
-        <div
-          role="menu"
-          onPointerDown={(e) => e.stopPropagation()}
-          className="absolute right-0 top-[calc(100%+0.5rem)] z-[80] w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-black/10 bg-white py-1 shadow-[0_16px_40px_rgba(0,0,0,0.18)] backdrop-blur-md"
-        >
-          <div className="border-b border-black/5 px-3 py-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--feg-green)]">
-              Notificaciones
-            </p>
-            <p className="mt-0.5 text-[10px] text-neutral-500">
-              Se marcan como leídas automáticamente a los {AUTO_READ_MS / 1000} s de abrir el menú.
-            </p>
+        <>
+          {/*
+            Móvil: panel anclado a viewport con el mismo margen a izquierda y derecha (incl. safe-area).
+            Sigue siendo descendiente de wrapRef para que el cierre al tocar fuera funcione.
+          */}
+          <div
+            className="fixed z-[80] flex justify-center md:hidden"
+            style={{
+              top: menuTopPx,
+              left: "max(1rem, env(safe-area-inset-left))",
+              right: "max(1rem, env(safe-area-inset-right))",
+            }}
+          >
+            {menuCard}
           </div>
-
-          <div className="max-h-[min(22rem,50vh)] overflow-y-auto">
-            {loading && items.length === 0 ? (
-              <p className="px-3 py-6 text-center text-sm text-neutral-500">Cargando…</p>
-            ) : null}
-
-            {!loading && items.length === 0 ? (
-              <p className="px-3 py-6 text-center text-sm text-neutral-500">No hay notificaciones</p>
-            ) : null}
-
-            {items.map((n) => {
-              const href = n.linkUrl?.trim() ?? "";
-              return (
-                <div
-                  key={n.id}
-                  role="none"
-                  className="flex gap-2 border-b border-black/[0.04] px-3 py-2.5 last:border-b-0"
-                >
-                  <div className="flex w-4 shrink-0 justify-center pt-1.5" aria-hidden>
-                    {!n.read ? (
-                      <span className="h-2 w-2 rounded-full bg-red-500 ring-1 ring-red-500/30" />
-                    ) : (
-                      <span className="h-2 w-2 rounded-full bg-transparent" />
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div
-                      className={`flex flex-col gap-0.5 rounded-md px-0 py-1 text-sm ${n.read ? "text-neutral-700" : "bg-emerald-50/80 font-medium text-[var(--feg-ink)]"}`}
-                    >
-                      <span className="line-clamp-2">{n.title}</span>
-                      {n.body ? (
-                        <span className="line-clamp-2 text-xs font-normal text-neutral-500">{n.body}</span>
-                      ) : null}
-                      <span className="text-[10px] font-normal uppercase tracking-wide text-neutral-400">
-                        {formatShortDate(n.createdAt)}
-                      </span>
-                    </div>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                      {href ? (
-                        <button
-                          type="button"
-                          className="text-left text-[11px] font-semibold text-[var(--feg-green-2)] hover:underline"
-                          onClick={() => openNotificationLink(href)}
-                        >
-                          Abrir enlace
-                        </button>
-                      ) : null}
-                      <button
-                        type="button"
-                        className="ml-auto text-[11px] font-semibold text-[var(--feg-green-2)] hover:underline"
-                        onClick={() => void markAsReadByIds([n.id])}
-                      >
-                        Marcar como leído
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="absolute right-0 top-[calc(100%+0.5rem)] z-[80] hidden w-[min(20rem,calc(100vw-2rem))] md:block">
+            {menuCard}
           </div>
-        </div>
+        </>
       ) : null}
     </div>
   );
