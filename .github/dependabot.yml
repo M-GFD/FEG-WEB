@@ -9,3 +9,8 @@ updates:
     ignore:
       - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]
+      # Prisma 7: urls en prisma.config.ts, adapter pg, generator prisma-client, posible ESM; migrar a mano
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
