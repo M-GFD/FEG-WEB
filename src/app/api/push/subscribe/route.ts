@@ -2,30 +2,23 @@ import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import {
+  PUBLIC_ERROR_GENERIC,
+  PUBLIC_ERROR_VALIDATION,
+  logServerError,
+} from "@/lib/public-api-error";
 import { z } from "zod";
 
 const schema = z.object({
-  endpoint: z.string().url(),
+  endpoint: z.string().url().max(2000),
   keys: z.object({
-    p256dh: z.string(),
-    auth: z.string(),
+    p256dh: z.string().min(1).max(500),
+    auth: z.string().min(1).max(500),
   }),
 });
 
-function supabasePushErrorMessage(error: { message?: string; code?: string }): string {
-  const msg = error.message ?? "";
-  if (/permission denied|row-level security|rls/i.test(msg)) {
-    return "No se pudo guardar la suscripción. Revisá SUPABASE_SERVICE_ROLE_KEY en Vercel.";
-  }
-  if (/relation|does not exist|42P01|Could not find/i.test(msg)) {
-    return "La tabla PushSubscription no existe. Ejecutá prisma/migrations/20260508_push_subscription.sql en el SQL Editor de Supabase.";
-  }
-  return msg || "Error al guardar la suscripción";
-}
-
 /**
  * Registra Web Push vía Supabase REST (misma credencial que el resto de la app).
- * Evita depender de DATABASE_URL / pooler de Prisma para este flujo.
  */
 export async function POST(req: Request) {
   try {
@@ -35,7 +28,7 @@ export async function POST(req: Request) {
     const supabase = getSupabaseAdmin();
     if (!supabase) {
       return NextResponse.json(
-        { error: "Configuración incompleta: faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY." },
+        { error: "Servicio no disponible temporalmente." },
         { status: 503 }
       );
     }
@@ -49,10 +42,7 @@ export async function POST(req: Request) {
 
     const parsed = schema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Datos inválidos", details: parsed.error.flatten() },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: PUBLIC_ERROR_VALIDATION }, { status: 400 });
     }
 
     const { endpoint, keys } = parsed.data;
@@ -64,8 +54,8 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     if (selErr) {
-      console.error("[api/push/subscribe] select", selErr);
-      return NextResponse.json({ error: supabasePushErrorMessage(selErr) }, { status: 500 });
+      logServerError("[api/push/subscribe] select", selErr);
+      return NextResponse.json({ error: PUBLIC_ERROR_GENERIC }, { status: 500 });
     }
 
     if (existing?.id) {
@@ -76,8 +66,8 @@ export async function POST(req: Request) {
         .update(patch)
         .eq("id", existing.id);
       if (upErr) {
-        console.error("[api/push/subscribe] update", upErr);
-        return NextResponse.json({ error: supabasePushErrorMessage(upErr) }, { status: 500 });
+        logServerError("[api/push/subscribe] update", upErr);
+        return NextResponse.json({ error: PUBLIC_ERROR_GENERIC }, { status: 500 });
       }
     } else {
       const { error: insErr } = await supabase.from("PushSubscription").insert({
@@ -87,15 +77,14 @@ export async function POST(req: Request) {
         userId,
       });
       if (insErr) {
-        console.error("[api/push/subscribe] insert", insErr);
-        return NextResponse.json({ error: supabasePushErrorMessage(insErr) }, { status: 500 });
+        logServerError("[api/push/subscribe] insert", insErr);
+        return NextResponse.json({ error: PUBLIC_ERROR_GENERIC }, { status: 500 });
       }
     }
 
     return NextResponse.json({ ok: true });
   } catch (e) {
-    console.error("[api/push/subscribe]", e);
-    const message = e instanceof Error ? e.message : "Error al guardar la suscripción";
-    return NextResponse.json({ error: message }, { status: 500 });
+    logServerError("[api/push/subscribe]", e);
+    return NextResponse.json({ error: PUBLIC_ERROR_GENERIC }, { status: 500 });
   }
 }

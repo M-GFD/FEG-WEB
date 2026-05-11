@@ -1,4 +1,10 @@
 import { auth } from "@/lib/auth";
+import { siteNotificationsDismissSchema } from "@/lib/api-input-schemas";
+import {
+  PUBLIC_ERROR_GENERIC,
+  PUBLIC_ERROR_VALIDATION,
+  logServerError,
+} from "@/lib/public-api-error";
 import { dismissSiteNotificationForUser } from "@/lib/site-notifications";
 
 export const runtime = "nodejs";
@@ -17,32 +23,25 @@ export async function POST(request: Request) {
       return Response.json({ ok: false, error: "JSON inválido" }, { status: 400 });
     }
 
-    const notificationId =
-      body && typeof body === "object" && "notificationId" in body
-        ? String((body as { notificationId?: unknown }).notificationId ?? "").trim()
-        : "";
-
-    if (!notificationId) {
-      return Response.json({ ok: false, error: "notificationId requerido" }, { status: 400 });
+    const parsed = siteNotificationsDismissSchema.safeParse(body);
+    if (!parsed.success) {
+      return Response.json({ ok: false, error: PUBLIC_ERROR_VALIDATION }, { status: 400 });
     }
 
-    const result = await dismissSiteNotificationForUser(session.user.id, notificationId);
+    const result = await dismissSiteNotificationForUser(session.user.id, parsed.data.notificationId);
     if (!result.ok) {
-      return Response.json(
-        { ok: false, error: result.error ?? "Error" },
-        { status: 500 }
-      );
+      logServerError("dismiss", result.error);
+      return Response.json({ ok: false, error: PUBLIC_ERROR_GENERIC }, { status: 500 });
     }
 
     return Response.json(
       { ok: true },
-      { headers: { "Cache-Control": "private, no-store" } }
+      {
+        headers: { "Cache-Control": "private, no-store" },
+      }
     );
   } catch (e) {
-    console.error("[api/site-notifications/dismiss POST]", e);
-    return Response.json(
-      { ok: false, error: e instanceof Error ? e.message : "Error interno" },
-      { status: 500 }
-    );
+    logServerError("[api/site-notifications/dismiss POST]", e);
+    return Response.json({ ok: false, error: PUBLIC_ERROR_GENERIC }, { status: 500 });
   }
 }

@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { PUBLIC_ERROR_GENERIC, logServerError } from "@/lib/public-api-error";
 import { fetchSiteNotificationsList } from "@/lib/site-notifications";
 
 export const runtime = "nodejs";
@@ -17,10 +18,7 @@ export async function GET() {
       }
     );
   } catch (e) {
-    console.error("[api/site-notifications GET]", e);
-    return Response.json(
-      { ok: false, error: e instanceof Error ? e.message : "Error interno" },
-      { status: 500 }
-    );
+    logServerError("[api/site-notifications GET]", e);
+    return Response.json({ ok: false, error: PUBLIC_ERROR_GENERIC }, { status: 500 });
   }
 }

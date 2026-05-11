@@ -20,7 +20,8 @@ declare module "next-auth" {
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
+  /** Sesión acotada (JWT); NextAuth renueva actividad por defecto al usar la app. */
+  session: { strategy: "jwt", maxAge: 12 * 60 * 60 },
   pages: {
     signIn: "/auth/signin",
   },

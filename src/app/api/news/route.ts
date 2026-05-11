@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { canModeratePress } from "@/lib/rbac";
+import { PUBLIC_ERROR_GENERIC, logServerError } from "@/lib/public-api-error";
 import { publishNewsArticle } from "@/lib/publish-news";
 
 export const runtime = "nodejs";
@@ -22,18 +23,19 @@ export async function POST(request: Request) {
     if (result.ok) {
       return Response.json({ ok: true, slug: result.slug });
     }
-    return Response.json(
-      { ok: false, error: result.error, code: result.code },
-      { status: result.status }
-    );
+    if (result.status >= 500) {
+      return Response.json({ ok: false, error: PUBLIC_ERROR_GENERIC }, { status: result.status });
+    }
+    const payload: { ok: false; error: string; code?: string } = {
+      ok: false,
+      error: result.error,
+    };
+    if (result.code) {
+      payload.code = result.code;
+    }
+    return Response.json(payload, { status: result.status });
   } catch (e) {
-    console.error("[api/news POST] fatal", e);
-    return Response.json(
-      {
-        ok: false,
-        error: e instanceof Error ? e.message : "Error interno del servidor",
-      },
-      { status: 500 }
-    );
+    logServerError("[api/news POST]", e);
+    return Response.json({ ok: false, error: PUBLIC_ERROR_GENERIC }, { status: 500 });
   }
 }
