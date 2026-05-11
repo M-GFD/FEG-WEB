@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { canModeratePress } from "@/lib/rbac";
+import { PUBLIC_ERROR_GENERIC, logServerError } from "@/lib/public-api-error";
 import { uploadNewsImage } from "@/lib/news-storage";
 
 export const runtime = "nodejs";
@@ -28,18 +29,15 @@ export async function POST(request: Request) {
 
     const result = await uploadNewsImage(file, session.user.id);
     if (!result.ok) {
-      return Response.json(result, { status: 400 });
+      return Response.json(
+        { ok: false, error: result.error ?? PUBLIC_ERROR_GENERIC },
+        { status: 400 }
+      );
     }
 
     return Response.json({ ok: true, url: result.url });
   } catch (e) {
-    console.error("[api/news/upload-image POST]", e);
-    return Response.json(
-      {
-        ok: false,
-        error: e instanceof Error ? e.message : "Error interno al subir la imagen",
-      },
-      { status: 500 }
-    );
+    logServerError("[api/news/upload-image POST]", e);
+    return Response.json({ ok: false, error: PUBLIC_ERROR_GENERIC }, { status: 500 });
   }
 }

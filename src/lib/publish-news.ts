@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { PUBLIC_ERROR_GENERIC } from "@/lib/public-api-error";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { slugifyTitle } from "@/lib/slugify";
 import { sanitizeNewsContent } from "@/lib/sanitize-news";
@@ -68,12 +69,10 @@ export async function publishNewsArticle(
   try {
     sanitized = sanitizeNewsContent(content);
   } catch (e) {
+    console.error("[publishNewsArticle] sanitizeNewsContent", e);
     return {
       ok: false,
-      error:
-        e instanceof Error
-          ? e.message
-          : "No se pudo validar el HTML de la noticia.",
+      error: "No se pudo validar el HTML de la noticia.",
       status: 400,
     };
   }
@@ -91,9 +90,10 @@ export async function publishNewsArticle(
   try {
     finalSlug = await resolveUniqueNewsSlug(baseSlug);
   } catch (e) {
+    console.error("[publishNewsArticle] resolveUniqueNewsSlug", e);
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "Error de slug",
+      error: PUBLIC_ERROR_GENERIC,
       status: 500,
     };
   }
@@ -127,20 +127,17 @@ export async function publishNewsArticle(
       .single();
 
     if (error) {
-      const detail = [error.message, error.hint, (error as { details?: string }).details]
-        .filter(Boolean)
-        .join(" — ");
-      console.error("[publishNewsArticle]", error);
+      console.error("[publishNewsArticle] insert", error);
       return {
         ok: false,
-        error: detail || "No se pudo guardar la noticia",
-        code: (error as { code?: string }).code,
+        error: PUBLIC_ERROR_GENERIC,
         status: 500,
       };
     }
 
     if (!row?.slug) {
-      return { ok: false, error: "La noticia no devolvió slug.", status: 500 };
+      console.error("[publishNewsArticle] sin slug en respuesta");
+      return { ok: false, error: PUBLIC_ERROR_GENERIC, status: 500 };
     }
 
     try {
@@ -167,7 +164,7 @@ export async function publishNewsArticle(
     console.error("[publishNewsArticle] unexpected", e);
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "Error interno al publicar",
+      error: PUBLIC_ERROR_GENERIC,
       status: 500,
     };
   }

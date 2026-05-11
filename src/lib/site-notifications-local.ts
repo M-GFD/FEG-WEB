@@ -2,6 +2,7 @@ import type { SiteNotificationDTO } from "@/lib/site-notifications";
 
 /**
  * Invitados: leído y “eliminado del listado” solo en este dispositivo (localStorage).
+ * Solo se persisten IDs públicos de avisos (no credenciales ni PII).
  */
 const READ_KEY = "feg:site-notif:readIds";
 const HIDDEN_KEY = "feg:site-notif:hiddenIds";

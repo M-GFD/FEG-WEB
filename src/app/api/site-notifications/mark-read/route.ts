@@ -1,4 +1,10 @@
 import { auth } from "@/lib/auth";
+import { siteNotificationsMarkReadSchema } from "@/lib/api-input-schemas";
+import {
+  PUBLIC_ERROR_GENERIC,
+  PUBLIC_ERROR_VALIDATION,
+  logServerError,
+} from "@/lib/public-api-error";
 import { markSiteNotificationIdsReadForUser } from "@/lib/site-notifications";
 
 export const runtime = "nodejs";
@@ -17,36 +23,27 @@ export async function POST(request: Request) {
       return Response.json({ ok: false, error: "JSON inválido" }, { status: 400 });
     }
 
-    const rawIds =
-      body &&
-      typeof body === "object" &&
-      "notificationIds" in body &&
-      Array.isArray((body as { notificationIds: unknown }).notificationIds)
-        ? (body as { notificationIds: unknown[] }).notificationIds
-        : [];
+    const parsed = siteNotificationsMarkReadSchema.safeParse(body);
+    if (!parsed.success) {
+      return Response.json({ ok: false, error: PUBLIC_ERROR_VALIDATION }, { status: 400 });
+    }
 
-    const ids = [
-      ...new Set(
-        rawIds
-          .filter((x): x is string => typeof x === "string" && x.trim().length > 0)
-          .map((x) => x.trim())
-      ),
-    ];
+    const ids = [...new Set(parsed.data.notificationIds.map((x) => x.trim()).filter(Boolean))];
 
     const result = await markSiteNotificationIdsReadForUser(session.user.id, ids);
     if (!result.ok) {
-      return Response.json({ ok: false, error: result.error ?? "Error" }, { status: 500 });
+      logServerError("mark-read", result.error);
+      return Response.json({ ok: false, error: PUBLIC_ERROR_GENERIC }, { status: 500 });
     }
 
     return Response.json(
       { ok: true },
-      { headers: { "Cache-Control": "private, no-store" } }
+      {
+        headers: { "Cache-Control": "private, no-store" },
+      }
     );
   } catch (e) {
-    console.error("[api/site-notifications/mark-read POST]", e);
-    return Response.json(
-      { ok: false, error: e instanceof Error ? e.message : "Error interno" },
-      { status: 500 }
-    );
+    logServerError("[api/site-notifications/mark-read POST]", e);
+    return Response.json({ ok: false, error: PUBLIC_ERROR_GENERIC }, { status: 500 });
   }
 }
