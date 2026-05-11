@@ -9,6 +9,3 @@ updates:
     ignore:
       - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]
-      # Tailwind v4 exige @tailwindcss/postcss y migrar postcss/globals; no auto-bump desde v3
-      - dependency-name: "tailwindcss"
-        update-types: ["version-update:semver-major"]
