@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { FegLogo } from "@/components/layout/FegLogo";
 import { resendVerification } from "@/app/auth/verify-email/actions";
@@ -40,31 +40,36 @@ function SignInForm() {
       return;
     }
 
-    const result = await signIn("credentials", {
-      email: email.trim().toLowerCase(),
-      password,
-      callbackUrl,
-      redirect: false,
-    });
+    setBusy(true);
+    try {
+      const result = await signIn("credentials", {
+        email: email.trim().toLowerCase(),
+        password,
+        callbackUrl,
+        redirect: false,
+      });
 
-    if (result?.error) {
-      if (result.error === "EMAIL_NOT_VERIFIED") {
-        setError("Tu email aún no está verificado.");
-        setBusy(true);
-        try {
-          await resendVerification(email.trim().toLowerCase());
-          setInfo("Te reenviamos el email de verificación.");
-        } finally {
-          setBusy(false);
+      if (result?.error) {
+        if (result.error === "EMAIL_NOT_VERIFIED") {
+          setError("Tu email aún no está verificado.");
+          try {
+            await resendVerification(email.trim().toLowerCase());
+            setInfo("Te reenviamos el email de verificación.");
+          } catch {
+            setInfo(null);
+            setError("No pudimos reenviar el email. Intentá más tarde.");
+          }
+          return;
         }
+        setError("Email o contraseña incorrectos");
         return;
       }
-      setError("Email o contraseña incorrectos");
-      return;
-    }
 
-    if (result?.url) {
-      window.location.href = result.url;
+      if (result?.url) {
+        window.location.href = result.url;
+      }
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -97,7 +102,11 @@ function SignInForm() {
           </p>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="mt-6 space-y-4"
+          aria-busy={busy}
+        >
           <div>
             <label
               htmlFor="email"
@@ -110,8 +119,9 @@ function SignInForm() {
               name="email"
               type="email"
               required
+              disabled={busy}
               autoComplete="email"
-              className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-4 py-2.5 text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
+              className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-4 py-2.5 text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
               placeholder="tu@email.com"
             />
           </div>
@@ -128,14 +138,16 @@ function SignInForm() {
                 name="password"
                 type={showPassword ? "text" : "password"}
                 required
+                disabled={busy}
                 autoComplete="current-password"
-                className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] py-2.5 pl-4 pr-12 text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
+                className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] py-2.5 pl-4 pr-12 text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
                 placeholder="••••••••"
               />
               <button
                 type="button"
+                disabled={busy}
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-[var(--feg-green)] outline-none transition hover:bg-[var(--feg-green)]/10 hover:text-[var(--feg-green-2)] focus-visible:ring-2 focus-visible:ring-[var(--feg-green-2)]/40"
+                className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-[var(--feg-green)] outline-none transition hover:bg-[var(--feg-green)]/10 hover:text-[var(--feg-green-2)] focus-visible:ring-2 focus-visible:ring-[var(--feg-green-2)]/40 disabled:cursor-not-allowed disabled:opacity-40"
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                 aria-pressed={showPassword}
               >
@@ -168,9 +180,19 @@ function SignInForm() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-xl bg-[var(--feg-green-2)] py-3 font-semibold text-white transition hover:brightness-95"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--feg-green-2)] py-3 font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-80"
           >
-            Entrar
+            {busy ? (
+              <>
+                <Loader2
+                  className="h-5 w-5 shrink-0 animate-spin"
+                  aria-hidden
+                />
+                Entrando…
+              </>
+            ) : (
+              "Entrar"
+            )}
           </button>
         </form>
 
