@@ -5,6 +5,8 @@ import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
+import { Eye, EyeOff } from "lucide-react";
+
 import { FegLogo } from "@/components/layout/FegLogo";
 import { resendVerification } from "@/app/auth/verify-email/actions";
 
@@ -17,6 +19,7 @@ function SignInForm() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -119,15 +122,30 @@ function SignInForm() {
             >
               Contraseña
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-4 py-2.5 text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                required
+                autoComplete="current-password"
+                className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] py-2.5 pl-4 pr-12 text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-[var(--feg-green)] outline-none transition hover:bg-[var(--feg-green)]/10 hover:text-[var(--feg-green-2)] focus-visible:ring-2 focus-visible:ring-[var(--feg-green-2)]/40"
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-[1.125rem] w-[1.125rem] shrink-0" aria-hidden />
+                ) : (
+                  <Eye className="h-[1.125rem] w-[1.125rem] shrink-0" aria-hidden />
+                )}
+              </button>
+            </div>
             <div className="mt-2 flex justify-end">
               <Link
                 href="/auth/forgot-password"
