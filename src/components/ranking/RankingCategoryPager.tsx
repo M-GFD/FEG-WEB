@@ -31,6 +31,33 @@ export function RankingCategoryPager({ categories, initialIndex }: Props) {
 
   return (
     <div className="space-y-6">
+      <nav
+        aria-label="Ir a categoría"
+        className="flex flex-wrap gap-2 border-b border-[var(--feg-green)]/10 pb-4"
+      >
+        {categories.map((c, idx) => {
+          const selected = idx === i;
+          return (
+            <button
+              key={c.groupKey}
+              type="button"
+              onClick={() => setIndex(idx)}
+              aria-current={selected ? "true" : undefined}
+              className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold shadow-sm transition ${
+                selected
+                  ? "border-[var(--feg-green-2)] bg-[var(--feg-green-soft)]/20 text-[var(--feg-ink)] ring-2 ring-[var(--feg-green-2)]/25"
+                  : "border-[var(--feg-green)]/20 bg-white/90 text-[var(--feg-green-2)] hover:border-[var(--feg-green)]/40 hover:bg-[var(--feg-bg)]"
+              }`}
+            >
+              {c.label}
+              <span className="ml-1 font-normal text-[var(--feg-green)]">
+                ({c.rows.length})
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm font-medium text-[var(--feg-green)]">
           Categoría{" "}
