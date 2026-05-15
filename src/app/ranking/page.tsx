@@ -31,15 +31,6 @@ export default async function RankingPage() {
               <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
                 Rankings {year}
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--feg-green)]">
-                Posiciones según handicap de jugadores matriculados, por categoría.
-                <span className="font-medium text-[var(--feg-ink)]">
-                  {" "}
-                  Menor handicap = mejor posición.
-                </span>{" "}
-                Solo se listan jugadores con handicap mayor a 0.{" "}
-                La tabla se actualiza cuando cambian los datos en la base de datos.
-              </p>
               {totalJugadores > 0 ? (
                 <p className="mt-2 text-xs text-[var(--feg-green-2)]/80">
                   {totalJugadores} jugador{totalJugadores === 1 ? "" : "es"} en{" "}
