@@ -7,12 +7,12 @@ import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { getUpcomingFegDates } from "@/lib/calendario-feg";
 
 const PLACEHOLDER_IMAGES = [
-  "/feg%20image%20(1).jpg",
-  "/feg%20image%20(2).jpg",
-  "/feg%20image%20(3).jpg",
-  "/feg%20image%20(4).jpg",
-  "/feg%20image%20(5).jpeg",
-  "/feg%20image%20(6).jpg",
+  "/feg%20image%20(1).webp",
+  "/feg%20image%20(2).webp",
+  "/feg%20image%20(3).webp",
+  "/feg%20image%20(4).webp",
+  "/feg%20image%20(5).webp",
+  "/feg%20image%20(6).webp",
 ];
 
 export function UpcomingTournamentsTabs() {

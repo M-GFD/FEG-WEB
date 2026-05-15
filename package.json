@@ -12,6 +12,7 @@
     "db:studio": "prisma studio",
     "bootstrap-admin": "node scripts/bootstrap-admin.cjs",
     "import-feg-players": "node scripts/import-feg-players.cjs",
+    "images:webp": "node scripts/convert-public-jpeg-to-webp.cjs",
     "security:audit": "npm audit --audit-level=moderate"
   },
   "dependencies": {
@@ -46,6 +47,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.0",
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^22.9.0",
     "@types/react": "^18.2.0",
@@ -55,9 +57,9 @@
     "dotenv": "^17.4.2",
     "eslint": "^9.39.4",
     "eslint-config-next": "15.5.12",
-    "@tailwindcss/postcss": "^4.3.0",
     "postcss": "^8.4.49",
     "prisma": "^5.22.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3"
   }

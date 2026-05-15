@@ -15,37 +15,37 @@ const MEMBERS: DirectorioMember[] = [
     role: "Presidente",
     name: "Nombre Apellido",
     summary: "Conduce la federación y define lineamientos institucionales.",
-    imageSrc: "/feg%20image%20(1).jpg",
+    imageSrc: "/feg%20image%20(1).webp",
   },
   {
     role: "Vice Presidente",
     name: "Nombre Apellido",
     summary: "Acompaña la gestión y coordina acciones con clubes y comisiones.",
-    imageSrc: "/feg%20image%20(2).jpg",
+    imageSrc: "/feg%20image%20(2).webp",
   },
   {
     role: "Tesorería",
     name: "Nombre Apellido",
     summary: "Administra presupuestos, pagos y rendiciones.",
-    imageSrc: "/feg%20image%20(3).jpg",
+    imageSrc: "/feg%20image%20(3).webp",
   },
   {
     role: "Secretario Gral",
     name: "Nombre Apellido",
     summary: "Organiza actas, documentación y agenda institucional.",
-    imageSrc: "/feg%20image%20(4).jpg",
+    imageSrc: "/feg%20image%20(4).webp",
   },
   {
     role: "Prensa",
     name: "Nombre Apellido",
     summary: "Coordina comunicación, publicaciones y cobertura de eventos.",
-    imageSrc: "/feg%20image%20(6).jpg",
+    imageSrc: "/feg%20image%20(6).webp",
   },
   {
     role: "Comercial",
     name: "Nombre Apellido",
     summary: "Gestiona alianzas, patrocinadores y convenios.",
-    imageSrc: "/feg%20image%20(5).jpeg",
+    imageSrc: "/feg%20image%20(5).webp",
   },
 ];
 
