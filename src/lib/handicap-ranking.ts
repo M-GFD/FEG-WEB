@@ -48,6 +48,75 @@ export function slugifyRankingCategoryKey(key: string): string {
   return s.length ? s : "categoria";
 }
 
+/** Orden del enum Prisma (lowercase) para categorías reconocidas fuera del bloque CAB*. */
+const PRISMA_CATEGORY_KEY_ORDER: string[] = (
+  Object.keys(RANKING_CATEGORY_LABELS) as Category[]
+).map((k) => k.toLowerCase());
+
+export type HandicapRankingCategorySortable = {
+  groupKey: string;
+  label: string;
+};
+
+/**
+ * Orden de visualización en /ranking: CAB exacto primero, luego CAB-*, luego enum, resto alfabético, sin categoría al final.
+ */
+export function compareHandicapRankingCategoryBlocks(
+  a: HandicapRankingCategorySortable,
+  b: HandicapRankingCategorySortable
+): number {
+  const ta = rankingCategorySortTier(a);
+  const tb = rankingCategorySortTier(b);
+  if (ta !== tb) return ta - tb;
+  if (ta <= 0) {
+    return a.label.localeCompare(b.label, "es", { sensitivity: "base" });
+  }
+  if (ta === 1) {
+    return (
+      PRISMA_CATEGORY_KEY_ORDER.indexOf(a.groupKey) -
+      PRISMA_CATEGORY_KEY_ORDER.indexOf(b.groupKey)
+    );
+  }
+  return a.label.localeCompare(b.label, "es", { sensitivity: "base" });
+}
+
+function rankingCategorySortTier(b: HandicapRankingCategorySortable): number {
+  if (b.groupKey === "__sin_categoria__") return 3;
+  if (b.groupKey === "cab" || /^cab$/i.test(b.label.trim())) return -1;
+  if (isLegacyCabBandCategory(b)) return 0;
+  if (PRISMA_CATEGORY_KEY_ORDER.includes(b.groupKey)) return 1;
+  return 2;
+}
+
+/** CAB-*, etc., sin mezclar con caballeros_* del enum Prisma. */
+function isLegacyCabBandCategory(b: HandicapRankingCategorySortable): boolean {
+  const k = b.groupKey;
+  if (k.includes("caballero")) return false;
+  if (k.startsWith("cab-") || k.startsWith("cab–")) return true;
+  const t = b.label.trim();
+  if (/^cab[-–]/i.test(t) && !/caballero/i.test(t)) return true;
+  return false;
+}
+
+export function sortHandicapRankingCategoryBlocks<T extends HandicapRankingCategorySortable>(
+  blocks: T[]
+): T[] {
+  return [...blocks].sort(compareHandicapRankingCategoryBlocks);
+}
+
+/** Índice inicial del paginador: CAB (clave o etiqueta corta); si no hay, Caballeros Scratch; si no, 0. */
+export function getInitialHandicapRankingCategoryIndex(
+  sorted: HandicapRankingCategorySortable[]
+): number {
+  const cab = sorted.findIndex(
+    (c) => c.groupKey === "cab" || /^cab$/i.test(c.label.trim())
+  );
+  if (cab >= 0) return cab;
+  const cabScratch = sorted.findIndex((c) => c.groupKey === "caballeros_scratch");
+  if (cabScratch >= 0) return cabScratch;
+  return 0;
+}
+
 /**
  * Valor numérico para ordenar (menor = mejor puesto en golf).
  * Usa el **Handicap Index** (WHS / AAG) cuando existe; si no, el entero `handicap` de respaldo.
