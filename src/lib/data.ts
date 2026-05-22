@@ -784,3 +784,31 @@ export async function getPlayerById(id: string) {
   const { data: club } = await supabase.from("Club").select("name").eq("id", p.clubId).single();
   return { ...p, club: club ? { name: club.name } : { name: "" } };
 }
+
+export type ReglamentoVideoRow = {
+  id: string;
+  title: string;
+  body: string;
+  videoUrl: string;
+  mimeType: string;
+  createdAt: string;
+};
+
+/** Videos explicativos publicados en Reglamento. */
+export async function getReglamentoVideos(): Promise<ReglamentoVideoRow[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("ReglamentoVideo")
+    .select("id,title,body,videoUrl,mimeType,createdAt")
+    .eq("published", true)
+    .order("createdAt", { ascending: false });
+
+  if (error) {
+    console.error("[getReglamentoVideos]", error.message);
+    return [];
+  }
+
+  return (data ?? []) as ReglamentoVideoRow[];
+}

@@ -50,6 +50,11 @@ const STATIC_PAGES: StaticPage[] = [
     keywords: ["reglamento", "ranking", "juveniles", "prejuveniles", "cupos", "2026", "lineamientos"],
   },
   {
+    title: "Videos explicativos del reglamento",
+    href: "/institucional/reglamento/videos",
+    keywords: ["videos", "explicativos", "reglamento", "tutorial", "juveniles", "prejuveniles"],
+  },
+  {
     title: "Rankings",
     href: "/ranking",
     keywords: ["ranking", "rankings", "puntos", "tabla", "posiciones"],

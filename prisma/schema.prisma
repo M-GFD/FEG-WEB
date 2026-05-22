@@ -303,6 +303,19 @@ model Banner {
   updatedAt DateTime @updatedAt
 }
 
+/// Videos explicativos publicados en Reglamento (admin).
+model ReglamentoVideo {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  videoUrl  String
+  mimeType  String
+  published Boolean  @default(true)
+  authorId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // ============ TREASURY ============
 model Expense {
   id          String        @id @default(cuid())
