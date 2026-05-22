@@ -5,12 +5,23 @@
 
 import { getSupabaseAdmin } from "./supabase";
 import {
+  matchesAudienceFilter,
+  type AudienceSegment,
+} from "./content-audience";
+import {
   formatHandicapRankingCell,
   handicapSortValue,
   keyForRankingCategory,
   labelForRankingCategory,
   slugifyRankingCategoryKey,
+  sortHandicapRankingCategoryBlocks,
 } from "./handicap-ranking";
+import {
+  compareYouthCategoryBlocks,
+  isMayoresPlayerCategory,
+  isYouthPlayerCategory,
+  resolveYouthCategoryTier,
+} from "./youth-categories";
 
 export type TournamentWithClub = {
   id: string;
@@ -19,6 +30,7 @@ export type TournamentWithClub = {
   date: string;
   clubId: string;
   status: string;
+  audience?: string | null;
   club: { name: string };
 };
 
@@ -337,7 +349,7 @@ export async function getPublicPlayersByClubId(clubId: string) {
   }>;
 }
 
-export async function getNews() {
+export async function getNews(options?: { audience?: AudienceSegment | null }) {
   const supabase = getSupabaseAdmin();
   if (!supabase) return [];
 
@@ -346,9 +358,18 @@ export async function getNews() {
     .select("*")
     .eq("published", true)
     .order("publishedAt", { ascending: false })
-    .limit(20);
+    .limit(50);
 
-  return data ?? [];
+  const items = data ?? [];
+  if (options?.audience) {
+    return items.filter((n) =>
+      matchesAudienceFilter(
+        (n as { audience?: string | null }).audience,
+        options.audience!
+      )
+    );
+  }
+  return items;
 }
 
 /** Listado de noticias publicadas para gestión (prensa): eliminar en bloque. */
@@ -481,10 +502,13 @@ async function fetchAllPlayersForHandicapRanking(
  * (menor = mejor). Excluye jugadores sin handicap válido o con handicap ≤ 0.
  * Los datos se leen en cada request (handicaps actualizados en DB).
  */
-export async function getHandicapRankingsByCategory(): Promise<HandicapRankingCategoryBlock[]> {
+export async function getHandicapRankingsByCategory(options?: {
+  audience?: AudienceSegment;
+}): Promise<HandicapRankingCategoryBlock[]> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return [];
 
+  const audience = options?.audience ?? "mayores";
   const players = await fetchAllPlayersForHandicapRanking(supabase);
   if (!players.length) return [];
 
@@ -503,8 +527,21 @@ export async function getHandicapRankingsByCategory(): Promise<HandicapRankingCa
 
   for (const p of players) {
     const sort = handicapSortValue(p);
-    // Solo entran jugadores con handicap efectivo finito y estrictamente > 0.
     if (!Number.isFinite(sort) || sort <= 0) continue;
+
+    if (audience === "menores") {
+      if (!isYouthPlayerCategory(p.category)) continue;
+      const tier = resolveYouthCategoryTier(p.category);
+      if (!tier) continue;
+      const gKey = tier.groupKey;
+      const label = tier.label;
+      const hLabel = formatHandicapRankingCell(p);
+      if (!byKey.has(gKey)) byKey.set(gKey, { label, list: [] });
+      byKey.get(gKey)!.list.push({ ...p, sort, hLabel });
+      continue;
+    }
+
+    if (!isMayoresPlayerCategory(p.category)) continue;
 
     const gKey = keyForRankingCategory(p.category);
     const label = labelForRankingCategory(p.category);
@@ -515,10 +552,7 @@ export async function getHandicapRankingsByCategory(): Promise<HandicapRankingCa
     byKey.get(gKey)!.list.push({ ...p, sort, hLabel });
   }
 
-  function tiebreak(
-    a: PlayerRankingRow,
-    b: PlayerRankingRow
-  ): number {
+  function tiebreak(a: PlayerRankingRow, b: PlayerRankingRow): number {
     const ln = a.lastName.localeCompare(b.lastName, "es", { sensitivity: "base" });
     if (ln !== 0) return ln;
     return a.firstName.localeCompare(b.firstName, "es", { sensitivity: "base" });
@@ -549,13 +583,12 @@ export async function getHandicapRankingsByCategory(): Promise<HandicapRankingCa
     });
   }
 
-  blocks.sort((a, b) => {
-    if (a.groupKey === "__sin_categoria__") return 1;
-    if (b.groupKey === "__sin_categoria__") return -1;
-    return a.label.localeCompare(b.label, "es", { sensitivity: "base" });
-  });
+  if (audience === "menores") {
+    blocks.sort(compareYouthCategoryBlocks);
+    return blocks;
+  }
 
-  return blocks;
+  return sortHandicapRankingCategoryBlocks(blocks);
 }
 
 export async function getTournamentEntry(entryId: string, tournamentId: string) {
@@ -588,8 +621,13 @@ export async function getTournamentEntry(entryId: string, tournamentId: string) 
 }
 
 /** Torneos públicos para histórico (todos los clubes). */
-export async function getPublicTournamentsHistoric(limit = 400) {
-  return getTournaments({ isAdmin: true, limit });
+export async function getPublicTournamentsHistoric(
+  limit = 400,
+  audience?: AudienceSegment
+) {
+  const all = await getTournaments({ isAdmin: true, limit });
+  if (!audience) return all;
+  return all.filter((t) => matchesAudienceFilter(t.audience, audience));
 }
 
 /** { tournamentId: { count, thumbUrl } } para APPROVED con torneo asociado. */

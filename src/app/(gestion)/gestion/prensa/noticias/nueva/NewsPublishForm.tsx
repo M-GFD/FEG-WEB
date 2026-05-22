@@ -6,6 +6,8 @@ import { parseApiJson } from "@/lib/parse-api-response";
 import { slugifyTitle } from "@/lib/slugify";
 import { publishNewsFromGestion } from "./actions";
 import { NewsRichEditor } from "./NewsRichEditor";
+import { ContentAudienceField } from "@/components/forms/ContentAudienceField";
+import type { ContentAudience } from "@/lib/content-audience";
 
 const MAX_GALLERY = 15;
 
@@ -27,6 +29,7 @@ export function NewsPublishForm() {
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [notifyPush, setNotifyPush] = useState(false);
+  const [audience, setAudience] = useState<ContentAudience>("GENERAL");
 
   useEffect(() => {
     if (!slugTouched) {
@@ -83,6 +86,7 @@ export function NewsPublishForm() {
         content: contentHtml,
         imageUrl: imageUrl ?? "",
         galleryUrls,
+        audience,
         notifyPush,
       });
 
@@ -99,6 +103,7 @@ export function NewsPublishForm() {
       setContentHtml("<p></p>");
       setCoverFile(null);
       setGalleryFiles([]);
+      setAudience("GENERAL");
       setFormResetKey((k) => k + 1);
       setSuccess("Noticia publicada. El formulario quedó listo para otra.");
       router.refresh();
@@ -220,6 +225,8 @@ export function NewsPublishForm() {
           </p>
         )}
       </div>
+
+      <ContentAudienceField value={audience} onChange={setAudience} />
 
       <div className="space-y-2">
         <span className="text-sm font-medium text-[var(--feg-green)]">Cuerpo de la noticia</span>
