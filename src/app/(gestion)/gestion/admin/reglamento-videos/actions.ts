@@ -56,3 +56,61 @@ export async function createReglamentoVideo(input: {
   revalidatePath("/institucional/reglamento/videos");
   return { ok: true as const };
 }
+
+const MAX_BULK_DELETE = 50;
+
+const deleteIdsSchema = z.array(z.string().min(1)).min(1).max(MAX_BULK_DELETE);
+
+/** Elimina videos publicados por id (solo admin). No borra archivos en Storage. */
+export async function deleteReglamentoVideosByIds(
+  videoIds: string[]
+): Promise<{ ok: true; deleted: number } | { ok: false; error: string }> {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return { ok: false, error: "No autorizado" };
+  }
+
+  const parsed = deleteIdsSchema.safeParse(
+    [...new Set(videoIds.map((id) => id?.trim()).filter(Boolean))]
+  );
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: parsed.error.errors[0]?.message ?? "Selección inválida",
+    };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return { ok: false, error: "Base de datos no disponible" };
+  }
+
+  const ids = parsed.data;
+  const { data: rows, error: selErr } = await supabase
+    .from("ReglamentoVideo")
+    .select("id")
+    .in("id", ids)
+    .eq("published", true);
+
+  if (selErr) {
+    console.error("[deleteReglamentoVideosByIds] select", selErr.message);
+    return { ok: false, error: selErr.message };
+  }
+
+  const toDelete = rows ?? [];
+  if (toDelete.length === 0) {
+    return { ok: false, error: "No hay videos publicados con esos identificadores." };
+  }
+
+  const deleteIds = toDelete.map((r: { id: string }) => r.id);
+  const { error } = await supabase.from("ReglamentoVideo").delete().in("id", deleteIds);
+
+  if (error) {
+    console.error("[deleteReglamentoVideosByIds]", error.message);
+    return { ok: false, error: error.message };
+  }
+
+  revalidatePath("/gestion/admin/reglamento-videos/eliminar");
+  revalidatePath("/institucional/reglamento/videos");
+  return { ok: true, deleted: deleteIds.length };
+}

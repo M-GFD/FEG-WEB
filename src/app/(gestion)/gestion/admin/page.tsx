@@ -44,6 +44,12 @@ export default async function GestionAdminHomePage() {
           >
             Publicar video explicativo
           </Link>
+          <Link
+            href="/gestion/admin/reglamento-videos/eliminar"
+            className="inline-flex rounded-xl border border-[var(--feg-green)]/25 bg-white px-4 py-2.5 text-sm font-semibold text-[var(--feg-green-2)] transition hover:bg-[var(--feg-bg)]"
+          >
+            Eliminar videos publicados
+          </Link>
         </div>
       </section>
 
