@@ -3,18 +3,12 @@ import { HeaderNotifications } from "@/components/layout/HeaderNotifications";
 import { MobileHeaderMenu } from "@/components/layout/MobileHeaderMenu";
 import { NavSearch } from "@/components/layout/NavSearch";
 import { HeaderDesktopRail } from "@/components/layout/HeaderDesktopRail";
-import type { AudienceSegment } from "@/lib/content-audience";
+import { NAV_DROPDOWN_ITEMS } from "@/lib/nav-dropdowns";
 
 export const PRIMARY_NAV_ITEMS = [
   { href: "/noticias", label: "Noticias" },
   { href: "/clubes", label: "Clubes" },
-  { href: "/institucional", label: "Institucional" },
 ] as const;
-
-export const AUDIENCE_NAV_SEGMENTS: { segment: AudienceSegment; label: string }[] = [
-  { segment: "menores", label: "Menores" },
-  { segment: "mayores", label: "Mayores" },
-];
 
 export function Header() {
   return (
@@ -23,7 +17,7 @@ export function Header() {
         <div className="relative mx-auto min-h-16 max-w-7xl px-6 md:max-w-none md:px-4 md:py-2 lg:px-6">
           <HeaderDesktopRail
             primaryLinks={[...PRIMARY_NAV_ITEMS]}
-            audienceSegments={AUDIENCE_NAV_SEGMENTS}
+            navDropdownItems={NAV_DROPDOWN_ITEMS}
           />
 
           <div className="grid w-full grid-cols-[minmax(0,auto)_minmax(0,1fr)_2.75rem_2.75rem] items-center gap-2 md:hidden">
@@ -41,7 +35,7 @@ export function Header() {
 
             <MobileHeaderMenu
               primaryLinks={[...PRIMARY_NAV_ITEMS]}
-              audienceSegments={AUDIENCE_NAV_SEGMENTS}
+              navDropdownItems={NAV_DROPDOWN_ITEMS}
             />
           </div>
         </div>

@@ -3,26 +3,16 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
 import { Menu } from "lucide-react";
-import {
-  audienceQueryHref,
-  type AudienceSegment,
-} from "@/lib/content-audience";
+import type { NavDropdownItem } from "@/lib/nav-dropdowns";
 
 export type MobileNavLink = { href: string; label: string };
 
-const AUDIENCE_SUB_LINKS: { path: string; label: string }[] = [
-  { path: "/ranking", label: "Rankings" },
-  { path: "/calendario", label: "Calendario" },
-  { path: "/torneos", label: "Torneos" },
-  { path: "/noticias", label: "Noticias" },
-];
-
 type Props = {
   primaryLinks: readonly MobileNavLink[];
-  audienceSegments: { segment: AudienceSegment; label: string }[];
+  navDropdownItems: NavDropdownItem[];
 };
 
-export function MobileHeaderMenu({ primaryLinks, audienceSegments }: Props) {
+export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
   return (
     <div className="md:hidden">
       <DropdownMenu.Root>
@@ -54,15 +44,15 @@ export function MobileHeaderMenu({ primaryLinks, audienceSegments }: Props) {
               </DropdownMenu.Item>
             ))}
 
-            {audienceSegments.map(({ segment, label }) => (
-              <div key={segment}>
+            {navDropdownItems.map(({ id, label, links }) => (
+              <div key={id}>
                 <DropdownMenu.Label className="px-4 pb-1 pt-3 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]/80">
                   {label}
                 </DropdownMenu.Label>
-                {AUDIENCE_SUB_LINKS.map(({ path, label: linkLabel }) => (
-                  <DropdownMenu.Item key={`${segment}-${path}`} asChild>
+                {links.map(({ href, label: linkLabel }) => (
+                  <DropdownMenu.Item key={`${id}-${href}`} asChild>
                     <Link
-                      href={audienceQueryHref(path, segment)}
+                      href={href}
                       className="block cursor-pointer rounded-xl px-4 py-2.5 pl-6 font-heading text-sm font-semibold uppercase tracking-wide text-[#24321c] outline-none transition hover:bg-[var(--feg-bg)] focus:bg-[var(--feg-bg)] data-[highlighted]:bg-[var(--feg-bg)]"
                     >
                       {linkLabel}

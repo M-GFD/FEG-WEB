@@ -3,17 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import {
-  audienceQueryHref,
-  type AudienceSegment,
-} from "@/lib/content-audience";
-
-const AUDIENCE_LINKS: { path: string; label: string }[] = [
-  { path: "/ranking", label: "Rankings" },
-  { path: "/calendario", label: "Calendario" },
-  { path: "/torneos", label: "Torneos" },
-  { path: "/noticias", label: "Noticias" },
-];
+import type { NavDropdownItem } from "@/lib/nav-dropdowns";
 
 const TRIGGER_LIGHT =
   "inline-flex items-center gap-1 rounded-full bg-white/55 px-4 py-2 text-sm font-semibold text-[#24321c] shadow-[0_0_10px_rgba(255,255,255,0.35),0_0_20px_rgba(255,255,255,0.18)] transition hover:bg-white/70 hover:text-[#123c15]";
@@ -29,23 +19,20 @@ const TRIGGER_DARK_OPEN =
 
 const CLOSE_DELAY_MS = 120;
 
-type SegmentItem = { segment: AudienceSegment; label: string };
-
 type Props = {
-  segments: SegmentItem[];
+  items: NavDropdownItem[];
   variant?: "dark" | "light";
 };
 
 type MenuProps = {
-  segment: AudienceSegment;
-  label: string;
+  item: NavDropdownItem;
   variant: "dark" | "light";
   open: boolean;
   onEnter: () => void;
   onLeave: () => void;
 };
 
-function AudienceHoverMenu({ segment, label, variant, open, onEnter, onLeave }: MenuProps) {
+function HoverNavMenu({ item, variant, open, onEnter, onLeave }: MenuProps) {
   const isLight = variant === "light";
   const triggerClass = open
     ? isLight
@@ -71,7 +58,7 @@ function AudienceHoverMenu({ segment, label, variant, open, onEnter, onLeave }: 
         aria-haspopup="true"
         className={`${triggerClass} whitespace-nowrap outline-none focus-visible:ring-2 focus-visible:ring-[var(--feg-green)]/40`}
       >
-        {label}
+        {item.label}
         <ChevronDown
           className={`h-3.5 w-3.5 opacity-70 transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden
@@ -81,13 +68,13 @@ function AudienceHoverMenu({ segment, label, variant, open, onEnter, onLeave }: 
       {open ? (
         <div className="absolute left-1/2 top-full z-[100] w-max -translate-x-1/2 pt-2">
           <div className="min-w-[11rem] rounded-2xl border border-[var(--feg-green)]/18 bg-white/95 p-1.5 shadow-[0_20px_50px_rgba(0,36,3,0.14)] backdrop-blur-md">
-            {AUDIENCE_LINKS.map(({ path, label: linkLabel }) => (
+            {item.links.map(({ href, label }) => (
               <Link
-                key={path}
-                href={audienceQueryHref(path, segment)}
+                key={href}
+                href={href}
                 className="block rounded-xl px-4 py-2.5 text-sm font-semibold text-[#24321c] transition hover:bg-[var(--feg-bg)] focus-visible:bg-[var(--feg-bg)] focus-visible:outline-none"
               >
-                {linkLabel}
+                {label}
               </Link>
             ))}
           </div>
@@ -97,9 +84,9 @@ function AudienceHoverMenu({ segment, label, variant, open, onEnter, onLeave }: 
   );
 }
 
-/** Menores / Mayores: hover para abrir; solo uno desplegado a la vez. */
-export function HeaderAudienceNavGroup({ segments, variant = "light" }: Props) {
-  const [open, setOpen] = useState<AudienceSegment | null>(null);
+/** Menús desplegables del nav: hover para abrir; solo uno desplegado a la vez. */
+export function HeaderHoverNavGroup({ items, variant = "light" }: Props) {
+  const [openId, setOpenId] = useState<string | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearCloseTimer = () => {
@@ -109,28 +96,27 @@ export function HeaderAudienceNavGroup({ segments, variant = "light" }: Props) {
     }
   };
 
-  const handleEnter = (segment: AudienceSegment) => {
+  const handleEnter = (id: string) => {
     clearCloseTimer();
-    setOpen(segment);
+    setOpenId(id);
   };
 
   const handleLeave = () => {
     clearCloseTimer();
-    closeTimer.current = setTimeout(() => setOpen(null), CLOSE_DELAY_MS);
+    closeTimer.current = setTimeout(() => setOpenId(null), CLOSE_DELAY_MS);
   };
 
   useEffect(() => () => clearCloseTimer(), []);
 
   return (
     <>
-      {segments.map(({ segment, label }) => (
-        <AudienceHoverMenu
-          key={segment}
-          segment={segment}
-          label={label}
+      {items.map((item) => (
+        <HoverNavMenu
+          key={item.id}
+          item={item}
           variant={variant}
-          open={open === segment}
-          onEnter={() => handleEnter(segment)}
+          open={openId === item.id}
+          onEnter={() => handleEnter(item.id)}
           onLeave={handleLeave}
         />
       ))}
