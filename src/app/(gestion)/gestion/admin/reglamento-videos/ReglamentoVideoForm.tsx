@@ -3,8 +3,35 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { parseApiJson } from "@/lib/parse-api-response";
-import { createReglamentoVideo } from "./actions";
+import { createReglamentoVideo, prepareReglamentoVideoUpload } from "./actions";
+
+async function uploadToSignedUrl(
+  signedUploadUrl: string,
+  token: string,
+  file: File,
+  mimeType: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const url = new URL(signedUploadUrl);
+  url.searchParams.set("token", token);
+
+  const res = await fetch(url.toString(), {
+    method: "PUT",
+    body: file,
+    headers: {
+      "Content-Type": mimeType,
+      "x-upsert": "false",
+    },
+  });
+
+  if (!res.ok) {
+    const detail = (await res.text()).slice(0, 200);
+    return {
+      ok: false,
+      error: detail || `Error al subir (${res.status})`,
+    };
+  }
+  return { ok: true };
+}
 
 export function ReglamentoVideoForm() {
   const router = useRouter();
@@ -36,30 +63,34 @@ export function ReglamentoVideoForm() {
 
     setSubmitting(true);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const uploadRes = await fetch("/api/admin/reglamento-videos/upload", {
-        method: "POST",
-        body: fd,
-        credentials: "same-origin",
+      const prep = await prepareReglamentoVideoUpload({
+        mimeType: file.type,
+        fileSize: file.size,
       });
-      const uploadData = await parseApiJson<{
-        ok: boolean;
-        url?: string;
-        mimeType?: string;
-        error?: string;
-      }>(uploadRes);
 
-      if (!uploadData.ok || !uploadData.url || !uploadData.mimeType) {
-        setError(uploadData.error ?? "No se pudo subir el video.");
+      if (!prep.ok) {
+        setError(prep.error ?? "No se pudo preparar la subida.");
+        return;
+      }
+
+      const { upload } = prep;
+      const uploaded = await uploadToSignedUrl(
+        upload.signedUploadUrl,
+        upload.token,
+        file,
+        upload.mimeType
+      );
+
+      if (!uploaded.ok) {
+        setError(uploaded.error);
         return;
       }
 
       const result = await createReglamentoVideo({
         title: title.trim(),
         body: body.trim(),
-        videoUrl: uploadData.url,
-        mimeType: uploadData.mimeType,
+        videoUrl: upload.publicUrl,
+        mimeType: upload.mimeType,
       });
 
       if (!result.ok) {
@@ -96,7 +127,7 @@ export function ReglamentoVideoForm() {
           Publicar video explicativo
         </h1>
         <p className="mt-1 text-sm text-[var(--feg-green)]">
-          El video aparecerá en{" "}
+          El video se sube directo a Supabase Storage (hasta 80 MB) y aparece en{" "}
           <span className="font-medium">Reglamento → Videos explicativos</span>.
         </p>
       </div>
