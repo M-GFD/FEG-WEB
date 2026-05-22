@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FegLogo } from "@/components/layout/FegLogo";
 import { NavLinks } from "@/components/layout/NavLinks";
-import { HeaderAudienceDropdown } from "@/components/layout/HeaderAudienceDropdown";
+import { HeaderAudienceNavGroup } from "@/components/layout/HeaderAudienceDropdown";
 import { NavSearch } from "@/components/layout/NavSearch";
 import { HeaderNotifications } from "@/components/layout/HeaderNotifications";
 
@@ -179,9 +179,7 @@ export function HeaderDesktopRail({ primaryLinks, audienceSegments }: Props) {
       >
         <nav className="flex max-w-[calc(100vw-2rem)] flex-nowrap items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
           <NavLinks links={primaryLinks} variant="light" />
-          {audienceSegments.map(({ segment }) => (
-            <HeaderAudienceDropdown key={segment} segment={segment} variant="light" />
-          ))}
+          <HeaderAudienceNavGroup segments={audienceSegments} variant="light" />
         </nav>
       </div>
 
