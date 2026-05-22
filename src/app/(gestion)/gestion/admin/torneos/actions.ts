@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getClubs } from "@/lib/data";
 import { slugifyTitle } from "@/lib/slugify";
+import { contentAudienceFromForm } from "@/lib/content-audience";
 import { z } from "zod";
 
 const createTournamentSchema = z.object({
@@ -11,6 +12,7 @@ const createTournamentSchema = z.object({
   date: z.string().min(1, "La fecha es obligatoria"),
   clubId: z.string().min(1, "Seleccioná un club"),
   isTeamEvent: z.boolean().optional(),
+  audience: z.enum(["GENERAL", "MENORES", "MAYORES"]).optional().default("GENERAL"),
 });
 
 export async function getClubsForTournament() {
@@ -28,6 +30,7 @@ export async function createTournament(formData: FormData) {
     date: formData.get("date"),
     clubId: formData.get("clubId"),
     isTeamEvent: formData.get("isTeamEvent") === "on",
+    audience: contentAudienceFromForm(String(formData.get("audience") ?? "GENERAL")),
   });
 
   if (!parsed.success) {
@@ -37,7 +40,7 @@ export async function createTournament(formData: FormData) {
     };
   }
 
-  const { name, date, clubId, isTeamEvent } = parsed.data;
+  const { name, date, clubId, isTeamEvent, audience } = parsed.data;
 
   const supabase = getSupabaseAdmin();
   if (!supabase) {
@@ -68,6 +71,7 @@ export async function createTournament(formData: FormData) {
     date: new Date(date).toISOString(),
     clubId,
     isTeamEvent: isTeamEvent ?? false,
+    audience,
     multiplier: 1,
     status: "DRAFT",
     createdAt: now,

@@ -14,6 +14,7 @@ export type PublishNewsFormInput = {
   content: string;
   imageUrl: string;
   galleryUrls: string[];
+  audience?: "GENERAL" | "MENORES" | "MAYORES";
   /** Enviar notificación push a PWA suscriptores al publicar. */
   notifyPush?: boolean;
 };
@@ -38,6 +39,7 @@ export async function publishNewsFromGestion(
       content: input.content,
       imageUrl: input.imageUrl,
       galleryUrls: input.galleryUrls,
+      audience: input.audience ?? "GENERAL",
       notifyPush: Boolean(input.notifyPush),
     });
   } catch (e) {

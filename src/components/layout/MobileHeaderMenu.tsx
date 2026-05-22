@@ -3,17 +3,26 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
 import { Menu } from "lucide-react";
+import {
+  audienceQueryHref,
+  type AudienceSegment,
+} from "@/lib/content-audience";
 
 export type MobileNavLink = { href: string; label: string };
 
+const AUDIENCE_SUB_LINKS: { path: string; label: string }[] = [
+  { path: "/ranking", label: "Rankings" },
+  { path: "/calendario", label: "Calendario" },
+  { path: "/torneos", label: "Torneos" },
+  { path: "/noticias", label: "Noticias" },
+];
+
 type Props = {
-  links: readonly MobileNavLink[];
+  primaryLinks: readonly MobileNavLink[];
+  audienceSegments: { segment: AudienceSegment; label: string }[];
 };
 
-/**
- * Navegación móvil: menú desplegable alineado a la derecha (misma lógica de anclas que NavLinks).
- */
-export function MobileHeaderMenu({ links }: Props) {
+export function MobileHeaderMenu({ primaryLinks, audienceSegments }: Props) {
   return (
     <div className="md:hidden">
       <DropdownMenu.Root>
@@ -32,9 +41,9 @@ export function MobileHeaderMenu({ links }: Props) {
             align="end"
             sideOffset={10}
             collisionPadding={16}
-            className="z-[100] min-w-[13.5rem] rounded-2xl border border-[var(--feg-green)]/18 bg-white/95 p-1.5 shadow-[0_20px_50px_rgba(0,36,3,0.14)] backdrop-blur-md will-change-[transform,opacity]"
+            className="z-[100] max-h-[min(80vh,28rem)] min-w-[13.5rem] overflow-y-auto rounded-2xl border border-[var(--feg-green)]/18 bg-white/95 p-1.5 shadow-[0_20px_50px_rgba(0,36,3,0.14)] backdrop-blur-md will-change-[transform,opacity]"
           >
-            {links.map(({ href, label }) => (
+            {primaryLinks.map(({ href, label }) => (
               <DropdownMenu.Item key={href} asChild>
                 <Link
                   href={href}
@@ -43,6 +52,24 @@ export function MobileHeaderMenu({ links }: Props) {
                   {label}
                 </Link>
               </DropdownMenu.Item>
+            ))}
+
+            {audienceSegments.map(({ segment, label }) => (
+              <div key={segment}>
+                <DropdownMenu.Label className="px-4 pb-1 pt-3 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]/80">
+                  {label}
+                </DropdownMenu.Label>
+                {AUDIENCE_SUB_LINKS.map(({ path, label: linkLabel }) => (
+                  <DropdownMenu.Item key={`${segment}-${path}`} asChild>
+                    <Link
+                      href={audienceQueryHref(path, segment)}
+                      className="block cursor-pointer rounded-xl px-4 py-2.5 pl-6 font-heading text-sm font-semibold uppercase tracking-wide text-[#24321c] outline-none transition hover:bg-[var(--feg-bg)] focus:bg-[var(--feg-bg)] data-[highlighted]:bg-[var(--feg-bg)]"
+                    >
+                      {linkLabel}
+                    </Link>
+                  </DropdownMenu.Item>
+                ))}
+              </div>
             ))}
           </DropdownMenu.Content>
         </DropdownMenu.Portal>

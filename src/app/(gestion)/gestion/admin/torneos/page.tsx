@@ -3,11 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createTournament, getClubsForTournament } from "./actions";
+import { ContentAudienceField } from "@/components/forms/ContentAudienceField";
+import type { ContentAudience } from "@/lib/content-audience";
 
 export default function AdminTorneosPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [clubs, setClubs] = useState<{ id: string; name: string }[]>([]);
+  const [audience, setAudience] = useState<ContentAudience>("GENERAL");
 
   useEffect(() => {
     getClubsForTournament().then(setClubs);
@@ -19,6 +22,7 @@ export default function AdminTorneosPage() {
     const result = await createTournament(formData);
     if (result.ok) {
       setSuccess(true);
+      setAudience("GENERAL");
       (
         document.getElementById("create-tournament-form") as HTMLFormElement
       )?.reset();
@@ -109,6 +113,13 @@ export default function AdminTorneosPage() {
               fotos.
             </p>
           </div>
+
+          <ContentAudienceField
+            value={audience}
+            onChange={setAudience}
+            legend="Audiencia del torneo"
+          />
+          <input type="hidden" name="audience" value={audience} />
 
           <div className="flex items-center gap-3">
             <input

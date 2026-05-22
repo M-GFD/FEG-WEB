@@ -73,7 +73,7 @@ export function UpcomingTournamentsTabs() {
                 const active = i === activeIdx;
                 return (
                   <button
-                    key={`${entry.fecha}-${entry.sede}`}
+                    key={`${entry.fecha}-${entry.sede}-${entry.modalidad}`}
                     type="button"
                     onClick={() => setActiveIdx(i)}
                     className={`w-full rounded-xl px-4 py-4 text-left transition ${

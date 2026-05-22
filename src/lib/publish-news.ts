@@ -6,6 +6,7 @@ import { slugifyTitle } from "@/lib/slugify";
 import { sanitizeNewsContent } from "@/lib/sanitize-news";
 import { resolveUniqueNewsSlug } from "@/lib/news-db";
 import { broadcastNewsPublishedPush } from "@/lib/push";
+import { contentAudienceFromForm, type ContentAudience } from "@/lib/content-audience";
 
 const createBodySchema = z.object({
   title: z.string().min(1, "Título requerido").max(200),
@@ -14,6 +15,7 @@ const createBodySchema = z.object({
   content: z.string().min(1, "El cuerpo de la noticia no puede estar vacío"),
   imageUrl: z.union([z.string().url(), z.literal(""), z.null()]).optional(),
   galleryUrls: z.array(z.string().url()).max(30).optional(),
+  audience: z.enum(["GENERAL", "MENORES", "MAYORES"]).optional().default("GENERAL"),
   /** Si es true, envía Web Push a suscriptores PWA; por defecto no se notifica. */
   notifyPush: z.boolean().optional().default(false),
 });
@@ -54,6 +56,7 @@ export async function publishNewsArticle(
     content,
     imageUrl,
     galleryUrls,
+    audience,
     notifyPush,
   } = parsed.data;
 
@@ -117,6 +120,7 @@ export async function publishNewsArticle(
         excerpt: excerpt?.trim() ? excerpt.trim() : null,
         imageUrl: cover,
         galleryUrls: galleryJson,
+        audience: contentAudienceFromForm(audience),
         published: true,
         publishedAt: now,
         authorId,

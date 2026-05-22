@@ -5,10 +5,22 @@ import {
   getTournamentApprovedPhotoStats,
 } from "@/lib/data";
 import { TorneosHistoricoClient } from "@/components/torneos/TorneosHistoricoClient";
+import {
+  AUDIENCE_SEGMENT_LABELS,
+  parseAudienceSegment,
+} from "@/lib/content-audience";
 
-export default async function TorneosPage() {
+type Props = {
+  searchParams: Promise<{ audiencia?: string | string[] }>;
+};
+
+export default async function TorneosPage({ searchParams }: Props) {
+  const sp = await searchParams;
+  const segment = parseAudienceSegment(sp.audiencia) ?? "mayores";
+  const segmentLabel = AUDIENCE_SEGMENT_LABELS[segment];
+
   const [tournaments, photoStats] = await Promise.all([
-    getPublicTournamentsHistoric(400),
+    getPublicTournamentsHistoric(400, segment),
     getTournamentApprovedPhotoStats(),
   ]);
 
@@ -33,10 +45,10 @@ export default async function TorneosPage() {
         <BackToHome />
         <header className="mb-10">
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
-            Federación
+            Federación · {segmentLabel}
           </p>
           <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
-            Histórico de torneos
+            Histórico de torneos · {segmentLabel}
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[var(--feg-green)]">
             Calendario de fechas: podés ordenar por antigüedad y filtrar por año. En cada
@@ -47,7 +59,7 @@ export default async function TorneosPage() {
 
         {tournaments.length === 0 ? (
           <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-10 text-center text-[var(--feg-green)]">
-            No hay torneos cargados aún.
+            No hay torneos cargados para {segmentLabel.toLowerCase()} aún.
           </p>
         ) : (
           <TorneosHistoricoClient tournaments={rows} />

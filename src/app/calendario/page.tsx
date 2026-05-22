@@ -1,23 +1,21 @@
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
+import {
+  AUDIENCE_SEGMENT_LABELS,
+  parseAudienceSegment,
+} from "@/lib/content-audience";
+import { getCalendarTableForAudience } from "@/lib/calendario-feg";
 
-const CALENDARIO_2026 = [
-  { num: "1°", fecha: "28 de Marzo", sede: "Villa Elisa", modalidad: "18H Mayores" },
-  { num: "2°", fecha: "25 de Abril", sede: "Club Social La Paz", modalidad: "18H Mayores" },
-  { num: "3°", fecha: "9 de Mayo", sede: "Los Bretes", modalidad: "18H Mayores" },
-  { num: "—", fecha: "15/16 de Mayo", sede: "Interfederativo (cancha a des.)", modalidad: "36H Mayores" },
-  { num: "4°", fecha: "30 de Mayo", sede: "Villa Libertador", modalidad: "18H Mayores" },
-  { num: "5°", fecha: "13 de Junio", sede: "Las Colinas", modalidad: "18H Mayores" },
-  { num: "6°", fecha: "4 de Julio", sede: "CUCU", modalidad: "18H Mayores" },
-  { num: "7°", fecha: "15 de Agosto", sede: "Aero Club Villaguay", modalidad: "18H Mayores" },
-  { num: "8°", fecha: "22 de Agosto", sede: "Concordia Golf Club", modalidad: "18H Mayores" },
-  { num: "9°", fecha: "5 de Setiembre", sede: "Gualeguaychú", modalidad: "18H Mayores" },
-  { num: "10°", fecha: "26 de Setiembre", sede: "Santa Elena", modalidad: "18H Mayores" },
-  { num: "11°", fecha: "24 de Octubre", sede: "Colón Golf Club", modalidad: "18H Mayores" },
-  { num: "12°", fecha: "14 de Noviembre", sede: "CAE", modalidad: "18H Mayores" },
-];
+type Props = {
+  searchParams: Promise<{ audiencia?: string | string[] }>;
+};
 
-export default function CalendarioPage() {
+export default async function CalendarioPage({ searchParams }: Props) {
+  const sp = await searchParams;
+  const segment = parseAudienceSegment(sp.audiencia) ?? "mayores";
+  const segmentLabel = AUDIENCE_SEGMENT_LABELS[segment];
+  const rows = getCalendarTableForAudience(segment);
+
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
       <Header />
@@ -25,13 +23,15 @@ export default function CalendarioPage() {
         <BackToHome />
         <header className="mb-10">
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
-            Temporada 2026
+            Temporada 2026 · {segmentLabel}
           </p>
           <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
-            Calendario Mayores
+            Calendario {segmentLabel}
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[var(--feg-green)]">
-            Federación de Golf del Litoral · Golf Club Social La Paz
+            {segment === "menores"
+              ? "Federación de Golf del Litoral · Prejuveniles, Juveniles y Junior (2° semestre 2026)."
+              : "Federación de Golf del Litoral · Golf Club Social La Paz"}
           </p>
         </header>
 
@@ -54,11 +54,11 @@ export default function CalendarioPage() {
               </tr>
             </thead>
             <tbody>
-              {CALENDARIO_2026.map((row, i) => {
+              {rows.map((row, i) => {
                 const isSpecial = row.num === "—";
                 return (
                   <tr
-                    key={i}
+                    key={`${row.num}-${row.fecha}-${row.sede}-${i}`}
                     className={`border-t border-[var(--feg-green)]/10 transition hover:bg-[var(--feg-bg)]/80 ${
                       isSpecial ? "bg-[var(--feg-yellow)]/10" : ""
                     }`}
@@ -69,9 +69,7 @@ export default function CalendarioPage() {
                     <td className="px-4 py-3 font-medium text-[var(--feg-ink)]">
                       {row.fecha}
                     </td>
-                    <td className="px-4 py-3 text-[var(--feg-ink)]">
-                      {row.sede}
-                    </td>
+                    <td className="px-4 py-3 text-[var(--feg-ink)]">{row.sede}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${

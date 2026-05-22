@@ -5,15 +5,29 @@ import { BackToHome } from "@/components/layout/BackToHome";
 import { getNews } from "@/lib/data";
 import { formatNewsDateParts } from "@/lib/news-dates";
 import { getGolfPlaceholder } from "@/lib/placeholders";
+import {
+  AUDIENCE_SEGMENT_LABELS,
+  parseAudienceSegment,
+} from "@/lib/content-audience";
 
 const longDate = { day: "numeric" as const, month: "long" as const, year: "numeric" as const };
 
-export default async function NoticiasPage() {
-  const news = await getNews();
+type Props = {
+  searchParams: Promise<{ audiencia?: string | string[] }>;
+};
+
+export default async function NoticiasPage({ searchParams }: Props) {
+  const sp = await searchParams;
+  const segment = parseAudienceSegment(sp.audiencia);
+  const news = await getNews({ audience: segment });
   const [featured, ...rest] = news;
   const featuredWhen = featured
     ? formatNewsDateParts(featured.publishedAt, featured.createdAt, longDate)
     : null;
+  const pageTitle = segment ? `Noticias · ${AUDIENCE_SEGMENT_LABELS[segment]}` : "Noticias";
+  const emptyMessage = segment
+    ? `No hay noticias publicadas para ${AUDIENCE_SEGMENT_LABELS[segment].toLowerCase()}.`
+    : "No hay noticias publicadas.";
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
@@ -22,20 +36,25 @@ export default async function NoticiasPage() {
         <BackToHome />
         <header className="mb-10">
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
-            Actualidad
+            Actualidad{segment ? ` · ${AUDIENCE_SEGMENT_LABELS[segment]}` : ""}
           </p>
           <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
-            Noticias
+            {pageTitle}
           </h1>
+          {segment ? (
+            <p className="mt-3 max-w-2xl text-sm text-[var(--feg-green)]">
+              Incluye noticias generales y las destinadas a{" "}
+              {AUDIENCE_SEGMENT_LABELS[segment].toLowerCase()}.
+            </p>
+          ) : null}
         </header>
 
         {news.length === 0 ? (
           <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-10 text-center text-[var(--feg-green)]">
-            No hay noticias publicadas.
+            {emptyMessage}
           </p>
         ) : (
           <div className="space-y-10">
-            {/* Card principal: noticia más importante */}
             {featured && featuredWhen && (
               <article className="overflow-hidden rounded-3xl border border-[var(--feg-green)]/12 bg-white shadow-[0_20px_60px_rgba(0,36,3,0.12)] transition hover:shadow-[0_24px_70px_rgba(0,36,3,0.16)]">
                 <Link href={`/noticias/${featured.slug}`} className="block">
@@ -70,44 +89,43 @@ export default async function NoticiasPage() {
               </article>
             )}
 
-            {/* Cards secundarias: noticias menos importantes */}
             {rest.length > 0 && (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {rest.map((n, i) => {
                   const rowWhen = formatNewsDateParts(n.publishedAt, n.createdAt);
                   return (
-                  <article
-                    key={n.id}
-                    className="overflow-hidden rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.08)] transition hover:border-[var(--feg-green-2)]/30 hover:shadow-[0_18px_48px_rgba(0,36,3,0.12)]"
-                  >
-                    <Link href={`/noticias/${n.slug}`} className="block">
-                      <div className="relative h-44 w-full">
-                        <Image
-                          src={n.imageUrl || getGolfPlaceholder(i + 1, "regular")}
-                          alt={n.title}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                      </div>
-                      <div className="p-5">
-                        <time
-                          dateTime={rowWhen.dateTime}
-                          className="text-xs font-semibold uppercase tracking-wide text-[var(--feg-green-2)]/80"
-                        >
-                          {rowWhen.label}
-                        </time>
-                        <h3 className="mt-2 font-heading text-lg font-semibold uppercase leading-snug tracking-tight text-[var(--feg-ink)] line-clamp-2">
-                          {n.title}
-                        </h3>
-                        {n.excerpt && (
-                          <p className="mt-2 text-sm leading-relaxed text-[var(--feg-green)] line-clamp-2">
-                            {n.excerpt}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  </article>
+                    <article
+                      key={n.id}
+                      className="overflow-hidden rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.08)] transition hover:border-[var(--feg-green-2)]/30 hover:shadow-[0_18px_48px_rgba(0,36,3,0.12)]"
+                    >
+                      <Link href={`/noticias/${n.slug}`} className="block">
+                        <div className="relative h-44 w-full">
+                          <Image
+                            src={n.imageUrl || getGolfPlaceholder(i + 1, "regular")}
+                            alt={n.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          />
+                        </div>
+                        <div className="p-5">
+                          <time
+                            dateTime={rowWhen.dateTime}
+                            className="text-xs font-semibold uppercase tracking-wide text-[var(--feg-green-2)]/80"
+                          >
+                            {rowWhen.label}
+                          </time>
+                          <h3 className="mt-2 font-heading text-lg font-semibold uppercase leading-snug tracking-tight text-[var(--feg-ink)] line-clamp-2">
+                            {n.title}
+                          </h3>
+                          {n.excerpt && (
+                            <p className="mt-2 text-sm leading-relaxed text-[var(--feg-green)] line-clamp-2">
+                              {n.excerpt}
+                            </p>
+                          )}
+                        </div>
+                      </Link>
+                    </article>
                   );
                 })}
               </div>

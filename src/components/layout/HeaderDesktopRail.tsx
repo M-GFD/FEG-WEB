@@ -5,8 +5,11 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FegLogo } from "@/components/layout/FegLogo";
 import { NavLinks } from "@/components/layout/NavLinks";
+import { HeaderAudienceDropdown } from "@/components/layout/HeaderAudienceDropdown";
 import { NavSearch } from "@/components/layout/NavSearch";
 import { HeaderNotifications } from "@/components/layout/HeaderNotifications";
+
+import type { AudienceSegment } from "@/lib/content-audience";
 
 type HeaderTheme = "dark" | "light";
 
@@ -19,7 +22,8 @@ const SAFE_GAP_PX = 16;
 const NOTIFICATIONS_RAIL_RESERVE_PX = 48;
 
 type Props = {
-  navLinks: NavLink[];
+  primaryLinks: NavLink[];
+  audienceSegments: { segment: AudienceSegment; label: string }[];
 };
 
 /**
@@ -39,7 +43,7 @@ type Props = {
  *   de la búsqueda descuenta el espacio reservado para notificaciones.
  * - El color del wordmark se ajusta al fondo (claro/oscuro) bajo el header.
  */
-export function HeaderDesktopRail({ navLinks }: Props) {
+export function HeaderDesktopRail({ primaryLinks, audienceSegments }: Props) {
   const pathname = usePathname();
 
   const railRef = useRef<HTMLDivElement | null>(null);
@@ -174,7 +178,10 @@ export function HeaderDesktopRail({ navLinks }: Props) {
         className="pointer-events-auto absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
       >
         <nav className="flex max-w-[calc(100vw-2rem)] flex-nowrap items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-          <NavLinks links={navLinks} variant="light" />
+          <NavLinks links={primaryLinks} variant="light" />
+          {audienceSegments.map(({ segment }) => (
+            <HeaderAudienceDropdown key={segment} segment={segment} variant="light" />
+          ))}
         </nav>
       </div>
 
