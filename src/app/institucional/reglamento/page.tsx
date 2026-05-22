@@ -23,12 +23,20 @@ export default function ReglamentoPage() {
             </p>
           </div>
 
-          <Link
-            href="/institucional"
-            className="inline-flex shrink-0 items-center justify-center rounded-full bg-[var(--feg-ink)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
-          >
-            Nosotros →
-          </Link>
+          <div className="flex shrink-0 flex-col gap-2">
+            <Link
+              href="/institucional"
+              className="inline-flex items-center justify-center rounded-full bg-[var(--feg-ink)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
+            >
+              Nosotros →
+            </Link>
+            <Link
+              href="/institucional/reglamento/videos"
+              className="inline-flex items-center justify-center rounded-full bg-[var(--feg-ink)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
+            >
+              Videos explicativos →
+            </Link>
+          </div>
         </header>
 
         <hr className="my-10 border-[var(--feg-green)]/10" />

@@ -35,6 +35,20 @@ export default async function GestionAdminHomePage() {
 
       <section className="space-y-3">
         <h2 className="font-heading text-lg font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
+          Reglamento
+        </h2>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/gestion/admin/reglamento-videos"
+            className="inline-flex rounded-xl bg-[var(--feg-green-2)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-95"
+          >
+            Publicar video explicativo
+          </Link>
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-heading text-lg font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
           Usuarios
         </h2>
         <div className="flex flex-wrap gap-3">
