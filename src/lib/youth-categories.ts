@@ -18,11 +18,17 @@ export const YOUTH_CATEGORY_TIERS: YouthCategoryTier[] = [
   { groupKey: "juveniles", label: "Juveniles", order: 0 },
   { groupKey: "prejuveniles", label: "Prejuveniles", order: 1 },
   { groupKey: "junior", label: "Junior", order: 2 },
-  { groupKey: "albatros", label: "Albatros", order: 3 },
-  { groupKey: "aguila", label: "Águila", order: 4 },
-  { groupKey: "birdie", label: "Birdie", order: 5 },
-  { groupKey: "principiante", label: "Principiante", order: 6 },
+  { groupKey: "cab-14", label: "CAB-14", order: 3 },
+  { groupKey: "cab-18", label: "CAB-18", order: 4 },
+  { groupKey: "dam-14", label: "DAM-14", order: 5 },
+  { groupKey: "dam-18", label: "DAM-18", order: 6 },
+  { groupKey: "albatros", label: "Albatros", order: 7 },
+  { groupKey: "aguila", label: "Águila", order: 8 },
+  { groupKey: "birdie", label: "Birdie", order: 9 },
+  { groupKey: "principiante", label: "Principiante", order: 10 },
 ];
+
+const YOUTH_LEGACY_BAND_KEYS = new Set(["cab-14", "cab-18", "dam-14", "dam-18"]);
 
 function normalizeCategory(raw: string | null | undefined): string {
   return String(raw ?? "")
@@ -30,7 +36,22 @@ function normalizeCategory(raw: string | null | undefined): string {
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{M}/gu, "")
+    .replace(/[–—]/g, "-")
     .replace(/\s+/g, " ");
+}
+
+function tierByGroupKey(groupKey: string): YouthCategoryTier | undefined {
+  return YOUTH_CATEGORY_TIERS.find((t) => t.groupKey === groupKey);
+}
+
+/** Bandas CAB/DAM juveniles (p. ej. CAB-14, DAM 18, CAB14). */
+function resolveLegacyYouthBand(k: string): YouthCategoryTier | null {
+  if (YOUTH_LEGACY_BAND_KEYS.has(k)) return tierByGroupKey(k) ?? null;
+  const m = k.match(/^(cab|dam)[-\s]?(\d+)$/);
+  if (!m) return null;
+  const key = `${m[1]}-${m[2]}`;
+  if (!YOUTH_LEGACY_BAND_KEYS.has(key)) return null;
+  return tierByGroupKey(key) ?? null;
 }
 
 /** Resuelve tier menores a partir del texto de categoría del jugador en DB. */
@@ -40,13 +61,16 @@ export function resolveYouthCategoryTier(
   const k = normalizeCategory(raw);
   if (!k || k === "—" || k === "-") return null;
 
+  const legacyBand = resolveLegacyYouthBand(k);
+  if (legacyBand) return legacyBand;
+
   if (k === "junior") return YOUTH_CATEGORY_TIERS[2];
   if (k.startsWith("pre") && k.includes("juvenil")) return YOUTH_CATEGORY_TIERS[1];
   if (k.startsWith("juvenil")) return YOUTH_CATEGORY_TIERS[0];
-  if (k.includes("albatros")) return YOUTH_CATEGORY_TIERS[3];
-  if (k.includes("aguila")) return YOUTH_CATEGORY_TIERS[4];
-  if (k.includes("birdie")) return YOUTH_CATEGORY_TIERS[5];
-  if (k.includes("principiante")) return YOUTH_CATEGORY_TIERS[6];
+  if (k.includes("albatros")) return tierByGroupKey("albatros") ?? null;
+  if (k.includes("aguila")) return tierByGroupKey("aguila") ?? null;
+  if (k.includes("birdie")) return tierByGroupKey("birdie") ?? null;
+  if (k.includes("principiante")) return tierByGroupKey("principiante") ?? null;
 
   return null;
 }
@@ -62,6 +86,7 @@ export function isMayoresPlayerCategory(raw: string | null | undefined): boolean
   if (isYouthPlayerCategory(raw)) return false;
   if (k.includes("sub 23") || k.includes("sub23")) return true;
   if (k.includes("senior") || k.includes("damas") || k.includes("dama")) return true;
+  if (YOUTH_LEGACY_BAND_KEYS.has(k)) return false;
   if (k.startsWith("cab") || k.includes("caballero")) return true;
   if (
     k.includes("scratch") ||
