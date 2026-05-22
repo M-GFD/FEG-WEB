@@ -32,7 +32,7 @@ export default function InstitucionalPage() {
             </Link>
             <Link
               href="/institucional/reglamento"
-              className="inline-flex items-center justify-center rounded-full border border-[var(--feg-green)]/25 bg-white px-6 py-2.5 text-sm font-semibold text-[var(--feg-green-2)] shadow-sm transition hover:border-[var(--feg-green-2)]/40 hover:bg-[var(--feg-bg)]"
+              className="inline-flex items-center justify-center rounded-full bg-[var(--feg-ink)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
             >
               Reglamento →
             </Link>
@@ -48,7 +48,7 @@ export default function InstitucionalPage() {
             </div>
             <div>
               <h2 className="font-heading text-2xl font-semibold tracking-tight text-[var(--feg-ink)]">
-                Qué nos proponemos
+                Lo que nos proponemos
               </h2>
               <div className="mt-4 space-y-4 text-[15px] leading-relaxed text-[var(--feg-green)]">
                 <p>
