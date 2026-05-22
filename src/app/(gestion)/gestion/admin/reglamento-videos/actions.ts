@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { createReglamentoVideoSignedUpload } from "@/lib/reglamento-video-storage";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -55,6 +56,39 @@ export async function createReglamentoVideo(input: {
 
   revalidatePath("/institucional/reglamento/videos");
   return { ok: true as const };
+}
+
+const prepareUploadSchema = z.object({
+  mimeType: z.enum(["video/mp4", "video/webm", "image/gif"]),
+  fileSize: z.number().int().positive(),
+});
+
+/** Devuelve credenciales para subir el archivo directo a Supabase Storage (sin pasar por Vercel). */
+export async function prepareReglamentoVideoUpload(input: {
+  mimeType: string;
+  fileSize: number;
+}) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return { ok: false as const, error: "No autorizado" };
+  }
+  if (!session.user.id) {
+    return { ok: false as const, error: "Sesión inválida" };
+  }
+
+  const parsed = prepareUploadSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false as const,
+      error: parsed.error.errors[0]?.message ?? "Datos del archivo inválidos",
+    };
+  }
+
+  return createReglamentoVideoSignedUpload(
+    session.user.id,
+    parsed.data.mimeType,
+    parsed.data.fileSize
+  );
 }
 
 const MAX_BULK_DELETE = 50;
