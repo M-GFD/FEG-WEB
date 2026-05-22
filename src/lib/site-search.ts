@@ -35,9 +35,9 @@ type StaticPage = {
 
 const STATIC_PAGES: StaticPage[] = [
   {
-    title: "Institucional",
+    title: "Nosotros",
     href: "/institucional",
-    keywords: ["institucional", "federación", "misión", "visión", "objetivos", "fe"],
+    keywords: ["nosotros", "institucional", "federación", "misión", "visión", "objetivos", "fe"],
   },
   {
     title: "Directorio",
@@ -46,7 +46,7 @@ const STATIC_PAGES: StaticPage[] = [
   },
   {
     title: "Reglamento ranking juveniles y prejuveniles",
-    href: "/institucional#reglamento",
+    href: "/institucional/reglamento",
     keywords: ["reglamento", "ranking", "juveniles", "prejuveniles", "cupos", "2026", "lineamientos"],
   },
   {

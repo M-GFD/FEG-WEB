@@ -53,7 +53,7 @@ export default async function RankingPage({ searchParams }: Props) {
             </div>
             {segment === "menores" ? (
               <Link
-                href="/institucional#reglamento"
+                href="/institucional/reglamento"
                 className="inline-flex shrink-0 items-center justify-center rounded-full bg-[var(--feg-ink)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
               >
                 Reglamento juveniles/prejuveniles →
