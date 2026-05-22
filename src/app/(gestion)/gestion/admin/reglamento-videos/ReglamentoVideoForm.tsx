@@ -126,10 +126,6 @@ export function ReglamentoVideoForm() {
         <h1 className="mt-2 font-heading text-2xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
           Publicar video explicativo
         </h1>
-        <p className="mt-1 text-sm text-[var(--feg-green)]">
-          El video se sube directo a Supabase Storage (hasta 80 MB) y aparece en{" "}
-          <span className="font-medium">Reglamento → Videos explicativos</span>.
-        </p>
       </div>
 
       <div className="space-y-2">
