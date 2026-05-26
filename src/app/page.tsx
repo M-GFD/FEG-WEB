@@ -39,15 +39,15 @@ export default async function HomePage() {
               <div className="mx-auto max-w-2xl text-center">
                 <RevealOnScroll revealIndex={1} yOffset={24} className="block w-full">
                   <h1 className="font-heading font-semibold leading-[1.08] text-center text-[#FFFFFF] [text-shadow:0_2px_14px_rgba(0,0,0,0.45),0_1px_4px_rgba(0,0,0,0.55)] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[56px] md:leading-[1.05]">
-                    <span className="inline-flex flex-col items-center normal-case md:hidden">
+                    <span className="inline-flex flex-col items-center uppercase md:hidden">
                       <span className="block whitespace-nowrap text-center text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
-                        Todo el golf
+                        TODO EL GOLF
                       </span>
                       <span className="block whitespace-nowrap text-center text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
-                        de Entre Ríos
+                        DE ENTRE RÍOS
                       </span>
                       <span className="block whitespace-nowrap text-center text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
-                        en un solo lugar
+                        EN UN SOLO LUGAR
                       </span>
                     </span>
                     <span className="hidden md:inline md:text-[56px]">
@@ -98,14 +98,18 @@ export default async function HomePage() {
           <div className="mx-auto max-w-3xl text-center">
             <RevealOnScroll revealIndex={0} yOffset={22} className="w-full text-center">
               <h2 className="w-full text-center font-heading text-[28px] font-semibold leading-[1.1] text-[var(--feg-ink)] sm:text-[36px]">
-                <span className="block">CONOCÉ LA ACTUALIDAD</span>
-                <span className="block">DEL CIRCUITO</span>
+                <span className="block md:hidden">CONOCÉ LA ACTUALIDAD</span>
+                <span className="block md:hidden">DEL CIRCUITO</span>
+                <span className="hidden md:inline">CONOCÉ LA ACTUALIDAD DEL CIRCUITO</span>
               </h2>
             </RevealOnScroll>
             <RevealOnScroll revealIndex={2} yOffset={20} className="mt-4 w-full text-center">
               <p className="mx-auto w-full max-w-xl text-center text-base font-medium text-[var(--feg-green)] sm:text-lg">
-                <span className="block">Resultados, momentos y protagonistas</span>
-                <span className="block">que definen la competencia</span>
+                <span className="block md:hidden">Resultados, momentos y protagonistas</span>
+                <span className="block md:hidden">que definen la competencia</span>
+                <span className="hidden md:inline">
+                  Resultados, momentos y protagonistas que definen la competencia
+                </span>
               </p>
             </RevealOnScroll>
           </div>
