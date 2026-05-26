@@ -40,13 +40,13 @@ export default async function HomePage() {
                 <RevealOnScroll revealIndex={1} yOffset={24} className="block w-full">
                   <h1 className="font-heading font-semibold leading-[1.08] text-center text-[#FFFFFF] [text-shadow:0_2px_14px_rgba(0,0,0,0.45),0_1px_4px_rgba(0,0,0,0.55)] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[56px] md:leading-[1.05]">
                     <span className="inline-flex flex-col items-center uppercase md:hidden">
-                      <span className="block whitespace-nowrap text-center text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
+                      <span className="block whitespace-nowrap text-center text-[clamp(calc(1.81rem+4pt),calc(8vw+4pt),calc(2.71rem+4pt))] max-[380px]:text-[calc(1.75rem+4pt)]">
                         TODO EL GOLF
                       </span>
-                      <span className="block whitespace-nowrap text-center text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
+                      <span className="block whitespace-nowrap text-center text-[clamp(calc(1.81rem+4pt),calc(8vw+4pt),calc(2.71rem+4pt))] max-[380px]:text-[calc(1.75rem+4pt)]">
                         DE ENTRE RÍOS
                       </span>
-                      <span className="block whitespace-nowrap text-center text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
+                      <span className="block whitespace-nowrap text-center text-[clamp(calc(1.81rem+4pt),calc(8vw+4pt),calc(2.71rem+4pt))] max-[380px]:text-[calc(1.75rem+4pt)]">
                         EN UN SOLO LUGAR
                       </span>
                     </span>
