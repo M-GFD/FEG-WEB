@@ -38,15 +38,15 @@ export default async function HomePage() {
             <div className="mx-auto w-full max-w-7xl shrink-0 px-4 pb-6 pt-12 sm:px-6 lg:px-8">
               <div className="mx-auto max-w-2xl text-center">
                 <RevealOnScroll revealIndex={1} yOffset={24} className="block w-full">
-                  <h1 className="font-heading font-semibold leading-[1.08] text-[#FFFFFF] [text-shadow:0_2px_14px_rgba(0,0,0,0.45),0_1px_4px_rgba(0,0,0,0.55)] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[56px] md:leading-[1.05]">
-                    <span className="md:hidden">
-                      <span className="block max-md:text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
+                  <h1 className="font-heading font-semibold leading-[1.08] text-center text-[#FFFFFF] [text-shadow:0_2px_14px_rgba(0,0,0,0.45),0_1px_4px_rgba(0,0,0,0.55)] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[56px] md:leading-[1.05]">
+                    <span className="inline-flex flex-col items-center normal-case md:hidden">
+                      <span className="block whitespace-nowrap text-center text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
                         Todo el golf
                       </span>
-                      <span className="block max-md:text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
+                      <span className="block whitespace-nowrap text-center text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
                         de Entre Ríos
                       </span>
-                      <span className="block max-md:text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
+                      <span className="block whitespace-nowrap text-center text-[clamp(1.81rem,8vw,2.71rem)] max-[380px]:text-[1.75rem]">
                         en un solo lugar
                       </span>
                     </span>
@@ -96,18 +96,16 @@ export default async function HomePage() {
       >
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <RevealOnScroll revealIndex={0} yOffset={22}>
-              <h2 className="font-heading text-[28px] font-semibold leading-[1.1] text-[var(--feg-ink)] sm:text-[36px]">
-                CONOCÉ LA ACTUALIDAD
-                <br />
-                DEL CIRCUITO
+            <RevealOnScroll revealIndex={0} yOffset={22} className="w-full text-center">
+              <h2 className="w-full text-center font-heading text-[28px] font-semibold leading-[1.1] text-[var(--feg-ink)] sm:text-[36px]">
+                <span className="block">CONOCÉ LA ACTUALIDAD</span>
+                <span className="block">DEL CIRCUITO</span>
               </h2>
             </RevealOnScroll>
-            <RevealOnScroll revealIndex={2} yOffset={20} className="mt-4">
-              <p className="text-base font-medium text-[var(--feg-green)] sm:text-lg">
-                Resultados, momentos y protagonistas
-                <br />
-                que definen la competencia
+            <RevealOnScroll revealIndex={2} yOffset={20} className="mt-4 w-full text-center">
+              <p className="mx-auto w-full max-w-xl text-center text-base font-medium text-[var(--feg-green)] sm:text-lg">
+                <span className="block">Resultados, momentos y protagonistas</span>
+                <span className="block">que definen la competencia</span>
               </p>
             </RevealOnScroll>
           </div>
