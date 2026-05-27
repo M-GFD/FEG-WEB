@@ -3,6 +3,8 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getTournaments } from "@/lib/data";
 import { requireGestionArea } from "@/lib/gestion-access";
+import { getActiveYouthTournamentConfig } from "@/lib/inscripcion-torneos-menores/config";
+import { formatFechaTitle } from "@/lib/calendario-feg";
 
 export default async function GestionClubHomePage() {
   const session = await auth();
@@ -12,11 +14,14 @@ export default async function GestionClubHomePage() {
   const clubId = session.user.clubId;
   const isAdmin = session.user.role === "ADMIN";
 
-  const tournaments = await getTournaments({
-    clubId,
-    isAdmin,
-    limit: 20,
-  });
+  const [tournaments, signupConfig] = await Promise.all([
+    getTournaments({
+      clubId,
+      isAdmin,
+      limit: 20,
+    }),
+    getActiveYouthTournamentConfig(),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -30,6 +35,26 @@ export default async function GestionClubHomePage() {
           apruebe.
         </p>
       </div>
+
+      {signupConfig ? (
+        <section className="rounded-2xl border border-[var(--feg-green)]/15 bg-white p-6 shadow-[0_14px_40px_rgba(0,36,3,0.06)]">
+          <p className="inline-flex rounded-full bg-[var(--feg-green-2)] px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white">
+            Inscripciones menores
+          </p>
+          <h2 className="mt-3 font-heading text-xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
+            {signupConfig.title}
+          </h2>
+          <p className="mt-1 text-sm font-medium text-[var(--feg-green)]">
+            {formatFechaTitle(signupConfig.dateLabel)} · Sede: {signupConfig.venue}
+          </p>
+          <Link
+            href="/gestion/club/inscriptos"
+            className="mt-4 inline-flex rounded-full bg-[var(--feg-yellow)] px-6 py-2.5 text-sm font-semibold text-[var(--feg-ink)] transition hover:brightness-95"
+          >
+            Ver inscriptos →
+          </Link>
+        </section>
+      ) : null}
 
       <section>
         <h2 className="mb-4 font-heading text-lg font-semibold uppercase tracking-tight text-[var(--feg-ink)]">

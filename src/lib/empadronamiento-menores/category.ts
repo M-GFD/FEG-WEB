@@ -11,8 +11,8 @@ export function ageOnReferenceDate(birthDate: Date, reference = EMPADRONAMIENTO_
 }
 
 /** Categoría según edad al 31/12/2026 (referencia planilla FEG). */
-export function categoryFromBirthDate(birthDate: Date): string {
-  const age = ageOnReferenceDate(birthDate);
+export function categoryFromBirthDate(birthDate: Date, reference = EMPADRONAMIENTO_REFERENCE_DATE): string {
+  const age = ageOnReferenceDate(birthDate, reference);
   if (age < 7) return "Principiante";
   if (age <= 9) return "Birdie";
   if (age <= 11) return "Águila";
@@ -21,6 +21,11 @@ export function categoryFromBirthDate(birthDate: Date): string {
   if (age <= 18) return "Juveniles";
   if (age <= 22) return "Sub 23";
   return "Fuera de rango";
+}
+
+/** Categoría según edad al día de la inscripción (hoy). */
+export function categoryAtSignup(birthDate: Date, now = new Date()): string {
+  return categoryFromBirthDate(birthDate, now);
 }
 
 export function parseBirthDateInput(value: string): Date | null {

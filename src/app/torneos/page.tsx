@@ -5,10 +5,12 @@ import {
   getTournamentApprovedPhotoStats,
 } from "@/lib/data";
 import { TorneosHistoricoClient } from "@/components/torneos/TorneosHistoricoClient";
+import { MenoresProximoTorneoCard } from "@/components/torneos/MenoresProximoTorneoCard";
 import {
   AUDIENCE_SEGMENT_LABELS,
   parseAudienceSegment,
 } from "@/lib/content-audience";
+import { getActiveYouthTournamentConfig } from "@/lib/inscripcion-torneos-menores/config";
 
 type Props = {
   searchParams: Promise<{ audiencia?: string | string[] }>;
@@ -19,9 +21,10 @@ export default async function TorneosPage({ searchParams }: Props) {
   const segment = parseAudienceSegment(sp.audiencia) ?? "mayores";
   const segmentLabel = AUDIENCE_SEGMENT_LABELS[segment];
 
-  const [tournaments, photoStats] = await Promise.all([
+  const [tournaments, photoStats, signupConfig] = await Promise.all([
     getPublicTournamentsHistoric(400, segment),
     getTournamentApprovedPhotoStats(),
+    segment === "menores" ? getActiveYouthTournamentConfig() : Promise.resolve(null),
   ]);
 
   const rows = tournaments.map((t) => {
@@ -56,6 +59,10 @@ export default async function TorneosPage({ searchParams }: Props) {
             prensa las aprobó. Los resultados publicados están en la ficha del torneo.
           </p>
         </header>
+
+        {segment === "menores" && signupConfig ? (
+          <MenoresProximoTorneoCard config={signupConfig} />
+        ) : null}
 
         {tournaments.length === 0 ? (
           <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-10 text-center text-[var(--feg-green)]">
