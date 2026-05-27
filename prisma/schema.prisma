@@ -65,6 +65,7 @@ model Club {
   tournaments Tournament[]
   expenses  Expense[]
   teamEntries TeamEntry[]
+  youthEnrollments YouthEnrollment[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -386,4 +387,57 @@ model SiteNotificationRead {
   @@unique([userId, notificationId])
   @@index([userId])
   @@index([userId, dismissedAt])
+}
+
+/// Empadronamiento web menores/juveniles (temporada anual).
+model YouthEnrollment {
+  id                  String   @id @default(cuid())
+  seasonYear          Int
+  dniHash             String
+
+  responsibleName     String
+  responsiblePhoneEnc String
+
+  lastName            String
+  firstName           String
+  gender              String
+  birthDate           DateTime @db.Date
+  ageDec31            Int
+  category            String
+  dniEnc              String
+  address             String
+  department          String
+  locality            String
+  phoneEnc            String
+  emailEnc            String
+  clubName            String
+  clubCode            String?
+  clubId              String?
+  club                Club?    @relation(fields: [clubId], references: [id])
+
+  school              String?
+  hasHandicap         Boolean
+  matricula           String?
+  professors          Json?
+  professorOther      String?
+
+  tutor1Name          String
+  tutor1DniEnc        String
+  tutor1PhoneEnc      String
+  tutor1EmailEnc      String
+
+  tutor2Name          String?
+  tutor2DniEnc        String?
+  tutor2EmailEnc      String?
+
+  healthData          Json
+
+  comments            String?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([seasonYear, dniHash])
+  @@index([seasonYear])
+  @@index([clubId])
 }
