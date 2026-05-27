@@ -16,13 +16,17 @@ const AUDIENCE_PATHS: { path: string; label: string }[] = [
 ];
 
 function audienceDropdown(segment: AudienceSegment, label: string): NavDropdownItem {
+  const links = AUDIENCE_PATHS.map(({ path, label: linkLabel }) => ({
+    href: audienceQueryHref(path, segment),
+    label: linkLabel,
+  }));
+  if (segment === "menores") {
+    links.push({ href: "/empadronamiento-menores", label: "Empadronamiento" });
+  }
   return {
     id: segment,
     label,
-    links: AUDIENCE_PATHS.map(({ path, label: linkLabel }) => ({
-      href: audienceQueryHref(path, segment),
-      label: linkLabel,
-    })),
+    links,
   };
 }
 
