@@ -29,18 +29,16 @@ type Props = {
  * Bloque desktop del Header (md+).
  *
  * Layout:
- * - Logo + wordmark (izquierda)
+ * - Logo (izquierda)
  * - Cápsula de rutas (absolutamente centrada al viewport)
  * - Notificaciones ✉️ + cápsula de búsqueda (derecha)
  *
  * Reglas:
  * - Los tres grupos NUNCA se superponen: se calcula `sideMax = (anchoRail - anchoRutas) / 2 - gap`
  *   y se aplica como `max-width` a los grupos laterales.
- * - El wordmark puede pasar a 2–3 renglones como máximo (dinámico según viewport), alineado a la izquierda.
  * - La cápsula de rutas no hace wrap de los botones (`flex-nowrap`).
  * - La cápsula de búsqueda comparte el bloque derecho con el botón ✉️; el ancho útil
  *   de la búsqueda descuenta el espacio reservado para notificaciones.
- * - El color del wordmark se ajusta al fondo (claro/oscuro) bajo el header.
  */
 export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
   const pathname = usePathname();
@@ -133,13 +131,7 @@ export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
     };
   }, [pathname]);
 
-  const wordmarkClass =
-    theme === "dark"
-      ? "text-[#FFFFFF] [text-shadow:0_1px_3px_rgba(0,0,0,0.45)]"
-      : "text-[var(--feg-green)]";
-
-  // Ancho de la cápsula de búsqueda: replica el ancho real del bloque
-  // logo+wordmark, capado a sideMax para evitar overlapping.
+  // Ancho de la cápsula de búsqueda: replica el ancho real del bloque logo, capado a sideMax.
   const cappedSearchSide =
     sideMax != null ? Math.max(0, sideMax - NOTIFICATIONS_RAIL_RESERVE_PX) : null;
   const searchWidth =
@@ -159,16 +151,10 @@ export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
       >
         <Link
           href="/"
-          aria-label="Inicio · Federación Entrerriana de Golf"
-          className="relative z-10 inline-flex w-full max-w-full items-center gap-2 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123c15]/40 focus-visible:ring-offset-2"
+          aria-label="Inicio · FEG"
+          className="relative z-10 inline-flex shrink-0 items-center rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123c15]/40 focus-visible:ring-offset-2"
         >
           <FegLogo size="nav" className="shrink-0" />
-          <span
-            aria-hidden
-            className={`line-clamp-3 min-w-0 flex-1 select-none text-left font-sans text-base font-normal leading-snug transition-colors duration-150 ${wordmarkClass}`}
-          >
-            Federación Entrerriana de Golf
-          </span>
         </Link>
       </div>
 
