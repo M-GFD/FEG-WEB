@@ -66,6 +66,7 @@ model Club {
   expenses  Expense[]
   teamEntries TeamEntry[]
   youthEnrollments YouthEnrollment[]
+  youthTournamentRegistrations YouthTournamentRegistration[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -439,5 +440,55 @@ model YouthEnrollment {
 
   @@unique([seasonYear, dniHash])
   @@index([seasonYear])
+  @@index([clubId])
+}
+
+/// Encabezado / torneo activo para inscripciones menores (editable por admin).
+model YouthTournamentSignupConfig {
+  id          String   @id @default(cuid())
+  isActive    Boolean  @default(false)
+  title       String
+  dateLabel   String
+  extraLine   String?
+  venue       String
+  fecha       String
+  sede        String
+  modalidad   String
+  tournamentKey String @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Inscripción de jugador empadronado a torneo menores activo.
+model YouthTournamentRegistration {
+  id                    String   @id @default(cuid())
+  tournamentKey         String
+  enrollmentId          String
+  dniHash               String
+  responsibleName       String
+  responsiblePhoneEnc   String
+  responsibleEmailEnc   String
+  clubName              String
+  clubOther             String?
+  clubId                String?
+  club                  Club?    @relation(fields: [clubId], references: [id])
+  lastName              String
+  firstName             String
+  gender                String
+  hasHandicap           Boolean
+  matricula             String?
+  birthDate             DateTime @db.Date
+  ageAtSignup           Int
+  category              String
+  playsPrejuvenilesAlso Boolean  @default(false)
+  isPrincipiante        Boolean  @default(false)
+  dietaryRestriction    Boolean
+  dietaryFoods          String?
+  comments              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([tournamentKey, dniHash])
+  @@index([tournamentKey])
   @@index([clubId])
 }

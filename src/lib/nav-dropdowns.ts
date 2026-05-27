@@ -22,6 +22,7 @@ function audienceDropdown(segment: AudienceSegment, label: string): NavDropdownI
   }));
   if (segment === "menores") {
     links.push({ href: "/empadronamiento-menores", label: "Empadronamiento" });
+    links.push({ href: "/inscripcion-torneos-menores", label: "Inscripción" });
   }
   return {
     id: segment,
