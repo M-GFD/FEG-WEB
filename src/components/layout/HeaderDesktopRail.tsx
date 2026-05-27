@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { FegLogo } from "@/components/layout/FegLogo";
 import { NavLinks } from "@/components/layout/NavLinks";
 import { HeaderHoverNavGroup } from "@/components/layout/HeaderHoverNavGroup";
@@ -14,10 +14,10 @@ type HeaderTheme = "dark" | "light";
 
 type NavLink = { href: string; label: string };
 
-/** Espacio mínimo entre la cápsula de rutas y los grupos laterales. */
-const SAFE_GAP_PX = 16;
+/** Ancho de la barra de búsqueda (antes ligado al bloque logo + wordmark). */
+const DESKTOP_SEARCH_BAR_WIDTH_PX = 220;
 
-/** Botón ✉️ + gap reservados entre rutas y la cápsula de búsqueda. */
+/** Botón ✉️ + gap reservados junto a la búsqueda. */
 const NOTIFICATIONS_RAIL_RESERVE_PX = 48;
 
 type Props = {
@@ -26,74 +26,12 @@ type Props = {
 };
 
 /**
- * Bloque desktop del Header (md+).
- *
- * Layout:
- * - Logo (izquierda)
- * - Cápsula de rutas (absolutamente centrada al viewport)
- * - Notificaciones ✉️ + cápsula de búsqueda (derecha)
- *
- * Reglas:
- * - Los tres grupos NUNCA se superponen: se calcula `sideMax = (anchoRail - anchoRutas) / 2 - gap`
- *   y se aplica como `max-width` a los grupos laterales.
- * - La cápsula de rutas no hace wrap de los botones (`flex-nowrap`).
- * - La cápsula de búsqueda comparte el bloque derecho con el botón ✉️; el ancho útil
- *   de la búsqueda descuenta el espacio reservado para notificaciones.
+ * Bloque desktop del Header (md+): logo, rutas centradas y búsqueda a la derecha.
  */
 export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
   const pathname = usePathname();
-
-  const railRef = useRef<HTMLDivElement | null>(null);
-  const leftRef = useRef<HTMLDivElement | null>(null);
-  const routesRef = useRef<HTMLDivElement | null>(null);
-
-  const [sideMax, setSideMax] = useState<number | null>(null);
-  const [leftWidth, setLeftWidth] = useState<number | null>(null);
   const [theme, setTheme] = useState<HeaderTheme>("light");
 
-  // Calcula sideMax y leftWidth para garantizar no-superposición.
-  useEffect(() => {
-    const rail = railRef.current;
-    const left = leftRef.current;
-    const routes = routesRef.current;
-    if (!rail || !left || !routes) return;
-
-    let raf = 0;
-
-    const compute = () => {
-      raf = 0;
-      const railW = rail.getBoundingClientRect().width;
-      const routesW = routes.getBoundingClientRect().width;
-      const available = Math.max(0, (railW - routesW) / 2 - SAFE_GAP_PX);
-      setSideMax(available);
-
-      // Re-medimos el ancho real del bloque izquierdo después de aplicar max-width
-      requestAnimationFrame(() => {
-        if (!left) return;
-        setLeftWidth(left.getBoundingClientRect().width);
-      });
-    };
-
-    const schedule = () => {
-      if (raf) return;
-      raf = requestAnimationFrame(compute);
-    };
-
-    compute();
-
-    const ro = new ResizeObserver(schedule);
-    ro.observe(rail);
-    ro.observe(routes);
-    ro.observe(left);
-    window.addEventListener("resize", schedule);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", schedule);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, []);
-
-  // Detecta el tema (claro/oscuro) bajo el header en cada scroll/resize/route.
   useEffect(() => {
     let raf = 0;
     function compute() {
@@ -131,37 +69,17 @@ export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
     };
   }, [pathname]);
 
-  // Ancho de la cápsula de búsqueda: replica el ancho real del bloque logo, capado a sideMax.
-  const cappedSearchSide =
-    sideMax != null ? Math.max(0, sideMax - NOTIFICATIONS_RAIL_RESERVE_PX) : null;
-  const searchWidth =
-    leftWidth != null && cappedSearchSide != null
-      ? Math.min(leftWidth, cappedSearchSide)
-      : leftWidth ?? null;
-
   return (
-    <div
-      ref={railRef}
-      className="relative hidden min-h-14 items-center justify-between gap-3 md:flex"
-    >
-      <div
-        ref={leftRef}
-        className="min-w-0 shrink"
-        style={sideMax != null ? { maxWidth: `${sideMax}px` } : undefined}
+    <div className="relative hidden min-h-14 items-center justify-between gap-3 md:flex">
+      <Link
+        href="/"
+        aria-label="Inicio · FEG"
+        className="relative z-10 inline-flex shrink-0 items-center rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123c15]/40 focus-visible:ring-offset-2"
       >
-        <Link
-          href="/"
-          aria-label="Inicio · FEG"
-          className="relative z-10 inline-flex shrink-0 items-center rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123c15]/40 focus-visible:ring-offset-2"
-        >
-          <FegLogo size="nav" className="shrink-0" />
-        </Link>
-      </div>
+        <FegLogo size="nav" className="shrink-0" />
+      </Link>
 
-      <div
-        ref={routesRef}
-        className="pointer-events-auto absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-      >
+      <div className="pointer-events-auto absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <nav className="flex max-w-[calc(100vw-2rem)] flex-nowrap items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
           <NavLinks links={primaryLinks} variant="light" />
           <HeaderHoverNavGroup items={navDropdownItems} variant="light" />
@@ -169,22 +87,15 @@ export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
       </div>
 
       <div
-        className="flex min-w-0 shrink-0 items-center justify-end gap-2"
-        style={
-          searchWidth != null && sideMax != null
-            ? {
-                width: `${searchWidth + NOTIFICATIONS_RAIL_RESERVE_PX}px`,
-                maxWidth: `${sideMax}px`,
-              }
-            : undefined
-        }
+        className="relative z-10 ml-auto flex shrink-0 items-center justify-end gap-2"
+        style={{ width: `${DESKTOP_SEARCH_BAR_WIDTH_PX + NOTIFICATIONS_RAIL_RESERVE_PX}px` }}
       >
         <HeaderNotifications theme={theme} />
         <div
-          className="min-w-0 flex-1 overflow-hidden"
-          style={searchWidth != null ? { width: `${searchWidth}px`, minWidth: 0 } : undefined}
+          className="shrink-0 overflow-hidden"
+          style={{ width: `${DESKTOP_SEARCH_BAR_WIDTH_PX}px` }}
         >
-          <div className="flex w-full min-w-0 max-w-full items-center overflow-hidden rounded-full bg-white/70 px-2.5 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+          <div className="flex w-full items-center overflow-hidden rounded-full bg-white/70 px-2.5 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
             <NavSearch variant="desktop" className="w-full min-w-0 max-w-full" />
           </div>
         </div>
