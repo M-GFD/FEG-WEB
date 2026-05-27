@@ -64,6 +64,12 @@ export default async function TorneosPage({ searchParams }: Props) {
           <MenoresProximoTorneoCard config={signupConfig} />
         ) : null}
 
+        {tournaments.length > 0 && segment === "menores" && signupConfig ? (
+          <h2 className="mb-6 font-heading text-xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
+            Histórico de torneos
+          </h2>
+        ) : null}
+
         {tournaments.length === 0 ? (
           <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-10 text-center text-[var(--feg-green)]">
             No hay torneos cargados para {segmentLabel.toLowerCase()} aún.
