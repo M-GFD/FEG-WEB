@@ -50,14 +50,22 @@ export default async function TorneosPage({ searchParams }: Props) {
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
             Federación · {segmentLabel}
           </p>
-          <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
-            Histórico de torneos · {segmentLabel}
-          </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[var(--feg-green)]">
-            Calendario de fechas: podés ordenar por antigüedad y filtrar por año. En cada
-            tarjeta verás una vista de la galería si el club organizador subió fotos y
-            prensa las aprobó. Los resultados publicados están en la ficha del torneo.
-          </p>
+          {segment === "menores" ? (
+            <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
+              Participa del próximo torneo
+            </h1>
+          ) : (
+            <>
+              <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
+                Histórico de torneos · {segmentLabel}
+              </h1>
+              <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[var(--feg-green)]">
+                Calendario de fechas: podés ordenar por antigüedad y filtrar por año. En cada
+                tarjeta verás una vista de la galería si el club organizador subió fotos y
+                prensa las aprobó. Los resultados publicados están en la ficha del torneo.
+              </p>
+            </>
+          )}
         </header>
 
         {segment === "menores" && signupConfig ? (
