@@ -1,7 +1,8 @@
 import crypto from "crypto";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { encryptSensitive } from "@/lib/sensitive-crypto";
-import { hashDniForLookup, normalizeDni } from "./dni";
+import { canonicalDniForLookup, hashDniForLookup, normalizeDni } from "./dni";
+import { upsertPlayerFromYouthEnrollment } from "@/lib/padron-menores-sync";
 import { lookupPadronMenorByDni } from "@/lib/padron-menores-lookup";
 import {
   EMPADRONAMIENTO_SEASON_YEAR,
@@ -87,8 +88,9 @@ export async function submitYouthEnrollment(
     return { ok: false, error: "DNI inválido." };
   }
 
-  const dniHash = hashDniForLookup(dniNorm);
-  const existing = await findYouthEnrollmentByDni(dniNorm);
+  const dniCanonical = canonicalDniForLookup(dniNorm);
+  const dniHash = hashDniForLookup(dniCanonical);
+  const existing = await findYouthEnrollmentByDni(dniCanonical);
   if (existing.enrolled) {
     return {
       ok: false,
@@ -126,7 +128,7 @@ export async function submitYouthEnrollment(
     birthDate: input.birthDate,
     ageDec31,
     category,
-    dniEnc: encryptSensitive(dniNorm),
+    dniEnc: encryptSensitive(dniCanonical),
     address: input.address.trim(),
     department: input.department,
     locality: input.locality.trim(),
@@ -166,6 +168,20 @@ export async function submitYouthEnrollment(
     }
     console.error("[submitYouthEnrollment]", error.message);
     return { ok: false, error: "No se pudo guardar el empadronamiento. Intentá nuevamente." };
+  }
+
+  if (clubId) {
+    await upsertPlayerFromYouthEnrollment({
+      lastName: input.lastName,
+      firstName: input.firstName,
+      gender: input.gender,
+      birthDate: input.birthDate,
+      category,
+      dni: dniCanonical,
+      clubId,
+      hasHandicap: input.hasHandicap,
+      matricula: input.hasHandicap ? input.matricula?.trim() || null : null,
+    });
   }
 
   return { ok: true };

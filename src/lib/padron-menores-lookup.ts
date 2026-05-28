@@ -69,21 +69,50 @@ function formatBirthDate(birthDate: string | null, birthYear: number): string {
   return "";
 }
 
-async function lookupInYouthEnrollment(
-  dniNorm: string,
-  dniCanonical: string
-): Promise<PadronMenorLookup | null> {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return null;
+type PlayerRow = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  birthDate: string | null;
+  birthYear: number;
+  category: string | null;
+  matricula: string | null;
+  handicap: number;
+  club: { name: string } | { name: string }[] | null;
+};
 
-  const hashCandidates = [
-    ...new Set(
-      [dniNorm, dniCanonical]
-        .map((d) => hashDniForLookup(d))
-        .filter(Boolean)
-    ),
-  ];
-  if (hashCandidates.length === 0) return null;
+function mapPlayerRowToLookup(
+  player: PlayerRow,
+  clubs: { id: string; name: string; code: string | null }[]
+): PadronMenorLookup | null {
+  const birthDate = formatBirthDate(player.birthDate, player.birthYear);
+  if (!birthDate) return null;
+
+  const clubRaw = player.club;
+  const clubFromDb = Array.isArray(clubRaw)
+    ? clubRaw[0]?.name ?? ""
+    : clubRaw?.name ?? "";
+
+  const clubMatch = matchEnrollmentClub(clubFromDb, clubs);
+  const clubName = (clubMatch?.name ?? clubFromDb).trim().toUpperCase();
+
+  return {
+    enrollmentId: player.id,
+    source: "player",
+    lastName: player.lastName,
+    firstName: player.firstName,
+    gender: mapGender(player.gender),
+    birthDate,
+    clubName,
+    hasHandicap: Boolean(player.matricula?.trim()) || player.handicap > 0,
+    matricula: player.matricula,
+  };
+}
+
+async function lookupInYouthEnrollment(dniHash: string): Promise<PadronMenorLookup | null> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase || !dniHash) return null;
 
   const { data, error } = await supabase
     .from("YouthEnrollment")
@@ -91,8 +120,7 @@ async function lookupInYouthEnrollment(
       "id,lastName,firstName,gender,birthDate,clubName,hasHandicap,matricula"
     )
     .eq("seasonYear", EMPADRONAMIENTO_SEASON_YEAR)
-    .in("dniHash", hashCandidates)
-    .limit(1)
+    .eq("dniHash", dniHash)
     .maybeSingle();
 
   if (error) {
@@ -117,21 +145,12 @@ async function lookupInYouthEnrollment(
   };
 }
 
-async function lookupInPlayerPadron(dniCanonical: string): Promise<PadronMenorLookup | null> {
+const PLAYER_SELECT =
+  "id,firstName,lastName,gender,birthDate,birthYear,category,matricula,handicap,dniEnc,dniHash,club:Club(name)";
+
+async function lookupInPlayerPadron(dniHash: string, dniCanonical: string): Promise<PadronMenorLookup | null> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return null;
-
-  const { data, error } = await supabase
-    .from("Player")
-    .select(
-      "id,firstName,lastName,gender,birthDate,birthYear,category,matricula,handicap,dniEnc,club:Club(name)"
-    )
-    .not("dniEnc", "is", null);
-
-  if (error) {
-    console.error("[lookupInPlayerPadron]", error.message);
-    return null;
-  }
 
   const { data: clubRows } = await supabase.from("Club").select("id,name,code");
   const clubs = (clubRows ?? []).map((c: { id: string; name: string; code: string | null }) => ({
@@ -140,20 +159,34 @@ async function lookupInPlayerPadron(dniCanonical: string): Promise<PadronMenorLo
     code: c.code,
   }));
 
+  if (dniHash) {
+    const { data: byHash, error: hashError } = await supabase
+      .from("Player")
+      .select(PLAYER_SELECT)
+      .eq("dniHash", dniHash)
+      .maybeSingle();
+
+    if (hashError) {
+      console.error("[lookupInPlayerPadron] dniHash", hashError.message);
+    } else if (byHash) {
+      const mapped = mapPlayerRowToLookup(byHash as PlayerRow, clubs);
+      if (mapped) return mapped;
+    }
+  }
+
+  const { data, error } = await supabase
+    .from("Player")
+    .select(PLAYER_SELECT)
+    .not("dniEnc", "is", null)
+    .is("dniHash", null);
+
+  if (error) {
+    console.error("[lookupInPlayerPadron]", error.message);
+    return null;
+  }
+
   for (const row of data ?? []) {
-    const player = row as {
-      id: string;
-      firstName: string;
-      lastName: string;
-      gender: string;
-      birthDate: string | null;
-      birthYear: number;
-      category: string | null;
-      matricula: string | null;
-      handicap: number;
-      dniEnc: string;
-      club: { name: string } | { name: string }[] | null;
-    };
+    const player = row as PlayerRow & { dniEnc: string };
 
     if (!isPadronMenorFromPlayer(player.category, player.birthYear)) continue;
 
@@ -166,28 +199,8 @@ async function lookupInPlayerPadron(dniCanonical: string): Promise<PadronMenorLo
     }
     if (!decrypted || canonicalDniForLookup(decrypted) !== dniCanonical) continue;
 
-    const clubRaw = player.club;
-    const clubFromDb = Array.isArray(clubRaw)
-      ? clubRaw[0]?.name ?? ""
-      : clubRaw?.name ?? "";
-
-    const clubMatch = matchEnrollmentClub(clubFromDb, clubs);
-    const clubName = (clubMatch?.name ?? clubFromDb).trim().toUpperCase();
-
-    const birthDate = formatBirthDate(player.birthDate, player.birthYear);
-    if (!birthDate) continue;
-
-    return {
-      enrollmentId: player.id,
-      source: "player",
-      lastName: player.lastName,
-      firstName: player.firstName,
-      gender: mapGender(player.gender),
-      birthDate,
-      clubName: clubName.toUpperCase(),
-      hasHandicap: Boolean(player.matricula?.trim()) || player.handicap > 0,
-      matricula: player.matricula,
-    };
+    const mapped = mapPlayerRowToLookup(player, clubs);
+    if (mapped) return mapped;
   }
 
   return null;
@@ -197,16 +210,17 @@ async function lookupInPlayerPadron(dniCanonical: string): Promise<PadronMenorLo
 export async function lookupPadronMenorByDni(
   dni: string
 ): Promise<{ found: true; player: PadronMenorLookup } | { found: false }> {
-  const dniNorm = normalizeDni(dni);
   const dniCanonical = canonicalDniForLookup(dni);
-  if (dniCanonical.length < 7 && dniNorm.length < 7) return { found: false };
+  if (dniCanonical.length < 7 && normalizeDni(dni).length < 7) return { found: false };
 
-  const fromEnrollment = await lookupInYouthEnrollment(dniNorm, dniCanonical);
+  const dniHash = hashDniForLookup(dniCanonical);
+
+  const fromEnrollment = await lookupInYouthEnrollment(dniHash);
   if (fromEnrollment) {
     return { found: true, player: fromEnrollment };
   }
 
-  const fromPlayer = await lookupInPlayerPadron(dniCanonical);
+  const fromPlayer = await lookupInPlayerPadron(dniHash, dniCanonical);
   if (fromPlayer) {
     return { found: true, player: fromPlayer };
   }

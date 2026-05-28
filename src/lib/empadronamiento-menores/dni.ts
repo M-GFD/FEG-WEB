@@ -17,8 +17,12 @@ export function canonicalDniForLookup(dni: string): string {
   return String(n);
 }
 
+/** Hash estable por persona (DNI canónico, sin ceros a la izquierda). */
 export function hashDniForLookup(dni: string): string {
-  const normalized = normalizeDni(dni);
-  if (!normalized) return "";
-  return crypto.createHash("sha256").update(`feg-youth-enrollment:${normalized}`).digest("hex");
+  const canonical = canonicalDniForLookup(dni);
+  if (!canonical) return "";
+  return crypto
+    .createHash("sha256")
+    .update(`feg-youth-enrollment:${canonical}`)
+    .digest("hex");
 }
