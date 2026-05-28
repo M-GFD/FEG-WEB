@@ -97,7 +97,7 @@ model Player {
   emailEnc       String?
   phoneEnc       String?
   dniEnc         String?
-  /** SHA-256 de DNI canónico; misma fórmula que YouthEnrollment.dniHash */
+  /// SHA-256 de DNI canonico; misma formula que YouthEnrollment.dniHash
   dniHash        String?
 
   entries        TournamentEntry[]
