@@ -340,6 +340,9 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
                 <input
                   id="ln"
                   value={lastName}
+                  onChange={(e) => {
+                    if (!playerLocked) setLastName(e.target.value);
+                  }}
                   readOnly={playerLocked}
                   className={inputClassName}
                   required
@@ -352,6 +355,9 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
                 <input
                   id="fn"
                   value={firstName}
+                  onChange={(e) => {
+                    if (!playerLocked) setFirstName(e.target.value);
+                  }}
                   readOnly={playerLocked}
                   className={inputClassName}
                   required
@@ -429,6 +435,9 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
                   id="bd"
                   type="date"
                   value={birthDate}
+                  onChange={(e) => {
+                    if (!playerLocked) setBirthDate(e.target.value);
+                  }}
                   readOnly={playerLocked}
                   className={inputClassName}
                   required
