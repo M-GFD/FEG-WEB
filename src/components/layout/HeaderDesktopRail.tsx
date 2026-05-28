@@ -95,7 +95,7 @@ export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
           className="shrink-0 overflow-hidden"
           style={{ width: `${DESKTOP_SEARCH_BAR_WIDTH_PX}px` }}
         >
-          <div className="flex w-full items-center overflow-hidden rounded-full bg-white/70 px-2.5 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+          <div className="flex w-full items-center overflow-hidden rounded-full bg-white/70 px-2 py-1 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
             <NavSearch variant="desktop" className="w-full min-w-0 max-w-full" />
           </div>
         </div>

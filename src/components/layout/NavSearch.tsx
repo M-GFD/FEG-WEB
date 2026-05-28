@@ -11,7 +11,7 @@ type Props = {
 };
 
 const inputBase =
-  "h-9 rounded-full border-0 bg-white/50 pl-9 pr-3.5 text-sm font-semibold text-[#24321c] placeholder:text-[#24321c]/50 outline-none transition focus:bg-white/75 focus:ring-2 focus:ring-[var(--feg-green)]/25";
+  "box-border h-9 w-full min-w-0 max-w-full shrink-0 rounded-full border-0 bg-transparent pl-9 pr-3.5 text-sm font-semibold text-[#24321c] placeholder:text-[#24321c]/50 shadow-none outline-none transition [-webkit-appearance:none] appearance-none focus:bg-white/40 focus:outline-none focus:ring-0 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden";
 
 export function NavSearch({ className, variant = "desktop" }: Props) {
   const router = useRouter();
@@ -24,12 +24,9 @@ export function NavSearch({ className, variant = "desktop" }: Props) {
     router.push(`/buscar?q=${encodeURIComponent(q)}`);
   }
 
-  // Cadena min-w-0 + overflow-hidden: el texto largo no desborda la cápsula redonda.
-  const widthClass = "box-border w-full min-w-0 max-w-full";
-
   return (
     <form
-      className={`${className ?? ""} w-full min-w-0 max-w-full overflow-hidden`}
+      className={`${className ?? ""} w-full min-w-0 max-w-full`}
       role="search"
       aria-label="Buscar en el sitio"
       onSubmit={onSubmit}
@@ -37,7 +34,7 @@ export function NavSearch({ className, variant = "desktop" }: Props) {
       <label htmlFor="nav-site-search" className="sr-only">
         Buscar noticias, torneos, clubes y jugadores
       </label>
-      <div className="relative w-full min-w-0 max-w-full overflow-hidden">
+      <div className="relative w-full min-w-0 max-w-full">
         <Search
           aria-hidden
           strokeWidth={2}
@@ -52,7 +49,7 @@ export function NavSearch({ className, variant = "desktop" }: Props) {
           placeholder="Buscar…"
           enterKeyHint="search"
           autoComplete="off"
-          className={`${inputBase} ${widthClass} shrink`}
+          className={inputBase}
         />
       </div>
     </form>
