@@ -207,7 +207,7 @@ export function EmpadronamientoMenoresForm({ clubCodes }: Props) {
           <span className="font-heading uppercase tracking-wide">Importante:</span> la planilla
           debe ser completada por los padres del jugador (madre, padre y/o tutor) en carácter de
           declaración jurada. Es un proceso anual y solo debe realizarse{" "}
-          <strong>una vez</strong> durante la temporada. La FGL asegura su trato confidencial.
+          <strong>una vez</strong> durante la temporada. La FEG asegura su trato confidencial.
         </p>
         <label className="mt-4 flex cursor-pointer items-start gap-3">
           <input
