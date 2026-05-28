@@ -26,9 +26,7 @@ export function Header() {
             </div>
 
             <div className="min-w-0 overflow-hidden">
-              <div className="flex min-w-0 max-w-full items-center overflow-hidden rounded-full bg-white/70 px-2 py-1 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-                <NavSearch variant="mobile" className="w-full min-w-0 max-w-full" />
-              </div>
+              <NavSearch variant="mobile" className="w-full min-w-0 max-w-full" />
             </div>
 
             <HeaderNotifications theme="light" className="flex h-11 w-full max-w-[2.75rem] justify-center justify-self-center" />

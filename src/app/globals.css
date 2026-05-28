@@ -42,3 +42,16 @@ h1, h2, h3, h4, h5, h6 {
 .news-editor .ProseMirror-focused {
   outline: none;
 }
+
+/* Barra de búsqueda del header: quita esquinas rectas nativas de type=search (WebKit). */
+.nav-search-input {
+  border-radius: 9999px;
+}
+.nav-search-input::-webkit-search-decoration,
+.nav-search-input::-webkit-search-cancel-button,
+.nav-search-input::-webkit-search-results-button,
+.nav-search-input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
