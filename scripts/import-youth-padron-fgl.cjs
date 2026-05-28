@@ -1,8 +1,9 @@
 /**
- * Importa el padrón de menores/juveniles FGL 2026 desde docs/empadronamiento-fgl-2026.md
- * a la tabla public."Player" (dniEnc cifrado) para búsqueda por DNI en inscripción/empadronamiento.
+ * Importa el padrón histórico FGL 2026 (planilla markdown) a Player.
+ * Uso puntual / actualización de planilla; NO hace falta para quien se empadrona por la web
+ * (el formulario guarda en YouthEnrollment y sincroniza Player automáticamente).
  *
- * Uso: node scripts/import-youth-padron-fgl.cjs
+ * Uso: npm run import-youth-padron
  * Requiere: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, PLAYER_DATA_ENCRYPTION_KEY
  */
 
@@ -34,6 +35,14 @@ const KEY = Buffer.from(KEY_RAW, "hex");
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: false },
 });
+
+function hashDniForLookup(canonicalDni) {
+  if (!canonicalDni) return "";
+  return crypto
+    .createHash("sha256")
+    .update(`feg-youth-enrollment:${canonicalDni}`)
+    .digest("hex");
+}
 
 function encryptSensitive(plain) {
   const value = String(plain).trim();
@@ -234,6 +243,7 @@ async function main() {
       gender: p.gender,
       clubId: club.id,
       dniEnc: encryptSensitive(p.dni),
+      dniHash: hashDniForLookup(p.dni),
       updatedAt: new Date().toISOString(),
     });
   }

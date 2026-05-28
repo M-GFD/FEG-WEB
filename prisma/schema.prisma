@@ -97,6 +97,8 @@ model Player {
   emailEnc       String?
   phoneEnc       String?
   dniEnc         String?
+  /** SHA-256 de DNI canónico; misma fórmula que YouthEnrollment.dniHash */
+  dniHash        String?
 
   entries        TournamentEntry[]
   teamEntries    TeamPlayer[]
@@ -109,6 +111,7 @@ model Player {
   @@unique([clubId, matricula], name: "Player_clubId_matricula_key")
   @@index([lastName])
   @@index([firstName])
+  @@index([dniHash])
 }
 
 enum Gender {
