@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { encryptSensitive } from "@/lib/sensitive-crypto";
 import { hashDniForLookup, normalizeDni } from "./dni";
+import { lookupPadronMenorByDni } from "@/lib/padron-menores-lookup";
 import {
   EMPADRONAMIENTO_SEASON_YEAR,
   type EmpadronamientoHealthData,
@@ -25,24 +26,10 @@ export async function getEnrollmentClubCodes(): Promise<ClubCodeOption[]> {
 
 export async function findYouthEnrollmentByDni(
   dni: string,
-  seasonYear = EMPADRONAMIENTO_SEASON_YEAR
+  _seasonYear = EMPADRONAMIENTO_SEASON_YEAR
 ): Promise<{ enrolled: boolean }> {
-  const supabase = getSupabaseAdmin();
-  const dniHash = hashDniForLookup(dni);
-  if (!supabase || !dniHash) return { enrolled: false };
-
-  const { data, error } = await supabase
-    .from("YouthEnrollment")
-    .select("id")
-    .eq("seasonYear", seasonYear)
-    .eq("dniHash", dniHash)
-    .maybeSingle();
-
-  if (error) {
-    console.error("[findYouthEnrollmentByDni]", error.message);
-    return { enrolled: false };
-  }
-  return { enrolled: Boolean(data) };
+  const found = await lookupPadronMenorByDni(dni);
+  return { enrolled: found.found };
 }
 
 function resolveClub(
