@@ -79,6 +79,38 @@ const STATIC_PAGES: StaticPage[] = [
     href: "/clubes",
     keywords: ["clubes", "club", "red federativa", "socios"],
   },
+  {
+    title: "Empadronamiento menores",
+    href: "/empadronamiento-menores",
+    keywords: [
+      "empadronamiento",
+      "empadronar",
+      "empadronarse",
+      "padron",
+      "padrón",
+      "menores",
+      "juveniles",
+      "formulario",
+      "temporada",
+      "feg",
+      "matricula",
+      "matrícula",
+    ],
+  },
+  {
+    title: "Inscripción torneos menores",
+    href: "/inscripcion-torneos-menores",
+    keywords: [
+      "inscripcion",
+      "inscripción",
+      "inscribirse",
+      "inscribir",
+      "torneo",
+      "torneos",
+      "menores",
+      "juveniles",
+    ],
+  },
 ];
 
 function normalizeQuery(raw: string): string {
@@ -89,15 +121,27 @@ function normalizeQuery(raw: string): string {
     .replace(/[%_\\,]/g, " ");
 }
 
+function normalizeForMatch(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "");
+}
+
 function matchStaticPages(q: string): SiteSearchHit[] {
-  const lower = q.toLowerCase();
+  const lower = normalizeForMatch(q);
   if (!lower) return [];
 
   const hits: SiteSearchHit[] = [];
   for (const p of STATIC_PAGES) {
+    const titleNorm = normalizeForMatch(p.title);
     const match =
-      p.title.toLowerCase().includes(lower) ||
-      p.keywords.some((k) => lower.includes(k) || k.includes(lower));
+      titleNorm.includes(lower) ||
+      lower.includes(titleNorm) ||
+      p.keywords.some((k) => {
+        const kn = normalizeForMatch(k);
+        return lower.includes(kn) || kn.includes(lower);
+      });
     if (match) {
       hits.push({
         type: "page",
