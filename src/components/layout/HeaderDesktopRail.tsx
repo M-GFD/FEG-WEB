@@ -14,12 +14,6 @@ type HeaderTheme = "dark" | "light";
 
 type NavLink = { href: string; label: string };
 
-/** Ancho de la barra de búsqueda (antes ligado al bloque logo + wordmark). */
-const DESKTOP_SEARCH_BAR_WIDTH_PX = 220;
-
-/** Botón ✉️ + gap reservados junto a la búsqueda. */
-const NOTIFICATIONS_RAIL_RESERVE_PX = 48;
-
 type Props = {
   primaryLinks: NavLink[];
   navDropdownItems: NavDropdownItem[];
@@ -27,6 +21,8 @@ type Props = {
 
 /**
  * Bloque desktop del Header (md+): logo, rutas centradas y búsqueda a la derecha.
+ * Layout en flex (sin nav absoluta) para que la barra de búsqueda pueda encogerse
+ * y nunca se superponga con la NavBar.
  */
 export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
   const pathname = usePathname();
@@ -70,7 +66,7 @@ export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
   }, [pathname]);
 
   return (
-    <div className="relative hidden min-h-14 items-center justify-between gap-3 md:flex">
+    <div className="relative hidden w-full min-h-14 items-center gap-2 md:flex md:gap-3">
       <Link
         href="/"
         aria-label="Inicio · FEG"
@@ -79,22 +75,19 @@ export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
         <FegLogo size="nav" className="shrink-0" />
       </Link>
 
-      <div className="pointer-events-auto absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <nav className="flex max-w-[calc(100vw-2rem)] flex-nowrap items-center justify-center gap-2 rounded-full bg-white/70 px-3 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+      <nav
+        aria-label="Principal"
+        className="flex min-w-0 flex-1 items-center justify-center overflow-hidden"
+      >
+        <div className="flex max-w-full flex-nowrap items-center justify-center gap-2 overflow-hidden rounded-full bg-white/70 px-2 py-2 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)] sm:px-3">
           <NavLinks links={primaryLinks} variant="light" />
           <HeaderHoverNavGroup items={navDropdownItems} variant="light" />
-        </nav>
-      </div>
+        </div>
+      </nav>
 
-      <div
-        className="relative z-10 ml-auto flex shrink-0 items-center justify-end gap-2"
-        style={{ width: `${DESKTOP_SEARCH_BAR_WIDTH_PX + NOTIFICATIONS_RAIL_RESERVE_PX}px` }}
-      >
-        <HeaderNotifications theme={theme} />
-        <div
-          className="min-w-0 shrink-0 overflow-hidden"
-          style={{ width: `${DESKTOP_SEARCH_BAR_WIDTH_PX}px` }}
-        >
+      <div className="relative z-10 flex min-w-0 shrink-[2] items-center justify-end gap-2">
+        <HeaderNotifications theme={theme} className="shrink-0" />
+        <div className="min-w-[4.5rem] w-[clamp(4.5rem,16vw,13.75rem)] max-w-[13.75rem] shrink">
           <NavSearch variant="desktop" className="w-full" />
         </div>
       </div>
