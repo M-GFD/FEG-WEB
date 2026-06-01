@@ -14,8 +14,7 @@ type Props = {
 
 export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
   return (
-    <div className="md:hidden">
-      <DropdownMenu.Root>
+    <DropdownMenu.Root>
         <DropdownMenu.Trigger asChild>
           <button
             type="button"
@@ -63,7 +62,6 @@ export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
             ))}
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
-      </DropdownMenu.Root>
-    </div>
+    </DropdownMenu.Root>
   );
 }
