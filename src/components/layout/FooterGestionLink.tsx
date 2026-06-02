@@ -15,7 +15,7 @@ export function FooterGestionLink() {
   return (
     <Link
       href={href}
-      className="shrink-0 text-base font-medium text-[var(--feg-green-2)] underline-offset-4 transition hover:text-[var(--feg-green)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--feg-green)]"
+      className="shrink-0 text-xs font-medium text-[var(--feg-green-2)] underline-offset-4 transition hover:text-[var(--feg-green)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--feg-green)]"
     >
       {label}
     </Link>
