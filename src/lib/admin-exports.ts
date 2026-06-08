@@ -4,6 +4,11 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import { decryptSensitive } from "@/lib/sensitive-crypto";
 import { hashDniForLookup } from "@/lib/empadronamiento-menores/dni";
 import {
+  currentAgeOnReferenceDate,
+  currentCategoryFromBirthDate,
+  parseBirthDateInput,
+} from "@/lib/empadronamiento-menores/category";
+import {
   EMPADRONAMIENTO_SEASON_YEAR,
   EMPADRONAMIENTO_HEALTH_CONDITIONS,
   type EmpadronamientoHealthData,
@@ -37,6 +42,26 @@ function normalizeGender(value: string | null | undefined): string {
   if (v === "F" || v === "MUJER") return "Mujer";
   if (v === "M" || v === "VARÓN" || v === "VARON") return "Varón";
   return value ?? "";
+}
+
+/**
+ * Categoría dinámica calculada desde la fecha de nacimiento (temporada vigente).
+ * Si la fecha no es válida, cae al valor almacenado.
+ */
+function dynamicCategory(
+  birthDate: string | null | undefined,
+  fallback: string | null | undefined
+): string {
+  const bd = parseBirthDateInput(String(birthDate ?? "").slice(0, 10));
+  if (!bd) return fallback ?? "";
+  return currentCategoryFromBirthDate(bd);
+}
+
+/** Edad al 31/12 de la temporada vigente, desde la fecha de nacimiento. */
+function dynamicAge(birthDate: string | null | undefined): string {
+  const bd = parseBirthDateInput(String(birthDate ?? "").slice(0, 10));
+  if (!bd) return "";
+  return String(currentAgeOnReferenceDate(bd));
 }
 
 function formatDate(value: string | null | undefined): string {
@@ -177,8 +202,8 @@ export async function fetchEmpadronadosRows(
       nombre: row.firstName ?? "",
       sexo: row.gender ?? "",
       fechaNacimiento: formatDate(row.birthDate),
-      edadDic31: row.ageDec31 != null ? String(row.ageDec31) : "",
-      categoria: row.category ?? "",
+      edadDic31: dynamicAge(row.birthDate) || (row.ageDec31 != null ? String(row.ageDec31) : ""),
+      categoria: dynamicCategory(row.birthDate, row.category),
       dni: safeDecrypt(row.dniEnc),
       club: row.clubName ?? "",
       responsable: row.responsibleName ?? "",
@@ -229,14 +254,17 @@ export async function fetchEmpadronadosRows(
     const club = Array.isArray(clubRaw) ? clubRaw[0]?.name ?? "" : clubRaw?.name ?? "";
     const birthYear =
       typeof row.birthYear === "number" && row.birthYear > 1900 ? row.birthYear : null;
+    const edad =
+      dynamicAge(row.birthDate) ||
+      (birthYear ? String(new Date().getFullYear() - birthYear) : "");
 
     rows.push({
       apellido: row.lastName ?? "",
       nombre: row.firstName ?? "",
       sexo: normalizeGender(row.gender),
       fechaNacimiento: formatDate(row.birthDate),
-      edadDic31: birthYear ? String(seasonYear - birthYear) : "",
-      categoria: row.category ?? "",
+      edadDic31: edad,
+      categoria: dynamicCategory(row.birthDate, row.category),
       dni,
       club,
       responsable: "",
@@ -347,8 +375,8 @@ export async function fetchInscriptosRows(
     nombre: row.firstName ?? "",
     sexo: row.gender ?? "",
     fechaNacimiento: formatDate(row.birthDate),
-    edad: row.ageAtSignup != null ? String(row.ageAtSignup) : "",
-    categoria: row.category ?? "",
+    edad: dynamicAge(row.birthDate) || (row.ageAtSignup != null ? String(row.ageAtSignup) : ""),
+    categoria: dynamicCategory(row.birthDate, row.category),
     dni: safeDecrypt(row.dniEnc),
     club: row.clubOther || row.clubName || "",
     tieneHandicap: yesNo(row.hasHandicap),
