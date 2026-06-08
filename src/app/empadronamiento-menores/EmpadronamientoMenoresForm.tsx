@@ -15,14 +15,8 @@ import {
   categoryFromBirthDate,
   parseBirthDateInput,
 } from "@/lib/empadronamiento-menores/category";
-import type { ClubCodeOption } from "@/lib/empadronamiento-menores/persistence";
-import { matchEnrollmentClub } from "@/lib/empadronamiento-menores/club-match";
 import { checkYouthEnrollmentDni, submitYouthEnrollmentForm } from "./actions";
 import { FieldLabel, FormSection, inputClassName, selectClassName } from "./form-ui";
-
-type Props = {
-  clubCodes: ClubCodeOption[];
-};
 
 const emptyHealth = (): EmpadronamientoHealthData => ({
   hasHealthInsurance: false,
@@ -31,7 +25,7 @@ const emptyHealth = (): EmpadronamientoHealthData => ({
   conditions: {},
 });
 
-export function EmpadronamientoMenoresForm({ clubCodes }: Props) {
+export function EmpadronamientoMenoresForm() {
   const [ack, setAck] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,11 +65,6 @@ export function EmpadronamientoMenoresForm({ clubCodes }: Props) {
   const [comments, setComments] = useState("");
 
   const disabled = !ack || submitting || success;
-
-  const clubCodeDisplay = useMemo(() => {
-    if (!clubName) return "";
-    return matchEnrollmentClub(clubName, clubCodes)?.code ?? "";
-  }, [clubName, clubCodes]);
 
   const { ageDec31, category } = useMemo(() => {
     const bd = parseBirthDateInput(birthDate);
@@ -431,37 +420,24 @@ export function EmpadronamientoMenoresForm({ clubCodes }: Props) {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <FieldLabel htmlFor="clubName" required>
-                Nombre del club de opción
-              </FieldLabel>
-              <select
-                id="clubName"
-                value={clubName}
-                onChange={(e) => setClubName(e.target.value)}
-                className={selectClassName}
-                required
-              >
-                <option value="">Seleccionar…</option>
-                {EMPADRONAMIENTO_CLUBS.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <FieldLabel htmlFor="clubCode">Código de club</FieldLabel>
-              <input
-                id="clubCode"
-                readOnly
-                value={clubCodeDisplay}
-                placeholder="Se completa al elegir club"
-                className={inputClassName}
-                aria-readonly
-              />
-            </div>
+          <div className="space-y-2">
+            <FieldLabel htmlFor="clubName" required>
+              Nombre del club de opción
+            </FieldLabel>
+            <select
+              id="clubName"
+              value={clubName}
+              onChange={(e) => setClubName(e.target.value)}
+              className={selectClassName}
+              required
+            >
+              <option value="">Seleccionar…</option>
+              {EMPADRONAMIENTO_CLUBS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
           </div>
         </FormSection>
 

@@ -51,7 +51,6 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
   const [birthDate, setBirthDate] = useState("");
 
   const [playsPrejuveniles, setPlaysPrejuveniles] = useState(false);
-  const [isPrincipiante, setIsPrincipiante] = useState(false);
   const [dietaryRestriction, setDietaryRestriction] = useState<boolean | null>(null);
   const [dietaryFoods, setDietaryFoods] = useState("");
   const [comments, setComments] = useState("");
@@ -153,7 +152,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
         matricula: hasHandicap ? matricula : undefined,
         birthDate,
         playsPrejuvenilesAlso: showPrejuvenilesOption ? playsPrejuveniles : false,
-        isPrincipiante,
+        isPrincipiante: false,
         dietaryRestriction,
         dietaryFoods: dietaryRestriction ? dietaryFoods : undefined,
         comments: comments || undefined,
@@ -464,15 +463,11 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
                 />
                 ¿Juega además la categoría Prejuveniles?
               </label>
-            ) : null}
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <input
-                type="checkbox"
-                checked={isPrincipiante}
-                onChange={(e) => setIsPrincipiante(e.target.checked)}
-              />
-              ¿Es un jugador Principiante?
-            </label>
+            ) : (
+              <p className="text-sm text-[var(--feg-green)]/70">
+                No hay participaciones especiales para la categoría del jugador.
+              </p>
+            )}
           </FormSection>
 
           <FormSection title="5 — Restricciones alimentarias">

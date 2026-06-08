@@ -1,6 +1,5 @@
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
-import { getEnrollmentClubCodes } from "@/lib/empadronamiento-menores/persistence";
 import { EMPADRONAMIENTO_SEASON_YEAR } from "@/lib/empadronamiento-menores/constants";
 import { EmpadronamientoMenoresForm } from "./EmpadronamientoMenoresForm";
 
@@ -11,8 +10,6 @@ export const metadata = {
 };
 
 export default async function EmpadronamientoMenoresPage() {
-  const clubCodes = await getEnrollmentClubCodes();
-
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
       <Header />
@@ -35,7 +32,7 @@ export default async function EmpadronamientoMenoresPage() {
         </header>
 
         <div className="mt-10">
-          <EmpadronamientoMenoresForm clubCodes={clubCodes} />
+          <EmpadronamientoMenoresForm />
         </div>
       </main>
     </div>
