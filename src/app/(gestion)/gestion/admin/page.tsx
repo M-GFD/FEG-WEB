@@ -44,6 +44,18 @@ export default async function GestionAdminHomePage() {
           >
             Torneo activo (inscripciones)
           </Link>
+          <Link
+            href="/gestion/admin/empadronados"
+            className="inline-flex rounded-xl border border-[var(--feg-green)]/25 bg-white px-4 py-2.5 text-sm font-semibold text-[var(--feg-green-2)] transition hover:bg-[var(--feg-bg)]"
+          >
+            Jugadores empadronados
+          </Link>
+          <Link
+            href="/gestion/admin/inscriptos"
+            className="inline-flex rounded-xl border border-[var(--feg-green)]/25 bg-white px-4 py-2.5 text-sm font-semibold text-[var(--feg-green-2)] transition hover:bg-[var(--feg-bg)]"
+          >
+            Inscriptos a torneos
+          </Link>
         </div>
       </section>
 
