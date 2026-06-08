@@ -2,6 +2,7 @@ import "server-only";
 import ExcelJS from "exceljs";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { decryptSensitive } from "@/lib/sensitive-crypto";
+import { hashDniForLookup } from "@/lib/empadronamiento-menores/dni";
 import {
   EMPADRONAMIENTO_SEASON_YEAR,
   EMPADRONAMIENTO_HEALTH_CONDITIONS,
@@ -28,6 +29,14 @@ function yesNo(value: boolean | null | undefined): string {
   if (value === true) return "Sí";
   if (value === false) return "No";
   return "";
+}
+
+/** Normaliza el género de Player (M/F) al texto del padrón (Varón/Mujer). */
+function normalizeGender(value: string | null | undefined): string {
+  const v = String(value ?? "").trim().toUpperCase();
+  if (v === "F" || v === "MUJER") return "Mujer";
+  if (v === "M" || v === "VARÓN" || v === "VARON") return "Varón";
+  return value ?? "";
 }
 
 function formatDate(value: string | null | undefined): string {
@@ -146,20 +155,24 @@ export async function fetchEmpadronadosRows(
   const supabase = getSupabaseAdmin();
   if (!supabase) return [];
 
-  const { data, error } = await supabase
+  const seenDniHash = new Set<string>();
+  const rows: EmpadronadoExportRow[] = [];
+
+  // 1) Empadronamientos cargados por el formulario web (datos completos).
+  const { data: enrollments, error } = await supabase
     .from("YouthEnrollment")
     .select("*")
     .eq("seasonYear", seasonYear)
     .order("lastName", { ascending: true });
 
   if (error) {
-    console.error("[fetchEmpadronadosRows]", error.message);
-    return [];
+    console.error("[fetchEmpadronadosRows] YouthEnrollment", error.message);
   }
 
-  return (data ?? []).map((row): EmpadronadoExportRow => {
+  for (const row of enrollments ?? []) {
+    if (row.dniHash) seenDniHash.add(row.dniHash);
     const health = row.healthData as EmpadronamientoHealthData | null;
-    return {
+    rows.push({
       apellido: row.lastName ?? "",
       nombre: row.firstName ?? "",
       sexo: row.gender ?? "",
@@ -191,8 +204,74 @@ export async function fetchEmpadronadosRows(
       condicionesSalud: healthSummary(health),
       comentarios: row.comments ?? "",
       fechaRegistro: formatDateTime(row.createdAt),
-    };
-  });
+    });
+  }
+
+  // 2) Padrón ya cargado en la tabla Player (importado / sincronizado).
+  const { data: players, error: playerError } = await supabase
+    .from("Player")
+    .select("firstName,lastName,gender,birthDate,birthYear,category,matricula,dniEnc,dniHash,createdAt,club:Club(name)")
+    .like("id", "player_youth_%")
+    .order("lastName", { ascending: true });
+
+  if (playerError) {
+    console.error("[fetchEmpadronadosRows] Player", playerError.message);
+  }
+
+  for (const row of players ?? []) {
+    const dni = safeDecrypt(row.dniEnc);
+    const dniHash =
+      (row.dniHash as string | null) || (dni ? hashDniForLookup(dni) : "");
+    if (dniHash && seenDniHash.has(dniHash)) continue;
+    if (dniHash) seenDniHash.add(dniHash);
+
+    const clubRaw = row.club as { name: string } | { name: string }[] | null;
+    const club = Array.isArray(clubRaw) ? clubRaw[0]?.name ?? "" : clubRaw?.name ?? "";
+    const birthYear =
+      typeof row.birthYear === "number" && row.birthYear > 1900 ? row.birthYear : null;
+
+    rows.push({
+      apellido: row.lastName ?? "",
+      nombre: row.firstName ?? "",
+      sexo: normalizeGender(row.gender),
+      fechaNacimiento: formatDate(row.birthDate),
+      edadDic31: birthYear ? String(seasonYear - birthYear) : "",
+      categoria: row.category ?? "",
+      dni,
+      club,
+      responsable: "",
+      responsableTelefono: "",
+      telefono: "",
+      email: "",
+      direccion: "",
+      departamento: "",
+      localidad: "",
+      escuela: "",
+      tieneHandicap: row.matricula ? "Sí" : "",
+      matricula: row.matricula ?? "",
+      profesores: "",
+      tutor1Nombre: "",
+      tutor1Dni: "",
+      tutor1Telefono: "",
+      tutor1Email: "",
+      tutor2Nombre: "",
+      tutor2Dni: "",
+      tutor2Email: "",
+      obraSocial: "",
+      grupoSanguineo: "",
+      condicionesSalud: "",
+      comentarios: "",
+      fechaRegistro: formatDateTime(row.createdAt),
+    });
+  }
+
+  rows.sort((a, b) =>
+    `${a.apellido} ${a.nombre}`.localeCompare(`${b.apellido} ${b.nombre}`, "es", {
+      sensitivity: "base",
+    })
+  );
+
+  return rows;
 }
 
 // ----------------- Inscriptos a torneos -----------------
