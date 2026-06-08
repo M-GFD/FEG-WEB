@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { requireGestionArea } from "@/lib/gestion-access";
 import { fetchEmpadronadosRows } from "@/lib/admin-exports";
 import { EMPADRONAMIENTO_SEASON_YEAR } from "@/lib/empadronamiento-menores/constants";
+import { EmpadronadosTable } from "./EmpadronadosTable";
 
 export const metadata = {
   title: "Empadronados | Gestión FEG",
@@ -49,41 +50,7 @@ export default async function AdminEmpadronadosPage() {
           Aún no hay jugadores empadronados en la temporada {EMPADRONAMIENTO_SEASON_YEAR}.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-sm">
-          <table className="w-full min-w-[760px] text-left text-sm">
-            <thead className="bg-[var(--feg-green-soft)] text-white">
-              <tr>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Jugador</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Categoría</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">DNI</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Club</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Localidad</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Fecha</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => (
-                <tr
-                  key={`${r.dni}-${i}`}
-                  className="border-t border-[var(--feg-green)]/10 hover:bg-[var(--feg-bg)]/60"
-                >
-                  <td className="px-4 py-3 font-medium text-[var(--feg-ink)]">
-                    {r.apellido}, {r.nombre}
-                    <span className="ml-1 text-xs text-[var(--feg-green)]">({r.sexo})</span>
-                  </td>
-                  <td className="px-4 py-3 text-[var(--feg-ink)]">{r.categoria}</td>
-                  <td className="px-4 py-3 text-[var(--feg-green)]">{r.dni || "—"}</td>
-                  <td className="px-4 py-3 text-[var(--feg-green)]">{r.club}</td>
-                  <td className="px-4 py-3 text-[var(--feg-green)]">{r.localidad || "—"}</td>
-                  <td className="px-4 py-3 text-xs text-[var(--feg-green)]">{r.fechaRegistro}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="border-t border-[var(--feg-green)]/10 px-4 py-3 text-xs text-[var(--feg-green)]">
-            Total: {rows.length} empadronado{rows.length === 1 ? "" : "s"}
-          </p>
-        </div>
+        <EmpadronadosTable rows={rows} />
       )}
     </div>
   );
