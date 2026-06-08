@@ -5,6 +5,7 @@ import { hashDniForLookup, normalizeDni } from "@/lib/empadronamiento-menores/dn
 import {
   ageOnReferenceDate,
   categoryAtSignup,
+  currentCategoryFromBirthDate,
   parseBirthDateInput,
 } from "@/lib/empadronamiento-menores/category";
 import { matchEnrollmentClub } from "@/lib/empadronamiento-menores/club-match";
@@ -130,6 +131,7 @@ export type TournamentRegistrationListItem = {
   firstName: string;
   gender: string;
   category: string;
+  birthDate: string;
   clubName: string;
   clubOther: string | null;
   hasHandicap: boolean;
@@ -151,7 +153,7 @@ export async function listYouthTournamentRegistrations(options: {
   let query = supabase
     .from("YouthTournamentRegistration")
     .select(
-      "id,lastName,firstName,gender,category,clubName,clubOther,hasHandicap,matricula,playsPrejuvenilesAlso,isPrincipiante,dietaryRestriction,createdAt,clubId"
+      "id,lastName,firstName,gender,category,birthDate,clubName,clubOther,hasHandicap,matricula,playsPrejuvenilesAlso,isPrincipiante,dietaryRestriction,createdAt,clubId"
     )
     .eq("tournamentKey", options.tournamentKey)
     .order("lastName", { ascending: true });
@@ -166,5 +168,23 @@ export async function listYouthTournamentRegistrations(options: {
     return [];
   }
 
-  return (data ?? []) as TournamentRegistrationListItem[];
+  return (data ?? []).map((row): TournamentRegistrationListItem => {
+    const bd = parseBirthDateInput(String(row.birthDate ?? "").slice(0, 10));
+    return {
+      id: row.id,
+      lastName: row.lastName,
+      firstName: row.firstName,
+      gender: row.gender,
+      category: bd ? currentCategoryFromBirthDate(bd) : row.category,
+      birthDate: row.birthDate,
+      clubName: row.clubName,
+      clubOther: row.clubOther,
+      hasHandicap: row.hasHandicap,
+      matricula: row.matricula,
+      playsPrejuvenilesAlso: row.playsPrejuvenilesAlso,
+      isPrincipiante: row.isPrincipiante,
+      dietaryRestriction: row.dietaryRestriction,
+      createdAt: row.createdAt,
+    };
+  });
 }

@@ -28,6 +28,24 @@ export function categoryAtSignup(birthDate: Date, now = new Date()): string {
   return categoryFromBirthDate(birthDate, now);
 }
 
+/** Fecha de referencia (31/12) de la temporada vigente al momento `now`. */
+export function currentSeasonReferenceDate(now = new Date()): Date {
+  return new Date(now.getFullYear(), 11, 31);
+}
+
+/**
+ * Categoría dinámica: se recalcula según la edad al 31/12 de la temporada vigente,
+ * en lugar de usar el valor congelado al momento del empadronamiento.
+ */
+export function currentCategoryFromBirthDate(birthDate: Date, now = new Date()): string {
+  return categoryFromBirthDate(birthDate, currentSeasonReferenceDate(now));
+}
+
+/** Edad al 31/12 de la temporada vigente. */
+export function currentAgeOnReferenceDate(birthDate: Date, now = new Date()): number {
+  return ageOnReferenceDate(birthDate, currentSeasonReferenceDate(now));
+}
+
 export function parseBirthDateInput(value: string): Date | null {
   if (!value) return null;
   const d = new Date(`${value}T12:00:00`);
