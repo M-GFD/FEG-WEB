@@ -55,7 +55,7 @@ const STATIC_PAGES: StaticPage[] = [
     keywords: ["reglamento", "menores", "prejuveniles", "juveniles", "junior", "2026"],
   },
   {
-    title: "Reglamento Pre y Juveniles 2026",
+    title: "Reglamento Pre-Juveniles y Juveniles 2026",
     href: "/institucional/reglamentos/pre-juveniles",
     keywords: ["reglamento", "prejuveniles", "juveniles", "pre y juveniles", "menores", "2026"],
   },
