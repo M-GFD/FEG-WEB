@@ -1,0 +1,87 @@
+{
+  "nav": {
+    "news": "Notícias",
+    "clubs": "Clubes",
+    "institutional": "Institucional",
+    "minors": "Menores",
+    "majors": "Maiores",
+    "rankings": "Rankings",
+    "calendar": "Calendário",
+    "tournaments": "Torneios",
+    "enrollment": "Cadastro",
+    "regulationsMinors": "Regulamento Menores",
+    "regulationsMayores": "Regulamento Maiores",
+    "aboutUs": "Sobre nós",
+    "regulations": "Regulamentos",
+    "homeAria": "Início · FEG",
+    "mainAria": "Principal",
+    "openMenu": "Abrir menu de navegação",
+    "closeMenu": "Fechar menu",
+    "menu": "Menu"
+  },
+  "locale": {
+    "label": "Idioma",
+    "es": "Español",
+    "en": "English",
+    "pt": "Português"
+  },
+  "search": {
+    "placeholder": "Buscar…",
+    "ariaLabel": "Buscar no site",
+    "srLabel": "Buscar notícias, torneios, clubes e jogadores"
+  },
+  "footer": {
+    "contact": "Contato",
+    "copyright": "© {year} Federação Entrerriana de Golfe",
+    "management": "Gestão",
+    "signIn": "Entrar"
+  },
+  "common": {
+    "backToHome": "← Voltar ao início",
+    "readMore": "Ver mais →",
+    "viewMore": "Ver mais →",
+    "viewCalendar": "Calendário →",
+    "viewFullCalendar": "Ver calendário completo →"
+  },
+  "home": {
+    "heroAlt": "Campo de golfe",
+    "heroLine1": "TODO O GOLFE",
+    "heroLine2": "DE ENTRE RÍOS",
+    "heroLine3": "EM UM SÓ LUGAR",
+    "heroTitleDesktop": "TODO O GOLFE DE ENTRE RÍOS,",
+    "heroTitleDesktop2": "EM UM SÓ LUGAR.",
+    "heroSubtitle": "Uma plataforma pensada para jogadores, clubes e competições de toda a província.",
+    "resultsAvailable": "RESULTADOS DISPONÍVEIS: Villa Elisa (Sênior Caballeros)",
+    "rankingLink": "Ranking →",
+    "newsTitleMobile1": "CONHEÇA A ATUALIDADE",
+    "newsTitleMobile2": "DO CIRCUITO",
+    "newsTitleDesktop": "CONHEÇA A ATUALIDADE DO CIRCUITO",
+    "newsSubtitleMobile1": "Resultados, momentos e protagonistas",
+    "newsSubtitleMobile2": "que definem a competição",
+    "newsSubtitleDesktop": "Resultados, momentos e protagonistas que definem a competição",
+    "newsEmpty": "Ainda não há notícias publicadas.",
+    "newsViewAll": "Ver todas as notícias →",
+    "institutionalAlt": "Institucional FEG",
+    "institutionalTitle": "INSTITUCIONAL",
+    "institutionalSubtitle": "Conheça a missão da FEG, seu papel regional e a visão para o desenvolvimento do golfe entrerriano.",
+    "objectivesLabel": "Objetivos",
+    "objectivesTitle": "Regulação e transparência",
+    "objectivesBody": "Rankings, resultados e gestão clara.",
+    "regionalLabel": "Papel regional",
+    "regionalTitle": "Coordenação provincial",
+    "regionalBody": "Calendário, clubes e circuito federado.",
+    "visionLabel": "Visão",
+    "visionTitle": "Desenvolvimento do esporte",
+    "visionBody": "Crescimento, jovens e projeção."
+  },
+  "tournaments": {
+    "title": "PRÓXIMOS TORNEIOS",
+    "subtitle": "Datas, sedes e modalidades do circuito federado.",
+    "empty": "Não há torneios próximos no momento.",
+    "viewFullCalendar": "Ver calendário completo →"
+  },
+  "heroCard": {
+    "nextTournament": "Próximo torneio",
+    "noUpcoming": "Sem torneios próximos na agenda."
+  }
+}

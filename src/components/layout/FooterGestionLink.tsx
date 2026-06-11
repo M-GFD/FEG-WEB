@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 const GESTION_CALLBACK = encodeURIComponent("/gestion");
 
 export function FooterGestionLink() {
   const { data: session, status } = useSession();
+  const t = useTranslations("footer");
 
   const isAuthed = status === "authenticated" && session?.user;
   const href = isAuthed ? "/gestion" : `/auth/signin?callbackUrl=${GESTION_CALLBACK}`;
-  const label = isAuthed ? "Gestión" : "Acceder";
+  const label = isAuthed ? t("management") : t("signIn");
 
   return (
     <Link

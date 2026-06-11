@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const baseRemotePatterns: NonNullable<
   NonNullable<NextConfig["images"]>["remotePatterns"]
@@ -82,7 +85,7 @@ function securityHeaders(): { key: string; value: string }[] {
     { key: "Referrer-Policy", value: "no-referrer" },
     {
       key: "Permissions-Policy",
-      value: "geolocation=(), microphone=(), camera=(), interest-cohort=()",
+      value: "geolocation=(), microphone=(), camera=()",
     },
   ];
   if (isProd) {
@@ -105,6 +108,15 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns,
   },
+  async redirects() {
+    return [
+      {
+        source: "/favicon.ico",
+        destination: "/LOGO_FEG%201.svg",
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {
@@ -123,4 +135,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

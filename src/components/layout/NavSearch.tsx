@@ -2,6 +2,7 @@
 
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { type FormEvent, useState } from "react";
 
 type Props = {
@@ -19,6 +20,7 @@ const inputClass =
 
 export function NavSearch({ className, variant = "desktop" }: Props) {
   const router = useRouter();
+  const t = useTranslations("search");
   const [value, setValue] = useState("");
   const inputId = variant === "mobile" ? "nav-site-search-mobile" : "nav-site-search";
 
@@ -33,11 +35,11 @@ export function NavSearch({ className, variant = "desktop" }: Props) {
     <form
       className={`${capsuleShell} ${className ?? ""}`}
       role="search"
-      aria-label="Buscar en el sitio"
+      aria-label={t("ariaLabel")}
       onSubmit={onSubmit}
     >
       <label htmlFor={inputId} className="sr-only">
-        Buscar noticias, torneos, clubes y jugadores
+        {t("srLabel")}
       </label>
       <Search
         aria-hidden
@@ -50,7 +52,7 @@ export function NavSearch({ className, variant = "desktop" }: Props) {
         name="q"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="Buscar…"
+        placeholder={t("placeholder")}
         enterKeyHint="search"
         autoComplete="off"
         className={inputClass}

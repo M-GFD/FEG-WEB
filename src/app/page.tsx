@@ -8,8 +8,11 @@ import { UpcomingTournamentsTabs } from "@/components/home/UpcomingTournamentsTa
 import { HomeScrollHash } from "@/components/home/HomeScrollHash";
 import { HeroNextTournamentCard } from "@/components/home/HeroNextTournamentCard";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
+import { getTranslations } from "next-intl/server";
 
 export default async function HomePage() {
+  const t = await getTranslations("home");
+  const tCommon = await getTranslations("common");
   const news = await getNews();
 
   return (
@@ -22,7 +25,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
             <Image
               src="/hero%20gif.gif"
-              alt="Cancha de golf"
+              alt={t("heroAlt")}
               fill
               priority
               className="object-cover object-[50%_38%] max-md:object-[40%_50%]"
@@ -41,26 +44,25 @@ export default async function HomePage() {
                   <h1 className="font-heading font-semibold leading-[1.08] text-center text-[#FFFFFF] [text-shadow:0_2px_14px_rgba(0,0,0,0.45),0_1px_4px_rgba(0,0,0,0.55)] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[56px] md:leading-[1.05]">
                     <span className="inline-flex flex-col items-center uppercase md:hidden">
                       <span className="block whitespace-nowrap text-center text-[clamp(calc(1.81rem+4pt),calc(8vw+4pt),calc(2.71rem+4pt))] max-[380px]:text-[calc(1.75rem+4pt)]">
-                        TODO EL GOLF
+                        {t("heroLine1")}
                       </span>
                       <span className="block whitespace-nowrap text-center text-[clamp(calc(1.81rem+4pt),calc(8vw+4pt),calc(2.71rem+4pt))] max-[380px]:text-[calc(1.75rem+4pt)]">
-                        DE ENTRE RÍOS
+                        {t("heroLine2")}
                       </span>
                       <span className="block whitespace-nowrap text-center text-[clamp(calc(1.81rem+4pt),calc(8vw+4pt),calc(2.71rem+4pt))] max-[380px]:text-[calc(1.75rem+4pt)]">
-                        EN UN SOLO LUGAR
+                        {t("heroLine3")}
                       </span>
                     </span>
                     <span className="hidden md:inline md:text-[56px]">
-                      TODO EL GOLF DE ENTRE RÍOS,
+                      {t("heroTitleDesktop")}
                       <br />
-                      EN UN SOLO LUGAR.
+                      {t("heroTitleDesktop2")}
                     </span>
                   </h1>
                 </RevealOnScroll>
                 <RevealOnScroll revealIndex={2} yOffset={18} className="block w-full">
                   <p className="mx-auto mt-4 max-w-xl text-[0.95rem] font-medium leading-relaxed text-[#FFFFFF] [text-shadow:0_1px_10px_rgba(0,0,0,0.42)] sm:text-base sm:leading-normal md:text-lg">
-                    Una plataforma diseñada para jugadores, clubes y competencias de
-                    toda la provincia.
+                    {t("heroSubtitle")}
                   </p>
                 </RevealOnScroll>
               </div>
@@ -76,13 +78,13 @@ export default async function HomePage() {
           <RevealOnScroll revealIndex={4} yOffset={16} className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
           <div className="flex flex-wrap items-center gap-3 text-white">
             <p className="min-w-0 font-heading text-xs font-semibold leading-snug sm:text-sm md:text-base lg:text-lg">
-              RESULTADOS DISPONIBLES: Villa Elisa (Senior Caballeros)
+              {t("resultsAvailable")}
             </p>
             <Link
               href="/ranking"
               className="rounded-full bg-[#f3e12b] px-3 py-1.5 text-xs font-semibold text-[#146638] transition hover:brightness-95"
             >
-              Ranking →
+              {t("rankingLink")}
             </Link>
           </div>
           </RevealOnScroll>
@@ -98,18 +100,16 @@ export default async function HomePage() {
           <div className="mx-auto max-w-3xl text-center">
             <RevealOnScroll revealIndex={0} yOffset={22} className="w-full text-center">
               <h2 className="w-full text-center font-heading text-[28px] font-semibold leading-[1.1] text-[var(--feg-ink)] sm:text-[36px]">
-                <span className="block md:hidden">CONOCÉ LA ACTUALIDAD</span>
-                <span className="block md:hidden">DEL CIRCUITO</span>
-                <span className="hidden md:inline">CONOCÉ LA ACTUALIDAD DEL CIRCUITO</span>
+                <span className="block md:hidden">{t("newsTitleMobile1")}</span>
+                <span className="block md:hidden">{t("newsTitleMobile2")}</span>
+                <span className="hidden md:inline">{t("newsTitleDesktop")}</span>
               </h2>
             </RevealOnScroll>
             <RevealOnScroll revealIndex={2} yOffset={20} className="mt-4 w-full text-center">
               <p className="mx-auto w-full max-w-xl text-center text-base font-medium text-[var(--feg-green)] sm:text-lg">
-                <span className="block md:hidden">Resultados, momentos y protagonistas</span>
-                <span className="block md:hidden">que definen la competencia</span>
-                <span className="hidden md:inline">
-                  Resultados, momentos y protagonistas que definen la competencia
-                </span>
+                <span className="block md:hidden">{t("newsSubtitleMobile1")}</span>
+                <span className="block md:hidden">{t("newsSubtitleMobile2")}</span>
+                <span className="hidden md:inline">{t("newsSubtitleDesktop")}</span>
               </p>
             </RevealOnScroll>
           </div>
@@ -118,7 +118,7 @@ export default async function HomePage() {
             {news.length === 0 ? (
               <RevealOnScroll revealIndex={1} className="col-span-full">
                 <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-8 text-center text-[var(--feg-green)]">
-                  Aún no hay noticias publicadas.
+                  {t("newsEmpty")}
                 </p>
               </RevealOnScroll>
             ) : (
@@ -163,7 +163,7 @@ export default async function HomePage() {
                     </p>
                     <div className="mt-auto flex justify-end pt-4">
                       <span className="inline-flex items-center justify-center rounded-full bg-[var(--feg-green)] px-3 py-1.5 text-xs font-semibold text-white transition group-hover:brightness-110">
-                        Ver más →
+                        {tCommon("readMore")}
                       </span>
                     </div>
                   </div>
@@ -180,7 +180,7 @@ export default async function HomePage() {
                 href="/noticias"
                 className="rounded-full bg-[var(--feg-ink)] px-8 py-3 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.15)] transition hover:brightness-110"
               >
-                Ver todas las noticias →
+                {t("newsViewAll")}
               </Link>
             </RevealOnScroll>
           )}
@@ -199,7 +199,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
           <Image
             src="/institucional%20gif.gif"
-            alt="Institucional FEG"
+            alt={t("institutionalAlt")}
             fill
             className="object-cover"
             sizes="100vw"
@@ -214,10 +214,10 @@ export default async function HomePage() {
                 {/* Arriba a la izquierda */}
                 <div className="max-w-2xl">
                   <h2 className="font-heading text-[28px] font-semibold leading-[1.1] text-white sm:text-[36px] [text-shadow:0_2px_12px_rgba(0,36,3,0.55),0_1px_3px_rgba(0,36,3,0.85)]">
-                    INSTITUCIONAL
+                    {t("institutionalTitle")}
                   </h2>
                   <p className="mt-4 max-w-xl text-base font-medium leading-relaxed text-white/85 sm:text-lg [text-shadow:0_2px_12px_rgba(0,36,3,0.42),0_1px_3px_rgba(0,36,3,0.7)]">
-                    Conocé la misión de la FEG, su rol regional y la visión para el desarrollo del golf entrerriano.
+                    {t("institutionalSubtitle")}
                   </p>
                 </div>
 
@@ -226,35 +226,35 @@ export default async function HomePage() {
                   <div className="grid w-full gap-3 sm:grid-cols-3">
                     <div className="rounded-2xl border border-white/15 bg-[#0b2b12] p-4">
                       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
-                        Objetivos
+                        {t("objectivesLabel")}
                       </div>
                       <div className="mt-2 text-sm font-semibold text-white [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
-                        Regulación y transparencia
+                        {t("objectivesTitle")}
                       </div>
                       <div className="mt-1 text-[13px] leading-relaxed text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.3)]">
-                        Rankings, resultados y gestión clara.
+                        {t("objectivesBody")}
                       </div>
                     </div>
                     <div className="rounded-2xl border border-white/15 bg-[#0b2b12] p-4">
                       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
-                        Rol regional
+                        {t("regionalLabel")}
                       </div>
                       <div className="mt-2 text-sm font-semibold text-white [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
-                        Coordinación provincial
+                        {t("regionalTitle")}
                       </div>
                       <div className="mt-1 text-[13px] leading-relaxed text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.3)]">
-                        Calendario, clubes y circuito federado.
+                        {t("regionalBody")}
                       </div>
                     </div>
                     <div className="rounded-2xl border border-white/15 bg-[#0b2b12] p-4">
                       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
-                        Visión
+                        {t("visionLabel")}
                       </div>
                       <div className="mt-2 text-sm font-semibold text-white [text-shadow:0_2px_10px_rgba(0,36,3,0.35)]">
-                        Desarrollo del deporte
+                        {t("visionTitle")}
                       </div>
                       <div className="mt-1 text-[13px] leading-relaxed text-white/80 [text-shadow:0_2px_10px_rgba(0,36,3,0.3)]">
-                        Crecimiento, jóvenes y proyección.
+                        {t("visionBody")}
                       </div>
                     </div>
                   </div>
@@ -266,7 +266,7 @@ export default async function HomePage() {
                     href="/institucional"
                     className="ml-auto inline-flex items-center justify-center rounded-full bg-[var(--feg-yellow)] px-7 py-3 text-sm font-semibold text-[var(--feg-green-2)] transition hover:brightness-95"
                   >
-                    Ver más →
+                    {tCommon("viewMore")}
                   </Link>
                 </div>
               </div>

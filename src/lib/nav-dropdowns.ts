@@ -1,5 +1,4 @@
 import { audienceQueryHref, type AudienceSegment } from "@/lib/content-audience";
-import { getReglamentoMayores } from "@/lib/reglamentos";
 
 export type NavDropdownLink = { href: string; label: string };
 
@@ -9,29 +8,35 @@ export type NavDropdownItem = {
   links: NavDropdownLink[];
 };
 
-const AUDIENCE_PATHS: { path: string; label: string }[] = [
-  { path: "/ranking", label: "Rankings" },
-  { path: "/calendario", label: "Calendario" },
-  { path: "/torneos", label: "Torneos" },
-  { path: "/noticias", label: "Noticias" },
-];
+type NavTranslator = {
+  (key: string): string;
+};
 
-function audienceDropdown(segment: AudienceSegment, label: string): NavDropdownItem {
-  const links = AUDIENCE_PATHS.map(({ path, label: linkLabel }) => ({
+const AUDIENCE_PATH_KEYS = [
+  { path: "/ranking", key: "rankings" },
+  { path: "/calendario", key: "calendar" },
+  { path: "/torneos", key: "tournaments" },
+  { path: "/noticias", key: "news" },
+] as const;
+
+function audienceDropdown(
+  segment: AudienceSegment,
+  label: string,
+  t: NavTranslator
+): NavDropdownItem {
+  const links = AUDIENCE_PATH_KEYS.map(({ path, key }) => ({
     href: audienceQueryHref(path, segment),
-    label: linkLabel,
+    label: t(key),
   }));
+
   if (segment === "menores") {
-    links.push({ href: "/empadronamiento-menores", label: "Empadronamiento" });
-    links.push({ href: "/menores/reglamento", label: "Reglamento Menores" });
+    links.push({ href: "/empadronamiento-menores", label: t("enrollment") });
+    links.push({ href: "/menores/reglamento", label: t("regulationsMinors") });
   }
   if (segment === "mayores") {
-    const reglamentoMayores = getReglamentoMayores();
-    links.push({
-      href: "/mayores/reglamento",
-      label: reglamentoMayores.navLabel,
-    });
+    links.push({ href: "/mayores/reglamento", label: t("regulationsMayores") });
   }
+
   return {
     id: segment,
     label,
@@ -39,15 +44,24 @@ function audienceDropdown(segment: AudienceSegment, label: string): NavDropdownI
   };
 }
 
-export const NAV_DROPDOWN_ITEMS: NavDropdownItem[] = [
-  {
-    id: "institucional",
-    label: "Institucional",
-    links: [
-      { href: "/institucional", label: "Nosotros" },
-      { href: "/institucional/reglamentos", label: "Reglamentos" },
-    ],
-  },
-  audienceDropdown("menores", "Menores"),
-  audienceDropdown("mayores", "Mayores"),
-];
+export function buildPrimaryNavItems(t: NavTranslator): NavDropdownLink[] {
+  return [
+    { href: "/noticias", label: t("news") },
+    { href: "/clubes", label: t("clubs") },
+  ];
+}
+
+export function buildNavDropdownItems(t: NavTranslator): NavDropdownItem[] {
+  return [
+    {
+      id: "institucional",
+      label: t("institutional"),
+      links: [
+        { href: "/institucional", label: t("aboutUs") },
+        { href: "/institucional/reglamentos", label: t("regulations") },
+      ],
+    },
+    audienceDropdown("menores", t("minors"), t),
+    audienceDropdown("mayores", t("majors"), t),
+  ];
+}

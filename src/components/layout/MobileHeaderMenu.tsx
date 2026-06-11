@@ -1,9 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { setUserLocale } from "@/actions/locale";
+import { LOCALE_CODE, locales, type AppLocale } from "@/i18n/routing";
 import type { NavDropdownItem } from "@/lib/nav-dropdowns";
 
 export type MobileNavLink = { href: string; label: string };
@@ -14,8 +18,14 @@ type Props = {
 };
 
 const PANEL_TRANSITION_MS = 300;
+const LOCALE_SECTION_ID = "locale";
 
 export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
+  const tNav = useTranslations("nav");
+  const tLocale = useTranslations("locale");
+  const locale = useLocale() as AppLocale;
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [renderPanel, setRenderPanel] = useState(false);
   const [panelActive, setPanelActive] = useState(false);
@@ -64,11 +74,20 @@ export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
     setExpandedId((current) => (current === id ? null : id));
   };
 
+  const selectLocale = (next: AppLocale) => {
+    if (next === locale || pending) return;
+    startTransition(async () => {
+      await setUserLocale(next);
+      router.refresh();
+    });
+    close();
+  };
+
   const panel = renderPanel ? (
     <div className="fixed inset-0 z-[200]" role="presentation">
       <button
         type="button"
-        aria-label="Cerrar menú"
+        aria-label={tNav("closeMenu")}
         onClick={close}
         className={`absolute inset-0 bg-[#002403]/45 backdrop-blur-[2px] transition-opacity duration-300 ${
           panelActive ? "opacity-100" : "opacity-0"
@@ -78,20 +97,20 @@ export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
       <nav
         role="dialog"
         aria-modal="true"
-        aria-label="Menú de navegación"
+        aria-label={tNav("menu")}
         className={`absolute right-0 top-0 flex h-dvh w-[min(100%,20rem)] flex-col border-l border-[var(--feg-green)]/15 bg-white/98 shadow-[-16px_0_48px_rgba(0,36,3,0.14)] backdrop-blur-md transition-transform duration-300 ease-out ${
           panelActive ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex shrink-0 items-center justify-between border-b border-[var(--feg-green)]/10 px-5 py-4">
           <p className="font-heading text-sm font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]">
-            Menú
+            {tNav("menu")}
           </p>
           <button
             type="button"
             onClick={close}
             className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--feg-green)]/12 text-[var(--feg-ink)] transition hover:bg-[var(--feg-bg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--feg-green)]"
-            aria-label="Cerrar menú"
+            aria-label={tNav("closeMenu")}
           >
             <X className="h-5 w-5" strokeWidth={2.25} aria-hidden />
           </button>
@@ -158,6 +177,63 @@ export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
                 </div>
               );
             })}
+
+            <div className="overflow-hidden rounded-2xl border border-[var(--feg-green)]/10 bg-[var(--feg-bg)]/40">
+              <button
+                type="button"
+                onClick={() => toggleSection(LOCALE_SECTION_ID)}
+                aria-expanded={expandedId === LOCALE_SECTION_ID}
+                className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left font-heading text-sm font-semibold uppercase tracking-wide text-[#24321c] transition hover:bg-white/70 focus-visible:bg-white/70 focus-visible:outline-none"
+              >
+                <span>{tLocale("label")}</span>
+                <span className="flex items-center gap-2">
+                  <span className="text-xs font-bold tracking-[0.08em] text-[var(--feg-green-2)]">
+                    {LOCALE_CODE[locale]}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 shrink-0 text-[var(--feg-green-2)] transition-transform duration-200 ${
+                      expandedId === LOCALE_SECTION_ID ? "rotate-180" : ""
+                    }`}
+                    aria-hidden
+                  />
+                </span>
+              </button>
+
+              <div
+                className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+                  expandedId === LOCALE_SECTION_ID ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                }`}
+              >
+                <ul
+                  role="listbox"
+                  aria-label={tLocale("label")}
+                  className="overflow-hidden border-t border-[var(--feg-green)]/10 bg-white/80"
+                >
+                  {locales.map((loc) => {
+                    const active = loc === locale;
+                    return (
+                      <li key={loc} role="presentation">
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={active}
+                          disabled={pending}
+                          onClick={() => selectLocale(loc)}
+                          className={`flex w-full items-center justify-between gap-3 px-4 py-3 pl-6 text-sm font-semibold transition focus-visible:outline-none ${
+                            active
+                              ? "bg-[var(--feg-bg)] text-[var(--feg-green)]"
+                              : "text-[#24321c] hover:bg-[var(--feg-bg)] focus-visible:bg-[var(--feg-bg)]"
+                          } ${pending ? "opacity-60" : ""}`}
+                        >
+                          <span>{LOCALE_CODE[loc]}</span>
+                          <span className="text-xs font-medium text-[#24321c]/70">{tLocale(loc)}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </nav>
@@ -170,7 +246,7 @@ export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
         type="button"
         onClick={() => setOpen(true)}
         className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#123c15]/12 bg-white/80 text-[#123c15] shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md transition hover:bg-white hover:shadow-[0_12px_34px_rgba(0,0,0,0.1)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--feg-green)]"
-        aria-label="Abrir menú de navegación"
+        aria-label={tNav("openMenu")}
         aria-expanded={open}
         aria-haspopup="dialog"
       >
