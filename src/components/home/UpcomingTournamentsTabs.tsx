@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import {
   formatFechaTitle,
@@ -64,6 +65,7 @@ function UpcomingTournamentCard({
 }
 
 export function UpcomingTournamentsTabs() {
+  const t = useTranslations("tournaments");
   const [now, setNow] = useState<Date>(() => new Date());
   const [activeImageIdx, setActiveImageIdx] = useState(0);
 
@@ -82,11 +84,9 @@ export function UpcomingTournamentsTabs() {
       >
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
           <h3 className="font-heading text-3xl font-semibold tracking-tight text-[var(--feg-ink)]">
-            PRÓXIMOS TORNEOS
+            {t("title")}
           </h3>
-          <p className="mt-4 text-[var(--feg-green)]">
-            No hay torneos próximos en este momento.
-          </p>
+          <p className="mt-4 text-[var(--feg-green)]">{t("empty")}</p>
         </div>
       </section>
     );
@@ -119,10 +119,10 @@ export function UpcomingTournamentsTabs() {
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-14 lg:px-8">
         <RevealOnScroll revealIndex={0} yOffset={18} className="mx-auto max-w-3xl text-center">
           <h3 className="font-heading text-[28px] font-semibold leading-[1.1] text-white [text-shadow:0_2px_12px_rgba(0,36,3,0.55)] sm:text-[36px]">
-            PRÓXIMOS TORNEOS
+            {t("title")}
           </h3>
           <p className="mx-auto mt-4 max-w-xl text-base font-medium text-white/85 [text-shadow:0_2px_10px_rgba(0,36,3,0.4)] sm:text-lg">
-            Fechas, sedes y modalidades del circuito federado.
+            {t("subtitle")}
           </p>
         </RevealOnScroll>
 
@@ -144,7 +144,7 @@ export function UpcomingTournamentsTabs() {
             href="/calendario"
             className="inline-flex items-center justify-center rounded-full bg-[var(--feg-yellow)] px-8 py-3 text-sm font-semibold text-[var(--feg-green-2)] transition hover:brightness-95"
           >
-            Ver calendario completo →
+            {t("viewFullCalendar")}
           </Link>
         </RevealOnScroll>
       </div>

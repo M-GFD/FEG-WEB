@@ -1,0 +1,87 @@
+{
+  "nav": {
+    "news": "News",
+    "clubs": "Clubs",
+    "institutional": "Institutional",
+    "minors": "Juniors",
+    "majors": "Seniors",
+    "rankings": "Rankings",
+    "calendar": "Calendar",
+    "tournaments": "Tournaments",
+    "enrollment": "Registration",
+    "regulationsMinors": "Junior Regulations",
+    "regulationsMayores": "Senior Regulations",
+    "aboutUs": "About us",
+    "regulations": "Regulations",
+    "homeAria": "Home · FEG",
+    "mainAria": "Main",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close menu",
+    "menu": "Menu"
+  },
+  "locale": {
+    "label": "Language",
+    "es": "Español",
+    "en": "English",
+    "pt": "Português"
+  },
+  "search": {
+    "placeholder": "Search…",
+    "ariaLabel": "Search the site",
+    "srLabel": "Search news, tournaments, clubs and players"
+  },
+  "footer": {
+    "contact": "Contact",
+    "copyright": "© {year} Entre Ríos Golf Federation",
+    "management": "Management",
+    "signIn": "Sign in"
+  },
+  "common": {
+    "backToHome": "← Back to home",
+    "readMore": "Read more →",
+    "viewMore": "View more →",
+    "viewCalendar": "Calendar →",
+    "viewFullCalendar": "View full calendar →"
+  },
+  "home": {
+    "heroAlt": "Golf course",
+    "heroLine1": "ALL GOLF",
+    "heroLine2": "IN ENTRE RÍOS",
+    "heroLine3": "IN ONE PLACE",
+    "heroTitleDesktop": "ALL GOLF IN ENTRE RÍOS,",
+    "heroTitleDesktop2": "IN ONE PLACE.",
+    "heroSubtitle": "A platform built for players, clubs and competitions across the province.",
+    "resultsAvailable": "RESULTS AVAILABLE: Villa Elisa (Senior Men)",
+    "rankingLink": "Ranking →",
+    "newsTitleMobile1": "STAY UP TO DATE",
+    "newsTitleMobile2": "WITH THE CIRCUIT",
+    "newsTitleDesktop": "STAY UP TO DATE WITH THE CIRCUIT",
+    "newsSubtitleMobile1": "Results, moments and protagonists",
+    "newsSubtitleMobile2": "that define the competition",
+    "newsSubtitleDesktop": "Results, moments and protagonists that define the competition",
+    "newsEmpty": "No news published yet.",
+    "newsViewAll": "View all news →",
+    "institutionalAlt": "FEG Institutional",
+    "institutionalTitle": "INSTITUTIONAL",
+    "institutionalSubtitle": "Learn about FEG's mission, regional role and vision for developing golf in Entre Ríos.",
+    "objectivesLabel": "Objectives",
+    "objectivesTitle": "Regulation and transparency",
+    "objectivesBody": "Rankings, results and clear management.",
+    "regionalLabel": "Regional role",
+    "regionalTitle": "Provincial coordination",
+    "regionalBody": "Calendar, clubs and the federated circuit.",
+    "visionLabel": "Vision",
+    "visionTitle": "Sport development",
+    "visionBody": "Growth, youth and long-term projection."
+  },
+  "tournaments": {
+    "title": "UPCOMING TOURNAMENTS",
+    "subtitle": "Dates, venues and formats of the federated circuit.",
+    "empty": "There are no upcoming tournaments at this time.",
+    "viewFullCalendar": "View full calendar →"
+  },
+  "heroCard": {
+    "nextTournament": "Next tournament",
+    "noUpcoming": "No upcoming tournaments on the schedule."
+  }
+}

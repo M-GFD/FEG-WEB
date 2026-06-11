@@ -1,16 +1,14 @@
 import { HeaderBar } from "@/components/layout/HeaderBar";
-import { NAV_DROPDOWN_ITEMS } from "@/lib/nav-dropdowns";
+import { buildNavDropdownItems, buildPrimaryNavItems } from "@/lib/nav-dropdowns";
+import { getTranslations } from "next-intl/server";
 
-export const PRIMARY_NAV_ITEMS = [
-  { href: "/noticias", label: "Noticias" },
-  { href: "/clubes", label: "Clubes" },
-] as const;
+export async function Header() {
+  const t = await getTranslations("nav");
 
-export function Header() {
   return (
     <HeaderBar
-      primaryLinks={[...PRIMARY_NAV_ITEMS]}
-      navDropdownItems={NAV_DROPDOWN_ITEMS}
+      primaryLinks={buildPrimaryNavItems(t)}
+      navDropdownItems={buildNavDropdownItems(t)}
     />
   );
 }

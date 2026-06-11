@@ -7,7 +7,9 @@ import { FegLogo } from "@/components/layout/FegLogo";
 import { NavSearch } from "@/components/layout/NavSearch";
 import { HeaderNotifications } from "@/components/layout/HeaderNotifications";
 import { HeaderNavCapsule, type HeaderNavLink } from "@/components/layout/HeaderNavCapsule";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import type { NavDropdownItem } from "@/lib/nav-dropdowns";
+import { useTranslations } from "next-intl";
 
 type HeaderTheme = "dark" | "light";
 
@@ -19,6 +21,7 @@ type Props = {
 /** Desktop: NavBar centrada en el header; solo se renderiza si hay espacio (ver HeaderBar). */
 export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
   const pathname = usePathname();
+  const tNav = useTranslations("nav");
   const [theme, setTheme] = useState<HeaderTheme>("light");
 
   useEffect(() => {
@@ -63,7 +66,7 @@ export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
       <div className="relative z-20 inline-flex shrink-0 items-center">
         <Link
           href="/"
-          aria-label="Inicio · FEG"
+          aria-label={tNav("homeAria")}
           className="inline-flex items-center rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123c15]/40 focus-visible:ring-offset-2"
         >
           <FegLogo size="nav" className="shrink-0" />
@@ -71,7 +74,7 @@ export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
       </div>
 
       <nav
-        aria-label="Principal"
+        aria-label={tNav("mainAria")}
         className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
       >
         <div className="pointer-events-auto">
@@ -83,6 +86,7 @@ export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
       </nav>
 
       <div className="relative z-20 ml-auto flex shrink-0 items-center justify-end gap-2">
+        <LocaleSwitcher headerContrast={theme} />
         <HeaderNotifications theme={theme} className="shrink-0" />
         <div className="w-[13.75rem] shrink-0">
           <NavSearch variant="desktop" className="w-full" />

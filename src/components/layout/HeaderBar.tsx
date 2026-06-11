@@ -8,6 +8,7 @@ import { NavSearch } from "@/components/layout/NavSearch";
 import { HeaderDesktopRail } from "@/components/layout/HeaderDesktopRail";
 import { HeaderNavCapsule, type HeaderNavLink } from "@/components/layout/HeaderNavCapsule";
 import { FegLogo } from "@/components/layout/FegLogo";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import type { NavDropdownItem } from "@/lib/nav-dropdowns";
 
 /** Margen horizontal del header (padding del contenedor + reserva). */
@@ -61,18 +62,23 @@ export function HeaderBar({ primaryLinks, navDropdownItems }: Props) {
             />
             <div className="flex shrink-0 items-center gap-2">
               <div className="h-9 w-9 shrink-0" />
+              <div className="h-9 w-9 shrink-0" />
               <div className="h-9 w-[13.75rem] shrink-0 rounded-full bg-white/70" />
             </div>
           </div>
 
           {useMobileLayout ? (
-            <div className="grid w-full grid-cols-[minmax(0,auto)_minmax(0,1fr)_2.75rem_2.75rem] items-center gap-2">
+            <div className="grid w-full grid-cols-[minmax(0,auto)_minmax(0,1fr)_2.75rem_2.75rem_2.75rem] items-center gap-2">
               <div className="min-w-0">
                 <FegLogoLink size="nav" />
               </div>
               <div className="min-w-0 overflow-hidden">
                 <NavSearch variant="mobile" className="w-full min-w-0 max-w-full" />
               </div>
+              <LocaleSwitcher
+                headerContrast="light"
+                className="flex h-11 w-full max-w-[2.75rem] justify-center justify-self-center"
+              />
               <HeaderNotifications
                 theme="light"
                 className="flex h-11 w-full max-w-[2.75rem] justify-center justify-self-center"

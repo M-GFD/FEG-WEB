@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Oswald, Urbanist } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import { Providers } from "./providers";
 import { FooterPublicOnly } from "@/components/layout/FooterPublicOnly";
@@ -34,16 +36,20 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
+  const locale = await getLocale();
+  const messages = await getMessages();
 
   return (
-    <html lang="es">
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`${oswald.variable} ${urbanist.variable} flex min-h-screen flex-col font-sans antialiased`}
       >
-        <Providers session={session}>
-          <div className="flex flex-1 flex-col">{children}</div>
-          <FooterPublicOnly />
-        </Providers>
+        <NextIntlClientProvider messages={messages}>
+          <Providers session={session}>
+            <div className="flex flex-1 flex-col">{children}</div>
+            <FooterPublicOnly />
+          </Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

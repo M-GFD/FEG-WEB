@@ -1,9 +1,14 @@
+"use client";
+
 import { FegLogoLink } from "@/components/layout/FegLogo";
 import { FooterGestionLink } from "@/components/layout/FooterGestionLink";
+import { useTranslations } from "next-intl";
 
 const CONTACT_EMAIL = "fgolf.entrerios@gmail.com";
 
 export function Footer() {
+  const t = useTranslations("footer");
+
   return (
     <footer className="mt-auto border-t border-[var(--feg-green)]/15 bg-white text-[var(--feg-ink)]">
       <div className="mx-auto max-w-7xl px-6 py-5 lg:px-8">
@@ -12,7 +17,7 @@ export function Footer() {
             <FegLogoLink size="nav" className="ring-offset-white" />
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]">
-                Contacto
+                {t("contact")}
               </p>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
@@ -25,7 +30,7 @@ export function Footer() {
 
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 sm:justify-end">
             <p className="text-xs text-[var(--feg-green)]/60">
-              © {new Date().getFullYear()} Federación Entrerriana de Golf
+              {t("copyright", { year: new Date().getFullYear() })}
             </p>
             <FooterGestionLink />
           </div>
