@@ -1,4 +1,5 @@
 import { audienceQueryHref, type AudienceSegment } from "@/lib/content-audience";
+import { getReglamentoMayores } from "@/lib/reglamentos";
 
 export type NavDropdownLink = { href: string; label: string };
 
@@ -22,6 +23,14 @@ function audienceDropdown(segment: AudienceSegment, label: string): NavDropdownI
   }));
   if (segment === "menores") {
     links.push({ href: "/empadronamiento-menores", label: "Empadronamiento" });
+    links.push({ href: "/menores/reglamento", label: "Reglamento Menores" });
+  }
+  if (segment === "mayores") {
+    const reglamentoMayores = getReglamentoMayores();
+    links.push({
+      href: "/mayores/reglamento",
+      label: reglamentoMayores.navLabel,
+    });
   }
   return {
     id: segment,
@@ -36,7 +45,7 @@ export const NAV_DROPDOWN_ITEMS: NavDropdownItem[] = [
     label: "Institucional",
     links: [
       { href: "/institucional", label: "Nosotros" },
-      { href: "/institucional/reglamento", label: "Reglamento" },
+      { href: "/institucional/reglamentos", label: "Reglamentos" },
     ],
   },
   audienceDropdown("menores", "Menores"),

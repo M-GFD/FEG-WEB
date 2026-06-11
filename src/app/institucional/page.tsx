@@ -31,10 +31,10 @@ export default function InstitucionalPage() {
               Directorio →
             </Link>
             <Link
-              href="/institucional/reglamento"
+              href="/institucional/reglamentos"
               className="inline-flex items-center justify-center rounded-full bg-[var(--feg-ink)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
             >
-              Reglamento →
+              Reglamentos →
             </Link>
           </div>
         </header>
