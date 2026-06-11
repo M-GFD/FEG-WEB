@@ -45,6 +45,31 @@ const STATIC_PAGES: StaticPage[] = [
     keywords: ["directorio", "presidente", "vice", "tesorería", "secretario", "prensa", "comercial", "autoridades"],
   },
   {
+    title: "Reglamentos",
+    href: "/institucional/reglamentos",
+    keywords: ["reglamentos", "reglamento", "normativa", "federación", "2026"],
+  },
+  {
+    title: "Reglamento Menores",
+    href: "/menores/reglamento",
+    keywords: ["reglamento", "menores", "prejuveniles", "juveniles", "junior", "2026"],
+  },
+  {
+    title: "Reglamento Pre y Juveniles 2026",
+    href: "/institucional/reglamentos/pre-juveniles",
+    keywords: ["reglamento", "prejuveniles", "juveniles", "pre y juveniles", "menores", "2026"],
+  },
+  {
+    title: "Reglamento Junior 2026",
+    href: "/institucional/reglamentos/junior",
+    keywords: ["reglamento", "junior", "menores", "2026"],
+  },
+  {
+    title: "Reglamento Mayores 2026",
+    href: "/institucional/reglamentos/mayores",
+    keywords: ["reglamento", "mayores", "senior", "damas", "2026"],
+  },
+  {
     title: "Reglamento ranking juveniles y prejuveniles",
     href: "/institucional/reglamento",
     keywords: ["reglamento", "ranking", "juveniles", "prejuveniles", "cupos", "2026", "lineamientos"],
