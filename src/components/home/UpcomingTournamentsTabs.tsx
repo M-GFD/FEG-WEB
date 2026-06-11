@@ -4,7 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
-import { getUpcomingFegDates } from "@/lib/calendario-feg";
+import {
+  formatFechaTitle,
+  getUpcomingFegDates,
+  type CalendarEntryWithDate,
+} from "@/lib/calendario-feg";
 
 const PLACEHOLDER_IMAGES = [
   "/feg%20image%20(1).webp",
@@ -15,30 +19,72 @@ const PLACEHOLDER_IMAGES = [
   "/feg%20image%20(6).webp",
 ];
 
+type TournamentCardProps = {
+  entry: CalendarEntryWithDate;
+  index: number;
+  revealIndex: number;
+  isActive: boolean;
+  onActivate: (index: number) => void;
+};
+
+function UpcomingTournamentCard({
+  entry,
+  index,
+  revealIndex,
+  isActive,
+  onActivate,
+}: TournamentCardProps) {
+  return (
+    <RevealOnScroll revealIndex={revealIndex} yOffset={20} className="min-w-0">
+      <article
+        onMouseEnter={() => onActivate(index)}
+        onClick={() => onActivate(index)}
+        onFocus={() => onActivate(index)}
+        tabIndex={0}
+        className={`relative w-full rounded-2xl bg-white/14 shadow-[0_20px_60px_rgba(0,36,3,0.18)] backdrop-blur-sm transition-[box-shadow,background-color] duration-300 outline-none ${
+          isActive ? "bg-white/20 ring-1 ring-white/25" : "ring-1 ring-white/10"
+        }`}
+      >
+        <div className="p-5">
+          <p className="min-w-0 text-xl font-semibold leading-snug">
+            <span className="text-white">{entry.sede}</span>
+            <span className="text-white/75"> – </span>
+            <span className="font-bold text-[var(--feg-yellow)]">
+              {formatFechaTitle(entry.fecha)}
+            </span>
+          </p>
+
+          <div className="mt-3 inline-flex w-fit rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white">
+            {entry.modalidad}
+          </div>
+        </div>
+      </article>
+    </RevealOnScroll>
+  );
+}
+
 export function UpcomingTournamentsTabs() {
-  // “Hoy” para el calendario según Argentina (GMT−3), ver FEG_TIME_ZONE en calendario-feg.
   const [now, setNow] = useState<Date>(() => new Date());
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000 * 60 * 60); // cada hora
+    const id = setInterval(() => setNow(new Date()), 1000 * 60 * 60);
     return () => clearInterval(id);
   }, []);
 
   const dates = useMemo(() => getUpcomingFegDates(4, now), [now]);
-  const [activeIdx, setActiveIdx] = useState(0);
-  const selected = dates[activeIdx] ?? dates[0];
 
   if (dates.length === 0) {
     return (
       <section
         id="proximos-torneos"
-        data-header-theme="dark"
-        className="scroll-mt-28 bg-[#0b0f0b] lg:scroll-mt-24"
+        className="scroll-mt-28 bg-[var(--feg-bg)] lg:scroll-mt-24"
       >
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-          <h3 className="font-heading text-3xl font-semibold tracking-tight text-white">
+          <h3 className="font-heading text-3xl font-semibold tracking-tight text-[var(--feg-ink)]">
             PRÓXIMOS TORNEOS
           </h3>
-          <p className="mt-4 text-white/60">
+          <p className="mt-4 text-[var(--feg-green)]">
             No hay torneos próximos en este momento.
           </p>
         </div>
@@ -46,108 +92,60 @@ export function UpcomingTournamentsTabs() {
     );
   }
 
-  const imageUrl =
-    PLACEHOLDER_IMAGES[activeIdx % PLACEHOLDER_IMAGES.length];
-
   return (
     <section
       id="proximos-torneos"
       data-header-theme="dark"
-      className="scroll-mt-28 bg-[#0b0f0b] lg:scroll-mt-24"
+      className="relative scroll-mt-28 overflow-hidden lg:scroll-mt-24"
+      onMouseLeave={() => setActiveImageIdx(0)}
     >
-      <div className="grid gap-0 lg:grid-cols-12 lg:items-stretch">
-        {/* Lista lateral — pegada al margen izquierdo */}
-        <RevealOnScroll
-          revealIndex={0}
-          yOffset={18}
-          className="bg-[#0b2b12] lg:col-span-4 lg:h-full"
-        >
-          {/* pl en lg alinea con max-w-7xl + lg:px-8 de Noticias (80rem = max-w-7xl) */}
-          <div className="h-full px-6 py-12 text-white lg:pr-8 lg:pl-[calc((100vw-min(100vw,80rem))/2+2rem)]">
-            <h3 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
-              PRÓXIMOS TORNEOS
-            </h3>
+      <div className="absolute inset-0 bg-[var(--feg-bg)]">
+        {PLACEHOLDER_IMAGES.map((src, i) => (
+          <Image
+            key={src}
+            src={src}
+            alt=""
+            fill
+            aria-hidden
+            className={`object-cover object-center transition-opacity duration-700 ease-out ${
+              activeImageIdx === i ? "opacity-100" : "opacity-0"
+            }`}
+            sizes="100vw"
+          />
+        ))}
+        <div className="absolute inset-0 bg-black/45" />
+      </div>
 
-            <div className="mt-8 space-y-1">
-              {dates.map((entry, i) => {
-                const active = i === activeIdx;
-                return (
-                  <button
-                    key={`${entry.fecha}-${entry.sede}-${entry.modalidad}`}
-                    type="button"
-                    onClick={() => setActiveIdx(i)}
-                    className={`w-full rounded-xl px-4 py-4 text-left transition ${
-                      active
-                        ? "bg-white/12 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.15)]"
-                        : "hover:bg-white/6"
-                    }`}
-                  >
-                    <p
-                      className={`font-heading text-lg font-semibold leading-tight ${
-                        active ? "text-[#dbf3db]" : "text-white/70"
-                      }`}
-                    >
-                      {entry.fecha}
-                    </p>
-                    <p
-                      className={`mt-1 text-sm font-medium ${
-                        active ? "text-white" : "text-white/50"
-                      }`}
-                    >
-                      {entry.sede}
-                    </p>
-                    <span
-                      className={`mt-2 inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                        active
-                          ? "bg-[var(--feg-yellow)] text-[#193f2b]"
-                          : "bg-white/10 text-white/60"
-                      }`}
-                    >
-                      {entry.modalidad}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <Link
-              href="/calendario"
-              className="mt-6 inline-flex items-center justify-center rounded-full bg-[var(--feg-yellow)] px-7 py-3 text-sm font-semibold text-[var(--feg-green-2)] transition hover:brightness-95"
-            >
-              Ver calendario completo →
-            </Link>
-          </div>
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-14 lg:px-8">
+        <RevealOnScroll revealIndex={0} yOffset={18} className="mx-auto max-w-3xl text-center">
+          <h3 className="font-heading text-[28px] font-semibold leading-[1.1] text-white [text-shadow:0_2px_12px_rgba(0,36,3,0.55)] sm:text-[36px]">
+            PRÓXIMOS TORNEOS
+          </h3>
+          <p className="mx-auto mt-4 max-w-xl text-base font-medium text-white/85 [text-shadow:0_2px_10px_rgba(0,36,3,0.4)] sm:text-lg">
+            Fechas, sedes y modalidades del circuito federado.
+          </p>
         </RevealOnScroll>
 
-        {/* Imagen + detalle — hasta el margen derecho, misma altura que la lista */}
-        <RevealOnScroll
-          revealIndex={2}
-          yOffset={28}
-          className="relative min-h-[400px] lg:col-span-8 lg:h-full lg:min-h-0"
-        >
-          <div className="relative h-full min-h-[400px] overflow-hidden lg:min-h-0 lg:h-full">
-            <Image
-              key={activeIdx}
-              src={imageUrl}
-              alt={`${selected.sede} — ${selected.fecha}`}
-              fill
-              className="object-cover object-center transition-opacity duration-500"
-              sizes="(max-width: 1024px) 100vw, 66vw"
+        <div className="mt-8 grid gap-5 sm:grid-cols-2">
+          {dates.map((entry, i) => (
+            <UpcomingTournamentCard
+              key={`${entry.fecha}-${entry.sede}-${entry.modalidad}`}
+              entry={entry}
+              index={i}
+              revealIndex={i + 1}
+              isActive={activeImageIdx === i}
+              onActivate={setActiveImageIdx}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          ))}
+        </div>
 
-            <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
-              <span className="inline-flex rounded-full bg-[var(--feg-yellow)] px-4 py-1.5 font-heading text-xs font-semibold text-[#193f2b] shadow-[0_10px_30px_rgba(0,0,0,0.25)]">
-                {selected.modalidad}
-              </span>
-              <h4 className="mt-3 font-heading text-3xl font-semibold leading-tight text-white sm:text-4xl">
-                {selected.sede}
-              </h4>
-              <p className="mt-2 text-lg font-medium text-white/85">
-                {selected.fecha} · {selected.year ?? selected._parsed.getFullYear()}
-              </p>
-            </div>
-          </div>
+        <RevealOnScroll revealIndex={5} yOffset={14} className="mt-8 flex justify-center">
+          <Link
+            href="/calendario"
+            className="inline-flex items-center justify-center rounded-full bg-[var(--feg-yellow)] px-8 py-3 text-sm font-semibold text-[var(--feg-green-2)] transition hover:brightness-95"
+          >
+            Ver calendario completo →
+          </Link>
         </RevealOnScroll>
       </div>
     </section>
