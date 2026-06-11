@@ -15,7 +15,7 @@ export type ReglamentoDefinition = {
 export const REGLAMENTOS: ReglamentoDefinition[] = [
   {
     slug: "pre-juveniles",
-    title: "Reglamento Pre y Juveniles 2026",
+    title: "Reglamento Pre-Juveniles y Juveniles 2026",
     description:
       "Normativa de la Federación Entrerriana de Golf para competencias de Prejuveniles y Juveniles en la temporada 2026.",
     pdfPath: "/reglamentos/pre-juveniles-2026.pdf",
