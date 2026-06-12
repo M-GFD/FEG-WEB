@@ -17,8 +17,19 @@ try {
 }
 
 const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
 const translate = require("google-translate-api-x");
+
+const MIGRATION_SQL = path.join(
+  __dirname,
+  "..",
+  "prisma",
+  "migrations",
+  "20260612_news_translations",
+  "migration.sql"
+);
 
 const TARGET_LOCALES = ["en", "pt"];
 const CHUNK_SIZE = 4000;
@@ -87,6 +98,19 @@ async function main() {
   }
 
   const supabase = createClient(url, key, { auth: { persistSession: false } });
+
+  const { error: tableProbe } = await supabase.from("NewsTranslation").select("id").limit(1);
+  if (tableProbe?.message?.includes("schema cache") || tableProbe?.code === "PGRST205") {
+    console.error("\nLa tabla NewsTranslation no existe en Supabase.");
+    console.error("Ejecutá este SQL en Supabase → SQL Editor y volvé a correr el script:\n");
+    if (fs.existsSync(MIGRATION_SQL)) {
+      console.error(fs.readFileSync(MIGRATION_SQL, "utf8"));
+    } else {
+      console.error(MIGRATION_SQL);
+    }
+    process.exit(1);
+  }
+
   const limit = parseLimit();
 
   let query = supabase
@@ -140,6 +164,10 @@ async function main() {
           { onConflict: "newsId,locale" }
         );
         if (upErr) {
+          if (upErr.message?.includes("schema cache") || upErr.code === "PGRST205") {
+            console.error(`  ${locale}: tabla NewsTranslation inexistente (ver instrucciones arriba).`);
+            process.exit(1);
+          }
           console.error(`  ${locale}:`, upErr.message);
         } else {
           console.log(`  ${locale}: OK`);

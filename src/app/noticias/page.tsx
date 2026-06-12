@@ -31,10 +31,10 @@ export default async function NoticiasPage({ searchParams }: Props) {
   const segmentLabelLower = segmentLabel?.toLowerCase() ?? "";
 
   const pageTitle = segment
-    ? t("titleWithAudience", { audience: segmentLabel! })
+    ? t("titleWithSegment", { segment: segmentLabel! })
     : t("title");
   const emptyMessage = segment
-    ? t("emptyForAudience", { audience: segmentLabelLower })
+    ? t("emptySegment", { segment: segmentLabelLower })
     : t("empty");
 
   return (
@@ -45,7 +45,7 @@ export default async function NoticiasPage({ searchParams }: Props) {
         <header className="mb-10">
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
             {segment
-              ? t("badgeWithAudience", { audience: segmentLabel! })
+              ? t("badgeWithSegment", { segment: segmentLabel! })
               : t("badge")}
           </p>
           <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
@@ -53,7 +53,7 @@ export default async function NoticiasPage({ searchParams }: Props) {
           </h1>
           {segment ? (
             <p className="mt-3 max-w-2xl text-sm text-[var(--feg-green)]">
-              {t("segmentDescription", { audience: segmentLabelLower })}
+              {t("segmentDescription", { segment: segmentLabelLower })}
             </p>
           ) : null}
         </header>
