@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
-import { ReglamentoPdfViewer } from "@/components/institucional/ReglamentoPdfViewer";
+import { ReglamentoPageLayout } from "@/components/institucional/ReglamentoPageLayout";
 import { audienceQueryHref } from "@/lib/content-audience";
 import { getReglamentoMayores } from "@/lib/reglamentos";
 
@@ -14,7 +14,7 @@ export default async function MayoresReglamentoPage() {
       <Header />
       <main className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
         <BackToHome />
-        <ReglamentoPdfViewer
+        <ReglamentoPageLayout
           reglamento={reglamento}
           badge={t("badge")}
           backHref={audienceQueryHref("/ranking", "mayores")}

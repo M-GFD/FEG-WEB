@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ReglamentoPdfEmbed } from "@/components/institucional/ReglamentoPdfEmbed";
+import { ReglamentoDocument } from "@/components/institucional/ReglamentoDocument";
+import { getReglamentoContent } from "@/lib/reglamentos-content";
 import { getReglamentoLabels, type ReglamentoDefinition } from "@/lib/reglamentos";
 
 type Props = {
@@ -10,11 +11,11 @@ type Props = {
   backLabel: string;
 };
 
-export async function ReglamentoPdfViewer({ reglamento, badge, backHref, backLabel }: Props) {
-  const tReg = await getTranslations("regulations");
-  const tHub = await getTranslations("regulationsHub");
+export async function ReglamentoPageLayout({ reglamento, badge, backHref, backLabel }: Props) {
   const tCommon = await getTranslations("common");
+  const tReg = await getTranslations("regulations");
   const labels = getReglamentoLabels(reglamento, tReg);
+  const sections = getReglamentoContent(reglamento.slug);
 
   return (
     <>
@@ -50,20 +51,7 @@ export async function ReglamentoPdfViewer({ reglamento, badge, backHref, backLab
 
       <hr className="my-10 border-[var(--feg-green)]/10" />
 
-      <ReglamentoPdfEmbed src={reglamento.pdfPath} title={labels.title} />
-
-      <p className="mt-4 text-sm text-[var(--feg-green)]/80">
-        {tHub("viewerFallback")}{" "}
-        <a
-          href={reglamento.pdfPath}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-semibold text-[var(--feg-green-2)] underline-offset-2 hover:underline"
-        >
-          {tHub("viewerOpenNewTab")}
-        </a>
-        .
-      </p>
+      <ReglamentoDocument sections={sections} />
     </>
   );
 }
