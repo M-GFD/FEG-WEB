@@ -1,13 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { setUserLocale } from "@/actions/locale";
-import { LOCALE_CODE, locales, type AppLocale } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import type { NavDropdownItem } from "@/lib/nav-dropdowns";
 
 export type MobileNavLink = { href: string; label: string };
@@ -18,14 +15,9 @@ type Props = {
 };
 
 const PANEL_TRANSITION_MS = 300;
-const LOCALE_SECTION_ID = "locale";
 
 export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
   const tNav = useTranslations("nav");
-  const tLocale = useTranslations("locale");
-  const locale = useLocale() as AppLocale;
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [renderPanel, setRenderPanel] = useState(false);
   const [panelActive, setPanelActive] = useState(false);
@@ -72,15 +64,6 @@ export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
 
   const toggleSection = (id: string) => {
     setExpandedId((current) => (current === id ? null : id));
-  };
-
-  const selectLocale = (next: AppLocale) => {
-    if (next === locale || pending) return;
-    startTransition(async () => {
-      await setUserLocale(next);
-      router.refresh();
-    });
-    close();
   };
 
   const panel = renderPanel ? (
@@ -177,63 +160,6 @@ export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
                 </div>
               );
             })}
-
-            <div className="overflow-hidden rounded-2xl border border-[var(--feg-green)]/10 bg-[var(--feg-bg)]/40">
-              <button
-                type="button"
-                onClick={() => toggleSection(LOCALE_SECTION_ID)}
-                aria-expanded={expandedId === LOCALE_SECTION_ID}
-                className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left font-heading text-sm font-semibold uppercase tracking-wide text-[#24321c] transition hover:bg-white/70 focus-visible:bg-white/70 focus-visible:outline-none"
-              >
-                <span>{tLocale("label")}</span>
-                <span className="flex items-center gap-2">
-                  <span className="text-xs font-bold tracking-[0.08em] text-[var(--feg-green-2)]">
-                    {LOCALE_CODE[locale]}
-                  </span>
-                  <ChevronDown
-                    className={`h-4 w-4 shrink-0 text-[var(--feg-green-2)] transition-transform duration-200 ${
-                      expandedId === LOCALE_SECTION_ID ? "rotate-180" : ""
-                    }`}
-                    aria-hidden
-                  />
-                </span>
-              </button>
-
-              <div
-                className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-                  expandedId === LOCALE_SECTION_ID ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                }`}
-              >
-                <ul
-                  role="listbox"
-                  aria-label={tLocale("label")}
-                  className="overflow-hidden border-t border-[var(--feg-green)]/10 bg-white/80"
-                >
-                  {locales.map((loc) => {
-                    const active = loc === locale;
-                    return (
-                      <li key={loc} role="presentation">
-                        <button
-                          type="button"
-                          role="option"
-                          aria-selected={active}
-                          disabled={pending}
-                          onClick={() => selectLocale(loc)}
-                          className={`flex w-full items-center justify-between gap-3 px-4 py-3 pl-6 text-sm font-semibold transition focus-visible:outline-none ${
-                            active
-                              ? "bg-[var(--feg-bg)] text-[var(--feg-green)]"
-                              : "text-[#24321c] hover:bg-[var(--feg-bg)] focus-visible:bg-[var(--feg-bg)]"
-                          } ${pending ? "opacity-60" : ""}`}
-                        >
-                          <span>{LOCALE_CODE[loc]}</span>
-                          <span className="text-xs font-medium text-[#24321c]/70">{tLocale(loc)}</span>
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </div>
           </div>
         </div>
       </nav>
