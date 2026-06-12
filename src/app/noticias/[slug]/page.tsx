@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { getNewsBySlug } from "@/lib/data";
 import { formatNewsDateParts } from "@/lib/news-dates";
+import { NewsGallery } from "@/components/news/NewsGallery";
 import { parseNewsGalleryUrls } from "@/lib/news-gallery";
 import { getGolfPlaceholder } from "@/lib/placeholders";
 
@@ -68,41 +69,7 @@ export default async function NoticiaPage({
             dangerouslySetInnerHTML={{ __html: news.content }}
           />
 
-          {gallery.length === 1 && (
-            <div className="relative mt-10 aspect-video w-full overflow-hidden rounded-2xl border border-[var(--feg-green)]/10">
-              <Image
-                src={gallery[0]}
-                alt={t("imageAlt", { title: news.title })}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 672px"
-              />
-            </div>
-          )}
-
-          {gallery.length > 1 && (
-            <section className="mt-12" aria-label={t("galleryAria")}>
-              <h2 className="font-heading text-xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
-                {t("gallery")}
-              </h2>
-              <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {gallery.map((url, i) => (
-                  <div
-                    key={`${url}-${i}`}
-                    className="relative aspect-video overflow-hidden rounded-2xl border border-[var(--feg-green)]/10 shadow-sm"
-                  >
-                    <Image
-                      src={url}
-                      alt={t("imageAltNumbered", { title: news.title, number: i + 1 })}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 100vw, 336px"
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+          {gallery.length > 0 && <NewsGallery images={gallery} title={news.title} />}
         </article>
       </main>
     </div>

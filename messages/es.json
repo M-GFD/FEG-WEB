@@ -155,7 +155,13 @@
     "gallery": "Galería",
     "galleryAria": "Galería de imágenes",
     "imageAlt": "{title} — imagen",
-    "imageAltNumbered": "{title} — imagen {number}"
+    "imageAltNumbered": "{title} — imagen {number}",
+    "openImage": "Abrir imagen en pantalla completa",
+    "lightboxAria": "Visor de imágenes en pantalla completa",
+    "lightboxClose": "Cerrar",
+    "lightboxPrev": "Imagen anterior",
+    "lightboxNext": "Imagen siguiente",
+    "lightboxCounter": "{current} / {total}"
   },
   "calendar": {
     "badge": "Temporada {year} · {segment}",
