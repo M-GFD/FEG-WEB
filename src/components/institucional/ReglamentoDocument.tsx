@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { ReglamentoBlock, ReglamentoContentSection } from "@/lib/reglamentos-content";
 
 function Block({ block }: { block: ReglamentoBlock }) {
@@ -29,11 +30,12 @@ type Props = {
 };
 
 /** Cuerpo del reglamento con el mismo estilo que /institucional/reglamento. */
-export function ReglamentoDocument({ sections }: Props) {
+export async function ReglamentoDocument({ sections }: Props) {
+  const t = await getTranslations("regulations");
   return (
     <section className="grid gap-10 md:grid-cols-[200px_1fr] md:gap-10">
       <div className="hidden text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green)]/55 md:block">
-        Reglamento
+        {t("documentLabel")}
       </div>
       <div className="space-y-10 text-[15px] leading-relaxed text-[var(--feg-green)]">
         {sections.map((section) => (

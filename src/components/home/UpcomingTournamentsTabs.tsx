@@ -5,11 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
-import {
-  formatFechaTitle,
-  getUpcomingFegDates,
-  type CalendarEntryWithDate,
-} from "@/lib/calendario-feg";
+import { formatCalendarDate, getUpcomingFegDates, type CalendarEntryWithDate } from "@/lib/calendario-feg";
+import { useCalendarI18n } from "@/lib/calendario-client";
 
 const PLACEHOLDER_IMAGES = [
   "/feg%20image%20(1).webp",
@@ -34,7 +31,8 @@ function UpcomingTournamentCard({
   revealIndex,
   isActive,
   onActivate,
-}: TournamentCardProps) {
+  locale,
+}: TournamentCardProps & { locale: string }) {
   return (
     <RevealOnScroll revealIndex={revealIndex} yOffset={20} className="min-w-0">
       <article
@@ -51,7 +49,7 @@ function UpcomingTournamentCard({
             <span className="text-white">{entry.sede}</span>
             <span className="text-white/75"> – </span>
             <span className="font-bold text-[var(--feg-yellow)]">
-              {formatFechaTitle(entry.fecha)}
+              {formatCalendarDate(entry._raw, locale as "es" | "en" | "pt")}
             </span>
           </p>
 
@@ -74,7 +72,8 @@ export function UpcomingTournamentsTabs() {
     return () => clearInterval(id);
   }, []);
 
-  const dates = useMemo(() => getUpcomingFegDates(4, now), [now]);
+  const { locale, labels } = useCalendarI18n();
+  const dates = useMemo(() => getUpcomingFegDates(4, locale, labels, now), [locale, labels, now]);
 
   if (dates.length === 0) {
     return (
@@ -129,12 +128,13 @@ export function UpcomingTournamentsTabs() {
         <div className="mt-8 grid gap-5 sm:grid-cols-2">
           {dates.map((entry, i) => (
             <UpcomingTournamentCard
-              key={`${entry.fecha}-${entry.sede}-${entry.modalidad}`}
+              key={`${entry._raw.month}-${entry._raw.day}-${entry.sede}-${entry.modalidad}`}
               entry={entry}
               index={i}
               revealIndex={i + 1}
               isActive={activeImageIdx === i}
               onActivate={setActiveImageIdx}
+              locale={locale}
             />
           ))}
         </div>

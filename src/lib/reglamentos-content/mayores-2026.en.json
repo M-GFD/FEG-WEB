@@ -1,0 +1,316 @@
+[
+  {
+    "id": "mayores-s1",
+    "title": "1. OBJECTIVES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "a) To encourage the practice and competition of golf among registered senior players belonging to entities affiliated with the Federation. b) To foster an atmosphere of camaraderie and friendship among players from different clubs and cities. c) To reward the best players according to the results obtained throughout the year."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s2",
+    "title": "2. PARTICIPANTS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "All amateur players who hold a valid registration and Handicap Index issued by the Asociación Argentina de Golf (AAG) and who are members of an entity affiliated with the Federación de Golf del Litoral shall participate in the Federación de Golf del Litoral (FGL) Senior Ranking – Year 2026."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s3",
+    "title": "3. FORMAT AND VENUES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Tournaments corresponding to the Federación de Golf del Litoral Senior Ranking shall be played under Medal Play over 18 holes. The Federación de Golf del Litoral shall designate the tournament venues and dates. At each tournament, the following competitions shall be held simultaneously: a) Individual tournament competition, divided into categories. b) Team competition, whose results shall form the Senior Team Ranking. c) Annual individual competitions, corresponding to the Gross and Senior Neto rankings."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s4",
+    "title": "4. TOURNAMENT CATEGORIES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "LADIES"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Ladies Scratch",
+          "Ladies up to 30 handicap",
+          "Ladies 31 to 59 handicap",
+          "Senior Ladies (over 50 years of age)"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "GENTLEMEN"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Gentlemen Scratch",
+          "Gentlemen up to 9 handicap",
+          "Gentlemen 10 to 16 handicap",
+          "Gentlemen 17 to 24 handicap",
+          "Gentlemen 25 to 54 handicap",
+          "Senior Gentlemen (over 55 years of age)"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Scratch categories shall compete without handicap allowance, while the remaining categories shall be played with handicap (net score). Scratch and Senior categories may overlap with the other handicap categories, competing simultaneously with cumulative prizes."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s5",
+    "title": "5. REGISTRATION",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Registration for each tournament shall be received by the host club."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s6",
+    "title": "6. TEE TIMES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Starting times and the composition of playing groups shall be arranged by the host club. Except in cases of force majeure, no more than two (2) players from the same affiliated entity may participate in the same starting time."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s7",
+    "title": "7. CONDITIONS OF COMPETITION",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Competitions shall be governed by the Rules of Golf in force as approved by The R&A and the USGA and by the conditions published by the AAG. The Tournament Committee may temporarily suspend play, cancel rounds, or modify conditions if necessary."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s8",
+    "title": "8. TEAM COMPETITION",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Each club affiliated with the FGL may enter one team in each FGL Senior Parallel Tournament, composed of a minimum of three (3) and a maximum of four (4) players. Players on the team must be designated in advance by the club before the start of each tournament. For the calculation of the team result, the three (3) best scorecards among the designated players shall be counted."
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "If the team consists of four (4) players, the worst scorecard shall be discarded."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "If a club does not make the prior designation and more than three (3) players participate, the four (4) club players with the lowest Handicap Index shall automatically be considered the team. A player's representation shall be the entity in which they are registered or the one the player has chosen as their representative entity, being where they habitually carry out their activity, provided it is affiliated with the FGL. On each date, the winning team shall be determined solely for the purposes of awarding tournament prizes."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s9",
+    "title": "9. TEAM RANKING",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "For the Annual Team Ranking, points shall be assigned according to the team's total net score in accordance with the following scale: 7 strokes or more under par – 21 points 5 to 6 strokes under par – 18 points 3 to 4 strokes under par – 15 points 1 to 2 strokes under par – 13 points Course par – 11 points 1 to 2 strokes over par – 9 points 3 to 4 strokes over par – 7 points 5 to 6 strokes over par – 6 points 7 to 8 strokes over par – 5 points 9 to 10 strokes over par – 4 points 11 to 12 strokes over par – 3 points 13 to 14 strokes over par – 2 points 15 or more strokes over par – 1 point For the final classification, the six (6) best dates obtained by each team shall be counted. Points obtained on certain calendar dates shall carry special weighting. The two dates prior to the final shall award points multiplied by 1.5. Final date: points obtained shall be doubled."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s10",
+    "title": "10. TEAM RANKING TIEBREAKERS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "1. Best net score obtained on a single date."
+      },
+      {
+        "type": "paragraph",
+        "text": "2. Second best net score obtained."
+      },
+      {
+        "type": "paragraph",
+        "text": "3. Third best net score obtained, and so on."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s11",
+    "title": "11. ANNUAL INDIVIDUAL RANKINGS",
+    "blocks": [
+      {
+        "type": "bullets",
+        "items": [
+          "Gross Ladies",
+          "Gross Gentlemen",
+          "Senior Neto Ladies",
+          "Senior Neto Gentlemen"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mayores-s12",
+    "title": "12. INDIVIDUAL RANKING SCORING",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "1st — 20 points 2nd — 10 points 3rd — 8 points 4th — 5 points 5th — 2 points 6th — 1 point For the final classification, the six (6) best dates shall be counted."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s13",
+    "title": "13. INDIVIDUAL RANKING TIEBREAKERS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "1. Highest number of first-place finishes"
+      },
+      {
+        "type": "paragraph",
+        "text": "2. Highest number of second-place finishes"
+      },
+      {
+        "type": "paragraph",
+        "text": "3. Best result on a discarded date"
+      },
+      {
+        "type": "paragraph",
+        "text": "4. Draw"
+      }
+    ]
+  },
+  {
+    "id": "mayores-s14",
+    "title": "14. ANNUAL RANKING AWARDS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Awards shall be given to:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "1st and 2nd place Gross Ladies",
+          "1st and 2nd place Gross Gentlemen",
+          "1st and 2nd place Senior Neto Ladies",
+          "1st and 2nd place Senior Neto Gentlemen"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mayores-s15",
+    "title": "15. SELECTION OF PLAYERS TO REPRESENT THE FEDERATION",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "The player ranked first in the Federación de Golf del Litoral Gross Gentlemen and Ladies Rankings shall automatically be designated to join the team representing the FGL in the Inter-Federation Tournament, provided that their average gross score in 18-hole tournaments relative to the Course Rating does not exceed four (4) strokes above said rating for gentlemen and six (6) strokes for ladies. For the purposes of this calculation:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "On each round, the player's gross score shall be compared with the Course Rating from the tees used in the competition.",
+          "The resulting average score shall be obtained by averaging the difference between the gross score of the definitive scoring dates after applying the corresponding discards and the Course Rating of each of those rounds."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "If the ranking winner does not meet the established sporting requirement, the Federation may designate the player it considers most suitable according to sporting merit criteria. The remaining players on the Federation representative team shall be selected by the FGL Championships Commission, giving priority to: a) Position in the AAG National Amateur Ranking, b) Participation and results in tournaments awarding World Amateur Golf Ranking (WAGR) points, c) Mid Amateur Ranking, d) Current Handicap Index, e) Results in federation tournaments, f) Other criteria of the FGL committee. To join the team representing the Federación de Golf del Litoral in the National Inter-Federation Senior Tournament, players must meet the following maximum Handicap Index limits at the time of designation:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Gentlemen: maximum Handicap Index of 6.0",
+          "Ladies: maximum Handicap Index of 10.0"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "If the player eligible by ranking does not meet these requirements, the Federación de Golf del Litoral, through the Championships Commission, may designate the player it considers most suitable within the sporting parameters established in these regulations. If the minimum number of players required to form a representative team meeting the established Handicap Index limits is not reached, the Federación de Golf del Litoral may decide not to enter a team in that competition."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s16",
+    "title": "16. TOURNAMENT AWARDS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "At each tournament, awards shall be given to the first and second place in each category. Tournament awards shall be the responsibility of the host club."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s17",
+    "title": "17. TOURNAMENT TIEBREAKERS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Automatic tiebreakers shall be resolved by the following criteria in order: Last 9 holes, last 6 holes, last 3 holes, last hole counting backward, draw."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s18",
+    "title": "18. COMPETITOR OBLIGATIONS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Players must respect etiquette rules, host club regulations, and decisions of the Tournament Committee."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s19",
+    "title": "19. SANCTIONS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "The Tournament Committee may apply a warning, disqualification, or exclusion from future competitions."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s20",
+    "title": "20. HOST CLUB OBLIGATIONS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "The host club must comply with and enforce the regulations, organize the tournament, and present the course in the best possible condition."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s21",
+    "title": "21. CONTRIBUTIONS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Each tournament shall receive a monetary contribution from the Federation allocated to the club for organizing the event. The amount shall be determined at the Members' Assembly, as shall the payment method, and shall be transferred once the tournament results are received."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s22",
+    "title": "22. AMENDMENTS TO THE REGULATIONS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "The Federación de Golf del Litoral may at any time make modifications, corrections, or additions to these regulations."
+      }
+    ]
+  }
+]

@@ -1,8 +1,9 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { parseAudienceSegment } from "@/lib/content-audience";
-import { getCalendarTableForAudience } from "@/lib/calendario-feg";
+import { createCalendarLabels, getCalendarTableForAudience } from "@/lib/calendario-feg";
+import type { AppLocale } from "@/i18n/routing";
 
 type Props = {
   searchParams: Promise<{ audiencia?: string | string[] }>;
@@ -11,9 +12,10 @@ type Props = {
 export default async function CalendarioPage({ searchParams }: Props) {
   const sp = await searchParams;
   const segment = parseAudienceSegment(sp.audiencia) ?? "mayores";
-  const rows = getCalendarTableForAudience(segment);
-
+  const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("calendar");
+  const labels = createCalendarLabels((key) => t(key));
+  const rows = getCalendarTableForAudience(segment, locale, labels);
   const tAudience = await getTranslations("audience");
   const segmentLabel = tAudience(segment);
 
@@ -24,13 +26,13 @@ export default async function CalendarioPage({ searchParams }: Props) {
         <BackToHome />
         <header className="mb-10">
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
-            {t("seasonBadge", { audience: segmentLabel })}
+            {t("seasonBadge", { audience: segmentLabel, year: 2026 })}
           </p>
           <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
             {t("title", { audience: segmentLabel })}
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[var(--feg-green)]">
-            {segment === "menores" ? t("subtitleMenores") : t("subtitleMayores")}
+            {segment === "menores" ? t("subtitleMenores", { year: 2026 }) : t("subtitleMayores")}
           </p>
         </header>
 

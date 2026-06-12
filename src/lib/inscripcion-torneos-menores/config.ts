@@ -1,8 +1,10 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import {
+  calendarEntryToSpanish,
   formatFechaTitle,
+  getSpanishCalendarLabels,
   getUpcomingFegDatesForAudience,
-  type CalendarEntry,
+  type CalendarEntryRaw,
 } from "@/lib/calendario-feg";
 import { buildTournamentKey } from "./tournament-key";
 
@@ -18,7 +20,8 @@ export type YouthTournamentSignupConfigPublic = {
   modalidad: string;
 };
 
-function configFromCalendarEntry(entry: CalendarEntry): Omit<YouthTournamentSignupConfigPublic, "id"> {
+function configFromCalendarEntry(raw: CalendarEntryRaw): Omit<YouthTournamentSignupConfigPublic, "id"> {
+  const entry = calendarEntryToSpanish(raw);
   const tournamentKey = buildTournamentKey(entry.fecha, entry.sede, entry.modalidad);
   return {
     tournamentKey,
@@ -49,8 +52,8 @@ export async function getActiveYouthTournamentConfig(): Promise<YouthTournamentS
     }
   }
 
-  const next = getUpcomingFegDatesForAudience("menores", 1)[0];
+  const next = getUpcomingFegDatesForAudience("menores", 1, "es", getSpanishCalendarLabels())[0];
   if (!next) return null;
-  const base = configFromCalendarEntry(next);
+  const base = configFromCalendarEntry(next._raw);
   return { id: "calendar-fallback", ...base };
 }
