@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { ReglamentoPdfEmbed } from "@/components/institucional/ReglamentoPdfEmbed";
 import { getReglamentoLabels, type ReglamentoDefinition } from "@/lib/reglamentos";
 
 type Props = {
@@ -49,13 +50,7 @@ export async function ReglamentoPdfViewer({ reglamento, badge, backHref, backLab
 
       <hr className="my-10 border-[var(--feg-green)]/10" />
 
-      <div className="overflow-hidden rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.08)]">
-        <iframe
-          src={`${reglamento.pdfPath}#view=FitH`}
-          title={labels.title}
-          className="h-[min(80vh,900px)] w-full"
-        />
-      </div>
+      <ReglamentoPdfEmbed src={reglamento.pdfPath} title={labels.title} />
 
       <p className="mt-4 text-sm text-[var(--feg-green)]/80">
         {tHub("viewerFallback")}{" "}
