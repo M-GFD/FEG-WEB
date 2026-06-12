@@ -14,6 +14,7 @@ import type { AppLocale } from "@/i18n/routing";
 export default async function HomePage() {
   const t = await getTranslations("home");
   const tCommon = await getTranslations("common");
+  const tNav = await getTranslations("nav");
   const locale = (await getLocale()) as AppLocale;
   const news = await getNews({ locale });
 
@@ -22,7 +23,7 @@ export default async function HomePage() {
       <HomeScrollHash />
       {/* Hero: min-h asegura área visible; object-cover usa el menor zoom que cubre (recorte mínimo matemático) */}
       <div className="relative flex min-h-[100svh] flex-col" data-header-theme="dark">
-        {/* Imagen solo hasta arriba de la franja de resultados (no detrás del banner) */}
+        {/* Imagen solo hasta arriba de la franja inferior del hero (no detrás del banner) */}
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
             <Image
@@ -77,18 +78,18 @@ export default async function HomePage() {
         </div>
 
         <div className="relative z-10 bg-[var(--feg-green)]" data-header-theme="dark">
-          <RevealOnScroll revealIndex={4} yOffset={16} className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
-          <div className="flex flex-wrap items-center gap-3 text-white">
-            <p className="min-w-0 font-heading text-xs font-semibold leading-snug sm:text-sm md:text-base lg:text-lg">
-              {t("resultsAvailable")}
-            </p>
-            <Link
-              href="/ranking"
-              className="rounded-full bg-[#f3e12b] px-3 py-1.5 text-xs font-semibold text-[#146638] transition hover:brightness-95"
-            >
-              {t("rankingLink")}
-            </Link>
-          </div>
+          <RevealOnScroll revealIndex={3} yOffset={16} className="mx-auto max-w-7xl px-6 py-4 lg:px-8">
+            <div className="flex flex-wrap items-center gap-3 text-white">
+              <p className="min-w-0 font-heading text-xs font-semibold leading-snug sm:text-sm md:text-base lg:text-lg">
+                {t("enrollmentBannerText")}
+              </p>
+              <Link
+                href="/empadronamiento-menores"
+                className="rounded-full bg-[#f3e12b] px-3 py-1.5 text-xs font-semibold text-[#146638] transition hover:brightness-95"
+              >
+                {tNav("enrollment")}
+              </Link>
+            </div>
           </RevealOnScroll>
         </div>
       </div>
