@@ -150,7 +150,12 @@
     "titleWithSegment": "Atualidade · {segment}",
     "segmentDescription": "Inclui notícias gerais e as destinadas a {segment}.",
     "empty": "Não há notícias publicadas.",
-    "emptySegment": "Não há notícias publicadas para {segment}."
+    "emptySegment": "Não há notícias publicadas para {segment}.",
+    "backToNews": "← Voltar às Notícias",
+    "gallery": "Galeria",
+    "galleryAria": "Galeria de imagens",
+    "imageAlt": "{title} — imagem",
+    "imageAltNumbered": "{title} — imagem {number}"
   },
   "calendar": {
     "badge": "Temporada {year} · {segment}",

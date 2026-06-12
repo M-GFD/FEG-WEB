@@ -15,7 +15,8 @@
     "import-youth-padron": "node scripts/import-youth-padron-fgl.cjs",
     "images:webp": "node scripts/convert-public-jpeg-to-webp.cjs",
     "security:audit": "npm audit --audit-level=moderate",
-    "backfill-news-translations": "node scripts/backfill-news-translations.cjs"
+    "backfill-news-translations": "node scripts/backfill-news-translations.cjs",
+    "db:migrate-news-translations": "npx prisma db execute --file prisma/migrations/20260612_news_translations/migration.sql"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",

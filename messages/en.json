@@ -150,7 +150,12 @@
     "titleWithSegment": "News · {segment}",
     "segmentDescription": "Includes general news and news for {segment}.",
     "empty": "No news published.",
-    "emptySegment": "No news published for {segment}."
+    "emptySegment": "No news published for {segment}.",
+    "backToNews": "← Back to News",
+    "gallery": "Gallery",
+    "galleryAria": "Image gallery",
+    "imageAlt": "{title} — image",
+    "imageAltNumbered": "{title} — image {number}"
   },
   "calendar": {
     "badge": "Season {year} · {segment}",
