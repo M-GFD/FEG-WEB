@@ -7,6 +7,7 @@ import { sanitizeNewsContent } from "@/lib/sanitize-news";
 import { resolveUniqueNewsSlug } from "@/lib/news-db";
 import { broadcastNewsPublishedPush } from "@/lib/push";
 import { contentAudienceFromForm, type ContentAudience } from "@/lib/content-audience";
+import { generateAndStoreNewsTranslations } from "@/lib/news-translations";
 
 const createBodySchema = z.object({
   title: z.string().min(1, "Título requerido").max(200),
@@ -127,7 +128,7 @@ export async function publishNewsArticle(
         createdAt: now,
         updatedAt: now,
       })
-      .select("slug")
+      .select("id,slug")
       .single();
 
     if (error) {
@@ -139,10 +140,18 @@ export async function publishNewsArticle(
       };
     }
 
-    if (!row?.slug) {
-      console.error("[publishNewsArticle] sin slug en respuesta");
+    if (!row?.slug || !row?.id) {
+      console.error("[publishNewsArticle] sin slug/id en respuesta");
       return { ok: false, error: PUBLIC_ERROR_GENERIC, status: 500 };
     }
+
+    void generateAndStoreNewsTranslations(row.id, {
+      title: title.trim(),
+      excerpt: excerpt?.trim() ? excerpt.trim() : null,
+      content: sanitized,
+    }).catch((trErr) => {
+      console.error("[publishNewsArticle] news translations", trErr);
+    });
 
     try {
       revalidatePath("/");

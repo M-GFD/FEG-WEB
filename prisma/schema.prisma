@@ -295,6 +295,24 @@ model News {
   authorId    String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  translations NewsTranslation[]
+}
+
+/// Traducciones persistidas (en/pt). El español canónico vive en News.
+model NewsTranslation {
+  id        String   @id @default(cuid())
+  newsId    String
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  locale    String   // "en" | "pt"
+  title     String
+  excerpt   String?
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([newsId, locale])
+  @@index([newsId])
+  @@index([locale])
 }
 
 model Banner {

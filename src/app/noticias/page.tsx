@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { AppLocale } from "@/i18n/routing";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { getNews } from "@/lib/data";
@@ -17,7 +18,8 @@ type Props = {
 export default async function NoticiasPage({ searchParams }: Props) {
   const sp = await searchParams;
   const segment = parseAudienceSegment(sp.audiencia);
-  const news = await getNews({ audience: segment });
+  const locale = (await getLocale()) as AppLocale;
+  const news = await getNews({ audience: segment, locale });
   const [featured, ...rest] = news;
   const featuredWhen = featured
     ? formatNewsDateParts(featured.publishedAt, featured.createdAt, longDate)

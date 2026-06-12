@@ -1,4 +1,6 @@
+import type { AppLocale } from "@/i18n/routing";
 import { prisma } from "@/lib/db";
+import { isNewsTranslationLocale } from "@/lib/news-translate";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export type SearchResultType =
@@ -227,19 +229,79 @@ function formatHandicap(h: number | null): string | null {
   return Number.isInteger(h) ? `${h}` : h.toFixed(1);
 }
 
-async function searchViaSupabase(q: string, labels: SearchLabels): Promise<SiteSearchHit[] | null> {
+async function searchNewsViaSupabase(
+  pattern: string,
+  locale: AppLocale
+): Promise<SiteSearchHit[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  if (!isNewsTranslationLocale(locale)) {
+    const { data } = await supabase
+      .from("News")
+      .select("id,title,slug,excerpt")
+      .eq("published", true)
+      .or(`title.ilike.${pattern},excerpt.ilike.${pattern},slug.ilike.${pattern}`)
+      .limit(PER_TYPE);
+
+    return (data ?? []).map((row) => {
+      const r = row as { title: string; slug: string; excerpt: string | null };
+      return {
+        type: "news" as const,
+        title: r.title,
+        href: `/noticias/${r.slug}`,
+        description: r.excerpt ?? undefined,
+      };
+    });
+  }
+
+  const { data: trData } = await supabase
+    .from("NewsTranslation")
+    .select("newsId,title,excerpt")
+    .eq("locale", locale)
+    .or(`title.ilike.${pattern},excerpt.ilike.${pattern}`)
+    .limit(PER_TYPE);
+
+  const ids = [...new Set((trData ?? []).map((r) => (r as { newsId: string }).newsId))];
+  if (ids.length === 0) return [];
+
+  const { data: newsRows } = await supabase
+    .from("News")
+    .select("id,slug")
+    .in("id", ids)
+    .eq("published", true);
+
+  const slugById = new Map(
+    (newsRows ?? []).map((n) => [(n as { id: string }).id, (n as { slug: string }).slug])
+  );
+
+  const hits: SiteSearchHit[] = [];
+  for (const row of trData ?? []) {
+    const r = row as { newsId: string; title: string; excerpt: string | null };
+    const slug = slugById.get(r.newsId);
+    if (!slug) continue;
+    hits.push({
+      type: "news",
+      title: r.title,
+      href: `/noticias/${slug}`,
+      description: r.excerpt ?? undefined,
+    });
+  }
+  return hits;
+}
+
+async function searchViaSupabase(
+  q: string,
+  labels: SearchLabels,
+  locale: AppLocale
+): Promise<SiteSearchHit[] | null> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return null;
 
   const pattern = `%${q}%`;
 
-  const [newsRes, tourRes, clubRes, playerRes, clubsByNameRes] = await Promise.all([
-    supabase
-      .from("News")
-      .select("id,title,slug,excerpt")
-      .eq("published", true)
-      .or(`title.ilike.${pattern},excerpt.ilike.${pattern},slug.ilike.${pattern}`)
-      .limit(PER_TYPE),
+  const [newsHits, tourRes, clubRes, playerRes, clubsByNameRes] = await Promise.all([
+    searchNewsViaSupabase(pattern, locale),
     supabase
       .from("Tournament")
       .select("id,name,slug,date,status")
@@ -268,17 +330,7 @@ async function searchViaSupabase(q: string, labels: SearchLabels): Promise<SiteS
       .limit(3),
   ]);
 
-  const hits: SiteSearchHit[] = [];
-
-  for (const row of newsRes.data ?? []) {
-    const r = row as { title: string; slug: string; excerpt: string | null };
-    hits.push({
-      type: "news",
-      title: r.title,
-      href: `/noticias/${r.slug}`,
-      description: r.excerpt ?? undefined,
-    });
-  }
+  const hits: SiteSearchHit[] = [...newsHits];
 
   for (const row of tourRes.data ?? []) {
     const r = row as { name: string; slug: string; date: string; status: string };
@@ -369,11 +421,9 @@ async function searchViaSupabase(q: string, labels: SearchLabels): Promise<SiteS
   return hits;
 }
 
-async function searchViaPrisma(q: string, labels: SearchLabels): Promise<SiteSearchHit[]> {
-  const hits: SiteSearchHit[] = [];
-
-  const [newsList, tours, clubs, players, clubMatchPlayers] = await Promise.all([
-    prisma.news
+async function searchNewsViaPrisma(q: string, locale: AppLocale): Promise<SiteSearchHit[]> {
+  if (!isNewsTranslationLocale(locale)) {
+    const newsList = await prisma.news
       .findMany({
         where: {
           published: true,
@@ -386,7 +436,52 @@ async function searchViaPrisma(q: string, labels: SearchLabels): Promise<SiteSea
         select: { title: true, slug: true, excerpt: true },
         take: PER_TYPE,
       })
-      .catch(() => []),
+      .catch(() => []);
+
+    return newsList.map((r) => ({
+      type: "news" as const,
+      title: r.title,
+      href: `/noticias/${r.slug}`,
+      description: r.excerpt ?? undefined,
+    }));
+  }
+
+  const trList = await prisma.newsTranslation
+    .findMany({
+      where: {
+        locale,
+        OR: [
+          { title: { contains: q, mode: "insensitive" } },
+          { excerpt: { contains: q, mode: "insensitive" } },
+        ],
+        news: { published: true },
+      },
+      select: {
+        title: true,
+        excerpt: true,
+        news: { select: { slug: true } },
+      },
+      take: PER_TYPE,
+    })
+    .catch(() => []);
+
+  return trList.map((r) => ({
+    type: "news" as const,
+    title: r.title,
+    href: `/noticias/${r.news.slug}`,
+    description: r.excerpt ?? undefined,
+  }));
+}
+
+async function searchViaPrisma(
+  q: string,
+  labels: SearchLabels,
+  locale: AppLocale
+): Promise<SiteSearchHit[]> {
+  const hits: SiteSearchHit[] = [];
+
+  const [newsHits, tours, clubs, players, clubMatchPlayers] = await Promise.all([
+    searchNewsViaPrisma(q, locale),
     prisma.tournament
       .findMany({
         where: {
@@ -454,14 +549,7 @@ async function searchViaPrisma(q: string, labels: SearchLabels): Promise<SiteSea
       .catch(() => []),
   ]);
 
-  for (const n of newsList) {
-    hits.push({
-      type: "news",
-      title: n.title,
-      href: `/noticias/${n.slug}`,
-      description: n.excerpt ?? undefined,
-    });
-  }
+  hits.push(...newsHits);
   for (const t of tours) {
     hits.push({
       type: "tournament",
@@ -533,7 +621,8 @@ function dedupeAndSort(hits: SiteSearchHit[]): SiteSearchHit[] {
  */
 export async function searchSite(
   rawQuery: string,
-  labels: SearchLabels
+  labels: SearchLabels,
+  locale: AppLocale = "es"
 ): Promise<{
   query: string;
   hits: SiteSearchHit[];
@@ -546,7 +635,8 @@ export async function searchSite(
   const staticHits = matchStaticPages(query, labels);
 
   const dbHits =
-    (await searchViaSupabase(query, labels)) ?? (await searchViaPrisma(query, labels));
+    (await searchViaSupabase(query, labels, locale)) ??
+    (await searchViaPrisma(query, labels, locale));
 
   const hits = dedupeAndSort([...staticHits, ...dbHits]);
   return { query, hits };
