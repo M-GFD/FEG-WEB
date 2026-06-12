@@ -84,7 +84,7 @@ export function NewsGallery({ images, title }: Props) {
 
       {open && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 p-4 sm:p-8"
+          className="fixed inset-0 z-[200] bg-black/95"
           role="dialog"
           aria-modal="true"
           aria-label={t("lightboxAria")}
@@ -120,9 +120,10 @@ export function NewsGallery({ images, title }: Props) {
           )}
 
           <div
-            className="relative flex h-full w-full max-h-[calc(100vh-4rem)] max-w-6xl items-center justify-center"
+            className="absolute inset-0 flex items-center justify-center px-14 py-16 sm:px-20"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* URL original de Supabase (resolución completa); tamaño vía viewport, no del thumbnail */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={images[index]}
@@ -131,7 +132,8 @@ export function NewsGallery({ images, title }: Props) {
                   ? t("imageAltNumbered", { title, number: index + 1 })
                   : t("imageAlt", { title })
               }
-              className="max-h-full max-w-full object-contain"
+              className="max-h-[calc(100dvh-8rem)] max-w-[min(calc(100vw-7rem),72rem)] object-contain"
+              decoding="async"
             />
           </div>
 
