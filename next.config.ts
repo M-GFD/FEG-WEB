@@ -68,6 +68,8 @@ function buildContentSecurityPolicy(): string {
     "font-src 'self' data:",
     "worker-src 'self' blob:",
     `connect-src ${connectSrc}`,
+    "frame-src 'self'",
+    "object-src 'self'",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -97,6 +99,15 @@ function securityHeaders(): { key: string; value: string }[] {
   return headers;
 }
 
+/** PDFs embebidos en el visor de reglamentos: permitir iframe/object en el mismo origen. */
+function pdfEmbedHeaders(): { key: string; value: string }[] {
+  return [
+    { key: "X-Frame-Options", value: "SAMEORIGIN" },
+    { key: "X-Content-Type-Options", value: "nosniff" },
+    { key: "Cache-Control", value: "public, max-age=86400, immutable" },
+  ];
+}
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   /** Hasta 15 fotos × 5 MB en “Enviar fotos” (Server Actions default = 1 MB). */
@@ -119,6 +130,14 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/reglamentos/:path*",
+        headers: pdfEmbedHeaders(),
+      },
+      {
+        source: "/:path*.pdf",
+        headers: pdfEmbedHeaders(),
+      },
       {
         source: "/sw.js",
         headers: [
