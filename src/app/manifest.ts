@@ -1,11 +1,14 @@
 import type { MetadataRoute } from "next";
+import { getTranslations } from "next-intl/server";
 import { FEG_LOGO_MIME, FEG_LOGO_PUBLIC_PATH } from "@/lib/feegBrand";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const t = await getTranslations("meta");
+
   return {
-    name: "FEG - Federación Entrerriana de Golf",
+    name: t("siteTitle"),
     short_name: "FEG",
-    description: "Torneos, rankings y resultados",
+    description: t("manifestDescription"),
     start_url: "/",
     display: "standalone",
     background_color: "#fafaf9",

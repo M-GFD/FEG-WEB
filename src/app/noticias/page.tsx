@@ -1,14 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { getNews } from "@/lib/data";
 import { formatNewsDateParts } from "@/lib/news-dates";
 import { getGolfPlaceholder } from "@/lib/placeholders";
-import {
-  AUDIENCE_SEGMENT_LABELS,
-  parseAudienceSegment,
-} from "@/lib/content-audience";
+import { parseAudienceSegment } from "@/lib/content-audience";
 
 const longDate = { day: "numeric" as const, month: "long" as const, year: "numeric" as const };
 
@@ -24,10 +22,18 @@ export default async function NoticiasPage({ searchParams }: Props) {
   const featuredWhen = featured
     ? formatNewsDateParts(featured.publishedAt, featured.createdAt, longDate)
     : null;
-  const pageTitle = segment ? `Noticias · ${AUDIENCE_SEGMENT_LABELS[segment]}` : "Noticias";
+
+  const t = await getTranslations("news");
+  const tAudience = await getTranslations("audience");
+  const segmentLabel = segment ? tAudience(segment) : null;
+  const segmentLabelLower = segmentLabel?.toLowerCase() ?? "";
+
+  const pageTitle = segment
+    ? t("titleWithAudience", { audience: segmentLabel! })
+    : t("title");
   const emptyMessage = segment
-    ? `No hay noticias publicadas para ${AUDIENCE_SEGMENT_LABELS[segment].toLowerCase()}.`
-    : "No hay noticias publicadas.";
+    ? t("emptyForAudience", { audience: segmentLabelLower })
+    : t("empty");
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
@@ -36,15 +42,16 @@ export default async function NoticiasPage({ searchParams }: Props) {
         <BackToHome />
         <header className="mb-10">
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
-            Actualidad{segment ? ` · ${AUDIENCE_SEGMENT_LABELS[segment]}` : ""}
+            {segment
+              ? t("badgeWithAudience", { audience: segmentLabel! })
+              : t("badge")}
           </p>
           <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
             {pageTitle}
           </h1>
           {segment ? (
             <p className="mt-3 max-w-2xl text-sm text-[var(--feg-green)]">
-              Incluye noticias generales y las destinadas a{" "}
-              {AUDIENCE_SEGMENT_LABELS[segment].toLowerCase()}.
+              {t("segmentDescription", { audience: segmentLabelLower })}
             </p>
           ) : null}
         </header>

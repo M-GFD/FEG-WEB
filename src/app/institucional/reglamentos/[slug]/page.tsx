@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { ReglamentoPdfViewer } from "@/components/institucional/ReglamentoPdfViewer";
@@ -13,6 +14,8 @@ export default async function InstitucionalReglamentoDetailPage({ params }: Prop
   const reglamento = getReglamentoBySlug(slug);
   if (!reglamento) notFound();
 
+  const t = await getTranslations("regulationsHub");
+
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
       <Header />
@@ -20,9 +23,9 @@ export default async function InstitucionalReglamentoDetailPage({ params }: Prop
         <BackToHome />
         <ReglamentoPdfViewer
           reglamento={reglamento}
-          badge="Reglamentos"
+          badge={t("badgeRegulations")}
           backHref="/institucional/reglamentos"
-          backLabel="Todos los reglamentos →"
+          backLabel={t("backAllRegulations")}
         />
       </main>
     </div>

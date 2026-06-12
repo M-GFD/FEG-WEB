@@ -8,15 +8,12 @@ import { sendVerifyEmail } from "@/lib/email";
 
 export async function verifyEmail(emailRaw: string, token: string) {
   const email = String(emailRaw || "").trim().toLowerCase();
-  if (!email || !token) return { ok: false as const, error: "Enlace inválido" };
+  if (!email || !token) return { ok: false as const, errorKey: "invalidLink" };
 
   const consumed = await consumeUserToken({ purpose: "verify", email, token });
   if (!consumed.ok) {
-    const msg =
-      consumed.reason === "expired"
-        ? "El enlace expiró. Solicitá uno nuevo."
-        : "El enlace no es válido. Solicitá uno nuevo.";
-    return { ok: false as const, error: msg };
+    const errorKey = consumed.reason === "expired" ? "expired" : "invalid";
+    return { ok: false as const, errorKey };
   }
 
   const supabase = getSupabaseAdmin();
@@ -26,7 +23,7 @@ export async function verifyEmail(emailRaw: string, token: string) {
       .from("User")
       .update({ emailVerified: now, updatedAt: now })
       .eq("email", email);
-    if (error) return { ok: false as const, error: error.message };
+    if (error) return { ok: false as const, errorKey: "invalidLink", errorMessage: error.message };
     return { ok: true as const };
   }
 
@@ -57,4 +54,3 @@ export async function resendVerification(emailRaw: string) {
   await sendVerifyEmail({ to: email, verifyUrl });
   return { ok: true as const };
 }
-

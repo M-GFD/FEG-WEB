@@ -77,39 +77,32 @@ export type SubmitYouthEnrollmentInput = {
 export async function submitYouthEnrollment(
   input: SubmitYouthEnrollmentInput,
   clubs: ClubCodeOption[]
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true } | { ok: false; errorKey: string }> {
   const supabase = getSupabaseAdmin();
   if (!supabase) {
-    return { ok: false, error: "El servicio no está disponible. Intentá más tarde." };
+    return { ok: false, errorKey: "serviceUnavailable" };
   }
 
   const dniNorm = normalizeDni(input.dni);
   if (dniNorm.length < 7) {
-    return { ok: false, error: "DNI inválido." };
+    return { ok: false, errorKey: "invalidDni" };
   }
 
   const dniCanonical = canonicalDniForLookup(dniNorm);
   const dniHash = hashDniForLookup(dniCanonical);
   const existing = await findYouthEnrollmentByDni(dniCanonical);
   if (existing.enrolled) {
-    return {
-      ok: false,
-      error:
-        "Este jugador ya está empadronado para la temporada 2026. El proceso es anual y solo debe realizarse una vez.",
-    };
+    return { ok: false, errorKey: "alreadyEnrolled" };
   }
 
   const birthDate = parseBirthDateInput(input.birthDate);
   if (!birthDate) {
-    return { ok: false, error: "Fecha de nacimiento inválida." };
+    return { ok: false, errorKey: "invalidBirthDate" };
   }
 
   const category = categoryFromBirthDate(birthDate);
   if (category === "Fuera de rango") {
-    return {
-      ok: false,
-      error: "La edad del jugador no corresponde a las categorías menores/juveniles de la temporada.",
-    };
+    return { ok: false, errorKey: "ageOutOfRange" };
   }
 
   const ageDec31 = ageOnReferenceDate(birthDate);
@@ -160,14 +153,10 @@ export async function submitYouthEnrollment(
   const { error } = await supabase.from("YouthEnrollment").insert(row);
   if (error) {
     if (error.code === "23505") {
-      return {
-        ok: false,
-        error:
-          "Este jugador ya está empadronado para la temporada 2026. El proceso es anual y solo debe realizarse una vez.",
-      };
+      return { ok: false, errorKey: "alreadyEnrolled" };
     }
     console.error("[submitYouthEnrollment]", error.message);
-    return { ok: false, error: "No se pudo guardar el empadronamiento. Intentá nuevamente." };
+    return { ok: false, errorKey: "saveFailed" };
   }
 
   if (clubId) {

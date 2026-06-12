@@ -2,24 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { requestPasswordReset } from "./actions";
 import { FegLogo } from "@/components/layout/FegLogo";
 
 export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations("auth.forgotPassword");
+  const tCommon = useTranslations("common");
 
   async function onSubmit(formData: FormData) {
     setError(null);
     try {
       const res = await requestPasswordReset(formData);
       if (!res.ok) {
-        setError(res.error ?? "No se pudo enviar el correo. Revisá la configuración de email del servidor.");
+        setError(res.error ?? t("sendFailed"));
         return;
       }
       setSent(true);
     } catch {
-      setError("No se pudo procesar la solicitud. Intenta de nuevo.");
+      setError(t("processFailed"));
     }
   }
 
@@ -31,21 +34,21 @@ export default function ForgotPasswordPage() {
         </div>
 
         <h1 className="mt-2 text-center font-heading text-2xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
-          Recuperar contraseña
+          {t("title")}
         </h1>
         <p className="mt-3 text-center text-sm font-medium leading-relaxed text-[var(--feg-green)]">
-          Te enviaremos un enlace para crear una nueva contraseña.
+          {t("subtitle")}
         </p>
 
         {sent ? (
           <div className="mt-6 rounded-xl bg-[var(--feg-green-2)]/10 p-4 text-sm text-[var(--feg-green-2)]">
-            Si el email existe, te enviamos un enlace para restablecer la contraseña.
+            {t("sent")}
           </div>
         ) : (
           <form action={onSubmit} className="mt-6 space-y-4">
             <div>
               <label htmlFor="email" className="mb-1 block text-sm font-medium text-[var(--feg-green)]">
-                Email
+                {tCommon("email")}
               </label>
               <input
                 id="email"
@@ -54,7 +57,7 @@ export default function ForgotPasswordPage() {
                 required
                 autoComplete="email"
                 className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-4 py-2.5 text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
-                placeholder="tu@email.com"
+                placeholder={tCommon("emailPlaceholder")}
               />
             </div>
 
@@ -64,7 +67,7 @@ export default function ForgotPasswordPage() {
               type="submit"
               className="w-full rounded-xl bg-[var(--feg-ink)] py-3 font-semibold text-white transition hover:brightness-110"
             >
-              Enviar enlace
+              {t("submit")}
             </button>
           </form>
         )}
@@ -74,11 +77,10 @@ export default function ForgotPasswordPage() {
             href="/auth/signin"
             className="font-medium underline-offset-2 hover:text-[var(--feg-ink)] hover:underline"
           >
-            Volver a iniciar sesión
+            {t("backToSignIn")}
           </Link>
         </p>
       </div>
     </div>
   );
 }
-

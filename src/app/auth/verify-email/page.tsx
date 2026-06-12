@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { verifyEmail } from "./actions";
 import { FegLogo } from "@/components/layout/FegLogo";
 
@@ -12,11 +13,12 @@ function VerifyEmailInner() {
   const token = sp.get("token") ?? "";
   const [msg, setMsg] = useState<string | null>(null);
   const [ok, setOk] = useState<boolean | null>(null);
+  const t = useTranslations("auth.verifyEmail");
 
   useEffect(() => {
     if (!email || !token) {
       setOk(false);
-      setMsg("Enlace incompleto. Abrí el link del correo o pedí uno nuevo al iniciar sesión.");
+      setMsg(t("incompleteLink"));
       return;
     }
     let cancelled = false;
@@ -24,16 +26,20 @@ function VerifyEmailInner() {
       if (cancelled) return;
       if (r.ok) {
         setOk(true);
-        setMsg("Correo verificado. Ya podés iniciar sesión.");
+        setMsg(t("success"));
       } else {
         setOk(false);
-        setMsg(r.error);
+        if ("errorMessage" in r && r.errorMessage) {
+          setMsg(r.errorMessage);
+        } else {
+          setMsg(t(`errors.${r.errorKey}` as "errors.invalidLink"));
+        }
       }
     });
     return () => {
       cancelled = true;
     };
-  }, [email, token]);
+  }, [email, token, t]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--feg-bg)] px-4 py-10">
@@ -42,9 +48,9 @@ function VerifyEmailInner() {
           <FegLogo size="nav" className="h-16 object-center sm:h-[4.25rem]" />
         </div>
         <h1 className="mt-4 text-center font-heading text-2xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
-          Verificar correo
+          {t("title")}
         </h1>
-        {ok === null && <p className="mt-6 text-center text-sm text-[var(--feg-green)]">Verificando…</p>}
+        {ok === null && <p className="mt-6 text-center text-sm text-[var(--feg-green)]">{t("verifying")}</p>}
         {ok !== null && msg && (
           <p
             className={`mt-6 text-center text-sm ${ok ? "text-[var(--feg-green-2)]" : "text-red-700"}`}
@@ -57,7 +63,7 @@ function VerifyEmailInner() {
           href="/auth/signin"
           className="mt-8 block w-full rounded-xl bg-[var(--feg-green-2)] py-3 text-center text-sm font-semibold text-white"
         >
-          Ir a iniciar sesión
+          {t("goToSignIn")}
         </Link>
       </div>
     </div>
@@ -65,11 +71,13 @@ function VerifyEmailInner() {
 }
 
 export default function VerifyEmailPage() {
+  const tCommon = useTranslations("common");
+
   return (
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-[var(--feg-bg)] text-sm text-[var(--feg-green)]">
-          Cargando…
+          {tCommon("loading")}
         </div>
       }
     >

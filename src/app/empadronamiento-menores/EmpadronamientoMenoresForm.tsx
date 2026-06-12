@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   EMPADRONAMIENTO_BLOOD_GROUPS,
   EMPADRONAMIENTO_CLUBS,
   EMPADRONAMIENTO_DEPARTMENTS,
   EMPADRONAMIENTO_HEALTH_CONDITIONS,
   EMPADRONAMIENTO_PROFESSORS,
+  EMPADRONAMIENTO_SEASON_YEAR,
   type EmpadronamientoHealthConditionKey,
   type EmpadronamientoHealthData,
 } from "@/lib/empadronamiento-menores/constants";
@@ -26,6 +28,12 @@ const emptyHealth = (): EmpadronamientoHealthData => ({
 });
 
 export function EmpadronamientoMenoresForm() {
+  const t = useTranslations("enrollment");
+  const tc = useTranslations("common");
+  const year = EMPADRONAMIENTO_SEASON_YEAR;
+  const formError = (key: string) =>
+    t(`errors.${key}` as "errors.ackRequired", { year });
+
   const [ack, setAck] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -95,9 +103,7 @@ export function EmpadronamientoMenoresForm() {
     }
     const res = await checkYouthEnrollmentDni(dni);
     if (res.enrolled) {
-      setDniWarning(
-        "Este jugador ya está empadronado para la temporada 2026. No es necesario completar el formulario nuevamente."
-      );
+      setDniWarning(t("dniAlreadyEnrolled", { year }));
     } else {
       setDniWarning(null);
     }
@@ -108,7 +114,7 @@ export function EmpadronamientoMenoresForm() {
     setError(null);
 
     if (!ack) {
-      setError("Debés aceptar las condiciones del aviso importante.");
+      setError(formError("ackRequired"));
       return;
     }
     if (dniWarning) {
@@ -116,19 +122,19 @@ export function EmpadronamientoMenoresForm() {
       return;
     }
     if (!gender) {
-      setError("Seleccioná el sexo del jugador.");
+      setError(formError("genderRequired"));
       return;
     }
     if (!department) {
-      setError("Seleccioná el departamento.");
+      setError(formError("departmentRequired"));
       return;
     }
     if (!clubName) {
-      setError("Seleccioná el club de opción.");
+      setError(formError("clubRequired"));
       return;
     }
     if (hasHandicap === null) {
-      setError("Indicá si el jugador tiene Handicap.");
+      setError(formError("handicapRequired"));
       return;
     }
 
@@ -165,12 +171,12 @@ export function EmpadronamientoMenoresForm() {
       });
 
       if (!result.ok) {
-        setError(result.error);
+        setError(formError(result.errorKey));
         return;
       }
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error inesperado");
+      setError(err instanceof Error ? err.message : formError("unexpected"));
     } finally {
       setSubmitting(false);
     }
@@ -180,10 +186,10 @@ export function EmpadronamientoMenoresForm() {
     return (
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center">
         <h2 className="font-heading text-2xl font-semibold text-emerald-900">
-          Gracias por su participación
+          {t("successTitle")}
         </h2>
         <p className="mt-3 text-sm font-medium text-emerald-800">
-          El empadronamiento fue registrado correctamente para la temporada 2026.
+          {t("successBody", { year })}
         </p>
       </div>
     );
@@ -193,10 +199,7 @@ export function EmpadronamientoMenoresForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="rounded-2xl border-2 border-[var(--feg-yellow)]/50 bg-[var(--feg-yellow)]/15 p-5">
         <p className="text-sm font-semibold leading-relaxed text-[var(--feg-ink)]">
-          <span className="font-heading uppercase tracking-wide">Importante:</span> la planilla
-          debe ser completada por los padres del jugador (madre, padre y/o tutor) en carácter de
-          declaración jurada. Es un proceso anual y solo debe realizarse{" "}
-          <strong>una vez</strong> durante la temporada. La FEG asegura su trato confidencial.
+          {t("importantNotice")}
         </p>
         <label className="mt-4 flex cursor-pointer items-start gap-3">
           <input
@@ -205,48 +208,46 @@ export function EmpadronamientoMenoresForm() {
             onChange={(e) => setAck(e.target.checked)}
             className="mt-1 h-4 w-4 rounded border-[var(--feg-green)]/30 text-[var(--feg-green-2)] focus:ring-[var(--feg-green-2)]"
           />
-          <span className="text-sm font-medium text-[var(--feg-ink)]">
-            He leído y acepto las condiciones — <strong>OK</strong>
-          </span>
+          <span className="text-sm font-medium text-[var(--feg-ink)]">{tc("ackOk")}</span>
         </label>
       </div>
 
       <fieldset disabled={disabled} className="space-y-6">
-        <FormSection title="1 — Responsable de la carga">
+        <FormSection title={t("sections.responsible")}>
           <div className="space-y-2">
             <FieldLabel htmlFor="responsibleName" required>
-              Nombre del responsable de la carga
+              {t("fields.responsibleName")}
             </FieldLabel>
             <input
               id="responsibleName"
               value={responsibleName}
               onChange={(e) => setResponsibleName(e.target.value)}
-              placeholder="Padre, madre o tutor"
+              placeholder={t("fields.responsibleNamePlaceholder")}
               className={inputClassName}
               required
             />
           </div>
           <div className="space-y-2">
             <FieldLabel htmlFor="responsiblePhone" required>
-              Teléfono de contacto del responsable
+              {t("fields.responsiblePhone")}
             </FieldLabel>
             <input
               id="responsiblePhone"
               type="tel"
               value={responsiblePhone}
               onChange={(e) => setResponsiblePhone(e.target.value)}
-              placeholder="Ej. 3434876922"
+              placeholder={t("fields.responsiblePhonePlaceholder")}
               className={inputClassName}
               required
             />
           </div>
         </FormSection>
 
-        <FormSection title="2 — Datos del jugador">
+        <FormSection title={t("sections.player")}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <FieldLabel htmlFor="lastName" required>
-                Apellido del jugador
+                {t("fields.lastName")}
               </FieldLabel>
               <input
                 id="lastName"
@@ -258,7 +259,7 @@ export function EmpadronamientoMenoresForm() {
             </div>
             <div className="space-y-2">
               <FieldLabel htmlFor="firstName" required>
-                Nombres del jugador
+                {t("fields.firstName")}
               </FieldLabel>
               <input
                 id="firstName"
@@ -272,7 +273,7 @@ export function EmpadronamientoMenoresForm() {
 
           <div className="space-y-2">
             <span className="text-sm font-medium text-[var(--feg-green)]">
-              Sexo <span className="text-red-600">*</span>
+              {t("fields.gender")} <span className="text-red-600">*</span>
             </span>
             <div className="flex flex-wrap gap-4">
               {(["Varón", "Mujer"] as const).map((g) => (
@@ -284,7 +285,7 @@ export function EmpadronamientoMenoresForm() {
                     onChange={() => setGender(g)}
                     required
                   />
-                  {g}
+                  {g === "Varón" ? tc("genderMale") : tc("genderFemale")}
                 </label>
               ))}
             </div>
@@ -293,7 +294,7 @@ export function EmpadronamientoMenoresForm() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <FieldLabel htmlFor="birthDate" required>
-                Fecha de nacimiento
+                {t("fields.birthDate")}
               </FieldLabel>
               <input
                 id="birthDate"
@@ -303,30 +304,28 @@ export function EmpadronamientoMenoresForm() {
                 className={inputClassName}
                 required
               />
-              <p className="text-xs text-[var(--feg-green)]/80">
-                Podés seleccionar el año haciendo clic arriba en el selector de fecha.
-              </p>
+              <p className="text-xs text-[var(--feg-green)]/80">{t("fields.birthDateHint")}</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <FieldLabel>Edad al 31/12/2026</FieldLabel>
+                <FieldLabel>{t("fields.ageDec31", { year })}</FieldLabel>
                 <input
                   readOnly
-                  value={ageDec31 != null ? String(ageDec31) : "—"}
+                  value={ageDec31 != null ? String(ageDec31) : tc("dash")}
                   className={inputClassName}
                   aria-readonly
                 />
               </div>
               <div className="space-y-2">
-                <FieldLabel>Categoría</FieldLabel>
-                <input readOnly value={category || "—"} className={inputClassName} aria-readonly />
+                <FieldLabel>{t("fields.category")}</FieldLabel>
+                <input readOnly value={category || tc("dash")} className={inputClassName} aria-readonly />
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
             <FieldLabel htmlFor="dni" required>
-              DNI
+              {t("fields.dni")}
             </FieldLabel>
             <input
               id="dni"
@@ -346,7 +345,7 @@ export function EmpadronamientoMenoresForm() {
 
           <div className="space-y-2">
             <FieldLabel htmlFor="address" required>
-              Dirección
+              {t("fields.address")}
             </FieldLabel>
             <input
               id="address"
@@ -360,7 +359,7 @@ export function EmpadronamientoMenoresForm() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <FieldLabel htmlFor="department" required>
-                Departamento
+                {t("fields.department")}
               </FieldLabel>
               <select
                 id="department"
@@ -369,7 +368,7 @@ export function EmpadronamientoMenoresForm() {
                 className={selectClassName}
                 required
               >
-                <option value="">Seleccionar…</option>
+                <option value="">{tc("select")}</option>
                 {EMPADRONAMIENTO_DEPARTMENTS.map((d) => (
                   <option key={d} value={d}>
                     {d}
@@ -379,7 +378,7 @@ export function EmpadronamientoMenoresForm() {
             </div>
             <div className="space-y-2">
               <FieldLabel htmlFor="locality" required>
-                Localidad
+                {t("fields.locality")}
               </FieldLabel>
               <input
                 id="locality"
@@ -394,7 +393,7 @@ export function EmpadronamientoMenoresForm() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <FieldLabel htmlFor="phone" required>
-                Teléfono
+                {t("fields.phone")}
               </FieldLabel>
               <input
                 id="phone"
@@ -407,7 +406,7 @@ export function EmpadronamientoMenoresForm() {
             </div>
             <div className="space-y-2">
               <FieldLabel htmlFor="email" required>
-                Correo electrónico
+                {t("fields.email")}
               </FieldLabel>
               <input
                 id="email"
@@ -422,7 +421,7 @@ export function EmpadronamientoMenoresForm() {
 
           <div className="space-y-2">
             <FieldLabel htmlFor="clubName" required>
-              Nombre del club de opción
+              {t("fields.clubName")}
             </FieldLabel>
             <select
               id="clubName"
@@ -431,7 +430,7 @@ export function EmpadronamientoMenoresForm() {
               className={selectClassName}
               required
             >
-              <option value="">Seleccionar…</option>
+              <option value="">{tc("select")}</option>
               {EMPADRONAMIENTO_CLUBS.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -441,26 +440,26 @@ export function EmpadronamientoMenoresForm() {
           </div>
         </FormSection>
 
-        <FormSection title="3 — Datos escolares y deportivos">
+        <FormSection title={t("sections.schoolSports")}>
           <div className="space-y-2">
-            <FieldLabel htmlFor="school">Establecimiento educativo</FieldLabel>
+            <FieldLabel htmlFor="school">{t("fields.school")}</FieldLabel>
             <input
               id="school"
               value={school}
               onChange={(e) => setSchool(e.target.value)}
-              placeholder="Según nivel educativo que corresponda"
+              placeholder={t("fields.schoolPlaceholder")}
               className={inputClassName}
             />
           </div>
 
           <div className="space-y-2">
             <span className="text-sm font-medium text-[var(--feg-green)]">
-              ¿Tiene Handicap? <span className="text-red-600">*</span>
+              {t("fields.hasHandicap")} <span className="text-red-600">*</span>
             </span>
             <div className="flex gap-4">
               {[
-                { v: true, l: "Sí" },
-                { v: false, l: "No" },
+                { v: true, l: tc("yes") },
+                { v: false, l: tc("no") },
               ].map(({ v, l }) => (
                 <label key={l} className="flex items-center gap-2 text-sm font-medium">
                   <input
@@ -479,7 +478,7 @@ export function EmpadronamientoMenoresForm() {
           {hasHandicap ? (
             <div className="space-y-2">
               <FieldLabel htmlFor="matricula" required>
-                Matrícula
+                {t("fields.matricula")}
               </FieldLabel>
               <input
                 id="matricula"
@@ -492,7 +491,7 @@ export function EmpadronamientoMenoresForm() {
           ) : null}
 
           <div className="space-y-2">
-            <span className="text-sm font-medium text-[var(--feg-green)]">Profesor a cargo</span>
+            <span className="text-sm font-medium text-[var(--feg-green)]">{t("fields.professor")}</span>
             <div className="grid gap-2 sm:grid-cols-2">
               {EMPADRONAMIENTO_PROFESSORS.map((p) => (
                 <label key={p} className="flex items-center gap-2 text-sm font-medium">
@@ -501,7 +500,7 @@ export function EmpadronamientoMenoresForm() {
                     checked={professors.includes(p)}
                     onChange={() => toggleProfessor(p)}
                   />
-                  {p}
+                  {p === "Otro" ? t("professorOther") : p}
                 </label>
               ))}
             </div>
@@ -510,7 +509,7 @@ export function EmpadronamientoMenoresForm() {
           {professors.includes("Otro") ? (
             <div className="space-y-2">
               <FieldLabel htmlFor="professorOther" required>
-                ¿Quién es el Profesor? (otro)
+                {t("fields.professorOther")}
               </FieldLabel>
               <input
                 id="professorOther"
@@ -523,10 +522,10 @@ export function EmpadronamientoMenoresForm() {
           ) : null}
         </FormSection>
 
-        <FormSection title="4 — Padre / Madre / Tutor 1">
+        <FormSection title={t("sections.tutor1")}>
           <div className="space-y-2">
             <FieldLabel htmlFor="tutor1Name" required>
-              Nombre y Apellido
+              {t("fields.tutorName")}
             </FieldLabel>
             <input
               id="tutor1Name"
@@ -539,7 +538,7 @@ export function EmpadronamientoMenoresForm() {
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
               <FieldLabel htmlFor="tutor1Dni" required>
-                DNI
+                {t("fields.tutorDni")}
               </FieldLabel>
               <input
                 id="tutor1Dni"
@@ -551,7 +550,7 @@ export function EmpadronamientoMenoresForm() {
             </div>
             <div className="space-y-2">
               <FieldLabel htmlFor="tutor1Phone" required>
-                Teléfono móvil
+                {t("fields.tutorMobile")}
               </FieldLabel>
               <input
                 id="tutor1Phone"
@@ -564,7 +563,7 @@ export function EmpadronamientoMenoresForm() {
             </div>
             <div className="space-y-2">
               <FieldLabel htmlFor="tutor1Email" required>
-                Correo electrónico
+                {t("fields.tutorEmail")}
               </FieldLabel>
               <input
                 id="tutor1Email"
@@ -578,9 +577,9 @@ export function EmpadronamientoMenoresForm() {
           </div>
         </FormSection>
 
-        <FormSection title="5 — Padre / Madre / Tutor 2 (si corresponde)">
+        <FormSection title={t("sections.tutor2")}>
           <div className="space-y-2">
-            <FieldLabel htmlFor="tutor2Name">Nombre y Apellido</FieldLabel>
+            <FieldLabel htmlFor="tutor2Name">{t("fields.tutorName")}</FieldLabel>
             <input
               id="tutor2Name"
               value={tutor2Name}
@@ -590,7 +589,7 @@ export function EmpadronamientoMenoresForm() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <FieldLabel htmlFor="tutor2Dni">DNI</FieldLabel>
+              <FieldLabel htmlFor="tutor2Dni">{t("fields.tutorDni")}</FieldLabel>
               <input
                 id="tutor2Dni"
                 value={tutor2Dni}
@@ -599,7 +598,7 @@ export function EmpadronamientoMenoresForm() {
               />
             </div>
             <div className="space-y-2">
-              <FieldLabel htmlFor="tutor2Email">Correo electrónico</FieldLabel>
+              <FieldLabel htmlFor="tutor2Email">{t("fields.tutorEmail")}</FieldLabel>
               <input
                 id="tutor2Email"
                 type="email"
@@ -611,15 +610,15 @@ export function EmpadronamientoMenoresForm() {
           </div>
         </FormSection>
 
-        <FormSection title="6 — Salud">
+        <FormSection title={t("sections.health")}>
           <div className="space-y-2">
             <span className="text-sm font-medium text-[var(--feg-green)]">
-              ¿Tiene obra social? <span className="text-red-600">*</span>
+              {t("fields.hasHealthInsurance")} <span className="text-red-600">*</span>
             </span>
             <div className="flex gap-4">
               {[
-                { v: true, l: "Sí" },
-                { v: false, l: "No" },
+                { v: true, l: tc("yes") },
+                { v: false, l: tc("no") },
               ].map(({ v, l }) => (
                 <label key={l} className="flex items-center gap-2 text-sm font-medium">
                   <input
@@ -641,7 +640,7 @@ export function EmpadronamientoMenoresForm() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <FieldLabel htmlFor="healthInsurance" required>
-                  Obra social
+                  {t("fields.healthInsurance")}
                 </FieldLabel>
                 <input
                   id="healthInsurance"
@@ -654,7 +653,7 @@ export function EmpadronamientoMenoresForm() {
                 />
               </div>
               <div className="space-y-2">
-                <FieldLabel htmlFor="memberNumber">Número de asociado</FieldLabel>
+                <FieldLabel htmlFor="memberNumber">{t("fields.memberNumber")}</FieldLabel>
                 <input
                   id="memberNumber"
                   value={health.memberNumber ?? ""}
@@ -668,7 +667,7 @@ export function EmpadronamientoMenoresForm() {
           ) : null}
 
           <div className="space-y-2">
-            <FieldLabel>Grupo sanguíneo</FieldLabel>
+            <FieldLabel>{t("fields.bloodGroup")}</FieldLabel>
             <div className="flex flex-wrap gap-3">
               {EMPADRONAMIENTO_BLOOD_GROUPS.map((g) => (
                 <label key={g} className="flex items-center gap-1.5 text-sm font-medium">
@@ -686,12 +685,12 @@ export function EmpadronamientoMenoresForm() {
 
           <div className="space-y-2">
             <span className="text-sm font-medium text-[var(--feg-green)]">
-              ¿Toma regularmente alguna medicación? <span className="text-red-600">*</span>
+              {t("fields.takesMedication")} <span className="text-red-600">*</span>
             </span>
             <div className="flex gap-4">
               {[
-                { v: true, l: "Sí" },
-                { v: false, l: "No" },
+                { v: true, l: tc("yes") },
+                { v: false, l: tc("no") },
               ].map(({ v, l }) => (
                 <label key={l} className="flex items-center gap-2 text-sm font-medium">
                   <input
@@ -710,7 +709,7 @@ export function EmpadronamientoMenoresForm() {
           {health.takesMedication ? (
             <div className="space-y-2">
               <FieldLabel htmlFor="medication" required>
-                ¿Qué medicación?
+                {t("fields.medication")}
               </FieldLabel>
               <input
                 id="medication"
@@ -724,12 +723,12 @@ export function EmpadronamientoMenoresForm() {
 
           <div className="space-y-2">
             <span className="text-sm font-medium text-[var(--feg-green)]">
-              ¿Recibió vacuna antitetánica?
+              {t("fields.tetanusVaccine")}
             </span>
             <div className="flex gap-4">
               {[
-                { v: true, l: "Sí" },
-                { v: false, l: "No" },
+                { v: true, l: tc("yes") },
+                { v: false, l: tc("no") },
               ].map(({ v, l }) => (
                 <label key={l} className="flex items-center gap-2 text-sm font-medium">
                   <input
@@ -746,10 +745,10 @@ export function EmpadronamientoMenoresForm() {
 
           <div className="space-y-2">
             <span className="text-sm font-medium text-[var(--feg-green)]">
-              Condiciones de salud (marcar las que correspondan)
+              {t("fields.healthConditions")}
             </span>
             <div className="space-y-2">
-              {EMPADRONAMIENTO_HEALTH_CONDITIONS.map(({ key, label }) => (
+              {EMPADRONAMIENTO_HEALTH_CONDITIONS.map(({ key }) => (
                 <label key={key} className="flex items-start gap-2 text-sm font-medium">
                   <input
                     type="checkbox"
@@ -757,7 +756,7 @@ export function EmpadronamientoMenoresForm() {
                     onChange={() => toggleCondition(key)}
                     className="mt-0.5"
                   />
-                  {label}
+                  {t(`healthConditions.${key}`)}
                 </label>
               ))}
             </div>
@@ -766,7 +765,7 @@ export function EmpadronamientoMenoresForm() {
           {health.conditions.allergic ? (
             <div className="space-y-2">
               <FieldLabel htmlFor="allergiesDetail" required>
-                Especifique a qué es alérgico
+                {t("fields.allergiesDetail")}
               </FieldLabel>
               <input
                 id="allergiesDetail"
@@ -783,7 +782,7 @@ export function EmpadronamientoMenoresForm() {
           {health.conditions.other ? (
             <div className="space-y-2">
               <FieldLabel htmlFor="otherConditions" required>
-                ¿Cuáles? (otras condiciones)
+                {t("fields.otherConditions")}
               </FieldLabel>
               <input
                 id="otherConditions"
@@ -800,7 +799,7 @@ export function EmpadronamientoMenoresForm() {
           {health.conditions.recentSurgery ? (
             <div className="space-y-2">
               <FieldLabel htmlFor="surgeryDetail" required>
-                ¿De qué fue operado?
+                {t("fields.surgeryDetail")}
               </FieldLabel>
               <input
                 id="surgeryDetail"
@@ -815,13 +814,13 @@ export function EmpadronamientoMenoresForm() {
           ) : null}
         </FormSection>
 
-        <FormSection title="7 — Comentarios">
+        <FormSection title={t("sections.comments")}>
           <textarea
             value={comments}
             onChange={(e) => setComments(e.target.value)}
             rows={4}
             className={inputClassName}
-            placeholder="Comentarios adicionales (opcional)"
+            placeholder={t("fields.commentsPlaceholder")}
           />
         </FormSection>
 
@@ -836,7 +835,7 @@ export function EmpadronamientoMenoresForm() {
           disabled={disabled || Boolean(dniWarning)}
           className="w-full rounded-full bg-[var(--feg-yellow)] px-8 py-3 font-heading text-sm font-semibold text-[var(--feg-ink)] transition hover:brightness-95 disabled:opacity-50 sm:w-auto"
         >
-          {submitting ? "Enviando…" : "Enviar empadronamiento"}
+          {submitting ? tc("submitting") : t("submit")}
         </button>
       </fieldset>
     </form>

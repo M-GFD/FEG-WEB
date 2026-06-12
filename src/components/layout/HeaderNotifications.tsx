@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useSiteNotifications } from "@/components/layout/SiteNotificationsContext";
 
 type HeaderTheme = "dark" | "light";
@@ -31,6 +32,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   const router = useRouter();
   const pathname = usePathname();
   const { items, loading, load, markAsReadByIds } = useSiteNotifications();
+  const t = useTranslations("notifications");
 
   const [open, setOpen] = useState(false);
   const [menuTopPx, setMenuTopPx] = useState(0);
@@ -55,14 +57,13 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
     };
   }, [open]);
 
-  /** Una sola vez por apertura: a los 3 s marca como leídas las que sigan sin leer. */
   useEffect(() => {
     if (!open) return;
-    const t = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       const unreadIds = itemsRef.current.filter((n) => !n.read).map((n) => n.id);
       if (unreadIds.length > 0) void markAsReadByIds(unreadIds);
     }, AUTO_READ_MS);
-    return () => window.clearTimeout(t);
+    return () => window.clearTimeout(timer);
   }, [open, markAsReadByIds]);
 
   useEffect(() => {
@@ -111,17 +112,17 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
     >
       <div className="border-b border-black/5 px-3 py-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-[var(--feg-green)]">
-          Notificaciones
+          {t("title")}
         </p>
       </div>
 
       <div className="max-h-[min(22rem,50vh)] overflow-y-auto">
         {loading && items.length === 0 ? (
-          <p className="px-3 py-6 text-center text-sm text-neutral-500">Cargando…</p>
+          <p className="px-3 py-6 text-center text-sm text-neutral-500">{t("loading")}</p>
         ) : null}
 
         {!loading && items.length === 0 ? (
-          <p className="px-3 py-6 text-center text-sm text-neutral-500">No hay notificaciones</p>
+          <p className="px-3 py-6 text-center text-sm text-neutral-500">{t("empty")}</p>
         ) : null}
 
         {items.map((n) => {
@@ -158,7 +159,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
                       className="text-left text-[11px] font-semibold text-[var(--feg-green-2)] hover:underline"
                       onClick={() => openNotificationLink(href)}
                     >
-                      Abrir enlace
+                      {t("openLink")}
                     </button>
                   ) : null}
                   <button
@@ -166,7 +167,7 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
                     className="ml-auto text-[11px] font-semibold text-[var(--feg-green-2)] hover:underline"
                     onClick={() => void markAsReadByIds([n.id])}
                   >
-                    Marcar como leído
+                    {t("markRead")}
                   </button>
                 </div>
               </div>
@@ -184,7 +185,9 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
         aria-expanded={open}
         aria-haspopup="menu"
         aria-busy={loading}
-        aria-label={unread ? `Notificaciones, ${unread} sin leer` : "Notificaciones"}
+        aria-label={
+          unread > 0 ? t("ariaUnread", { count: unread }) : t("ariaDefault")
+        }
         onClick={() => setOpen((v) => !v)}
         className={`relative flex h-11 w-11 touch-manipulation items-center justify-center rounded-full bg-white/70 text-lg leading-none backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition hover:bg-white/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#123c15]/40 focus-visible:ring-offset-2 md:h-9 md:w-9 ${iconClass}`}
       >
@@ -196,10 +199,6 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
 
       {open ? (
         <>
-          {/*
-            Móvil: panel anclado a viewport con el mismo margen a izquierda y derecha (incl. safe-area).
-            Sigue siendo descendiente de wrapRef para que el cierre al tocar fuera funcione.
-          */}
           <div
             className="fixed z-[80] flex justify-center md:hidden"
             style={{

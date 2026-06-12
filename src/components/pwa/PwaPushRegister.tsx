@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 function urlBase64ToUint8Array(base64String: string): BufferSource {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -80,9 +81,11 @@ async function resolveVapidPublicKey(): Promise<string | null> {
   }
 }
 
-async function registerAndPostSubscription(vapid: string): Promise<{ ok: boolean; error?: string }> {
+async function registerAndPostSubscription(
+  vapid: string
+): Promise<{ ok: boolean; errorKey?: string; error?: string }> {
   if (!vapid || !("serviceWorker" in navigator) || !("PushManager" in window)) {
-    return { ok: false, error: "Navegador incompatible" };
+    return { ok: false, errorKey: "unsupportedBrowser" };
   }
 
   const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
@@ -96,14 +99,14 @@ async function registerAndPostSubscription(vapid: string): Promise<{ ok: boolean
         applicationServerKey: urlBase64ToUint8Array(vapid),
       });
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "No se pudo suscribir al servicio push";
-      return { ok: false, error: msg };
+      const msg = e instanceof Error ? e.message : "";
+      return { ok: false, errorKey: "subscribeFailed", error: msg || undefined };
     }
   }
 
   const j = sub.toJSON();
   if (!j.endpoint || !j.keys?.auth || !j.keys?.p256dh) {
-    return { ok: false, error: "Suscripción incompleta" };
+    return { ok: false, errorKey: "incompleteSubscription" };
   }
 
   const res = await fetch("/api/push/subscribe", {
@@ -117,7 +120,7 @@ async function registerAndPostSubscription(vapid: string): Promise<{ ok: boolean
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    let message = res.statusText?.trim() || "Error al guardar";
+    let message = res.statusText?.trim() || "";
     const trimmed = text.trim();
     if (trimmed.startsWith("{")) {
       try {
@@ -133,7 +136,7 @@ async function registerAndPostSubscription(vapid: string): Promise<{ ok: boolean
     } else if (trimmed.length > 0 && trimmed.length < 500) {
       message = trimmed;
     }
-    return { ok: false, error: message };
+    return { ok: false, errorKey: "saveFailed", error: message || undefined };
   }
 
   return { ok: true };
@@ -142,6 +145,8 @@ async function registerAndPostSubscription(vapid: string): Promise<{ ok: boolean
 type OfferMode = "none" | "ios-hint" | "push";
 
 export function PwaPushRegister() {
+  const t = useTranslations("pwa");
+  const tc = useTranslations("common");
   const [vapidKey, setVapidKey] = useState<string | null>(null);
   const [mode, setMode] = useState<OfferMode>("none");
   const [busy, setBusy] = useState(false);
@@ -245,9 +250,7 @@ export function PwaPushRegister() {
   const onEnablePush = useCallback(() => {
     if (!vapidKey) return;
     if (isIosLike() && !isStandalonePwa()) {
-      setSubscribeError(
-        "Abrí la FEG desde el ícono en tu inicio. En Safari solamente el permiso no aplica a la app instalada."
-      );
+      setSubscribeError(t("errors.iosStandaloneRequired"));
       return;
     }
 
@@ -263,18 +266,20 @@ export function PwaPushRegister() {
         }
         const r = await registerAndPostSubscription(vapidKey);
         if (!r.ok) {
-          setSubscribeError(r.error ?? "No se pudo activar");
+          setSubscribeError(
+            r.errorKey ? t(`errors.${r.errorKey}` as "errors.activateFailed") : r.error ?? t("errors.activateFailed")
+          );
           return;
         }
         setMode("none");
       } catch (e) {
         console.error("[PwaPushRegister] activar", e);
-        setSubscribeError(e instanceof Error ? e.message : "Error");
+        setSubscribeError(e instanceof Error ? e.message : t("errors.generic"));
       } finally {
         setBusy(false);
       }
     });
-  }, [vapidKey]);
+  }, [vapidKey, t]);
 
   const onDismissPush = () => {
     setSubscribeError(null);
@@ -294,24 +299,23 @@ export function PwaPushRegister() {
     return (
       <div
         role="dialog"
-        aria-label="Cómo activar notificaciones en iPhone"
+        aria-label={t("iosDialogAria")}
         className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[var(--feg-green)]/20 bg-[var(--feg-green)] p-4 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
         style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
       >
         <div className="mx-auto max-w-lg text-sm text-[#FFFFFF]">
-          <p className="font-semibold">Avisos en iPhone / iPad</p>
+          <p className="font-semibold">{t("iosTitle")}</p>
           <p className="mt-2 text-[#FFFFFF]/90">
-            Las notificaciones push solo se pueden activar si abrís la FEG desde el{" "}
-            <strong className="text-[#FFFFFF]">ícono en tu pantalla de inicio</strong>, no desde Safari. Si aún no la agregaste:{" "}
-            <strong className="text-[#FFFFFF]">Compartir</strong> → <strong className="text-[#FFFFFF]">Agregar a inicio</strong>, abrí esa app y tocá Activar
-            ahí.
+            {t.rich("iosBody", {
+              strong: (chunks) => <strong className="text-[#FFFFFF]">{chunks}</strong>,
+            })}
           </p>
           <button
             type="button"
             onClick={onDismissIosHint}
             className="mt-4 w-full rounded-xl border border-white/40 py-2.5 text-sm font-medium text-[#FFFFFF] sm:w-auto sm:px-6"
           >
-            Entendido
+            {t("iosUnderstand")}
           </button>
         </div>
       </div>
@@ -323,16 +327,13 @@ export function PwaPushRegister() {
   return (
     <div
       role="dialog"
-      aria-label="Activar notificaciones"
+      aria-label={t("pushDialogAria")}
       className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/10 bg-[var(--feg-green)] p-4 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
       style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
     >
       <div className="mx-auto flex max-w-lg flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm text-[#FFFFFF]">
-          <p>
-            <span className="font-semibold">Recibí avisos cuando haya noticias nuevas.</span>{" "}
-            Pulsá o hacé clic en Activar y aceptá en el cuadro del sistema (no solo en esta barra).
-          </p>
+          <p>{t("pushBody")}</p>
           {subscribeError && (
             <p className="mt-2 text-xs text-red-200" role="alert">
               {subscribeError}
@@ -345,7 +346,7 @@ export function PwaPushRegister() {
             onClick={onDismissPush}
             className="rounded-xl bg-[var(--feg-green-2)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95"
           >
-            Ahora no
+            {t("dismiss")}
           </button>
           <button
             type="button"
@@ -353,7 +354,7 @@ export function PwaPushRegister() {
             disabled={busy}
             className="rounded-xl bg-[var(--feg-yellow)] px-4 py-2 text-sm font-semibold text-[var(--feg-ink)] transition hover:brightness-95 disabled:opacity-60"
           >
-            {busy ? "…" : "Activar"}
+            {busy ? tc("busy") : t("enable")}
           </button>
         </div>
       </div>

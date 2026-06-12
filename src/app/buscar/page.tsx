@@ -1,8 +1,14 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { PublicPlayerCard } from "@/components/players/PublicPlayerCard";
-import { labelForSearchType, searchSite, type SiteSearchHit } from "@/lib/site-search";
+import {
+  getSearchLabels,
+  searchSite,
+  type SearchLabels,
+  type SiteSearchHit,
+} from "@/lib/site-search";
 
 type Props = {
   searchParams: Promise<{ q?: string }>;
@@ -26,14 +32,14 @@ function PlayerCard({ hit }: { hit: SiteSearchHit }) {
   );
 }
 
-function GenericCard({ hit }: { hit: SiteSearchHit }) {
+function GenericCard({ hit, labels }: { hit: SiteSearchHit; labels: SearchLabels }) {
   return (
     <Link
       href={hit.href}
       className="block rounded-2xl border border-[var(--feg-green)]/12 bg-white p-5 shadow-[0_10px_30px_rgba(0,36,3,0.06)] transition hover:border-[var(--feg-green)]/25 hover:shadow-[0_14px_40px_rgba(0,36,3,0.1)]"
     >
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]">
-        {labelForSearchType(hit.type)}
+        {labels.labelForType(hit.type)}
       </p>
       <h2 className="mt-1.5 font-heading text-lg font-semibold leading-snug text-[var(--feg-ink)]">
         {hit.title}
@@ -49,7 +55,9 @@ function GenericCard({ hit }: { hit: SiteSearchHit }) {
 
 export default async function BuscarPage({ searchParams }: Props) {
   const { q: rawQ } = await searchParams;
-  const { query, hits } = await searchSite(rawQ ?? "");
+  const t = await getTranslations("searchPage");
+  const labels = getSearchLabels(t);
+  const { query, hits } = await searchSite(rawQ ?? "", labels);
 
   const playerHits = hits.filter((h) => h.type === "player");
   const otherHits = hits.filter((h) => h.type !== "player");
@@ -61,38 +69,37 @@ export default async function BuscarPage({ searchParams }: Props) {
         <BackToHome />
         <header className="mb-8">
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
-            Sitio
+            {t("badge")}
           </p>
           <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
-            Búsqueda
+            {t("title")}
           </h1>
           {query ? (
             <p className="mt-3 text-base font-medium text-[var(--feg-green)]">
-              Resultados para «{query}» — {hits.length}{" "}
-              {hits.length === 1 ? "coincidencia" : "coincidencias"}
+              {t("resultsFor", { query, count: hits.length })}
             </p>
           ) : (
             <p className="mt-3 text-base font-medium text-[var(--feg-green)]">
-              Escribí un término en la barra del encabezado y presioná Enter.
+              {t("emptyPrompt")}
             </p>
           )}
         </header>
 
         {!query ? null : hits.length === 0 ? (
           <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-10 text-center text-[var(--feg-green)]">
-            No encontramos resultados. Probá con otro nombre, apellido o club.
+            {t("noResults")}
           </p>
         ) : (
           <div className="space-y-10">
             {otherHits.length > 0 && (
               <section>
                 <h2 className="mb-3 font-heading text-sm font-semibold uppercase tracking-[0.16em] text-[var(--feg-green-2)]">
-                  Sitio · Noticias · Torneos · Clubes
+                  {t("sectionMixed")}
                 </h2>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {otherHits.map((h) => (
                     <li key={`${h.type}-${h.href}-${h.title}`}>
-                      <GenericCard hit={h} />
+                      <GenericCard hit={h} labels={labels} />
                     </li>
                   ))}
                 </ul>
@@ -102,7 +109,7 @@ export default async function BuscarPage({ searchParams }: Props) {
             {playerHits.length > 0 && (
               <section>
                 <h2 className="mb-3 font-heading text-sm font-semibold uppercase tracking-[0.16em] text-[var(--feg-green-2)]">
-                  Jugadores ({playerHits.length})
+                  {t("sectionPlayers", { count: playerHits.length })}
                 </h2>
                 <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {playerHits.map((h) => (

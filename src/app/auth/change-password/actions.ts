@@ -7,18 +7,18 @@ import { z } from "zod";
 
 const schema = z
   .object({
-    newPassword: z.string().min(6, "Mínimo 6 caracteres"),
+    newPassword: z.string().min(6, "passwordMin"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Las contraseñas no coinciden",
+    message: "passwordMismatch",
     path: ["confirmPassword"],
   });
 
 export async function changePassword(formData: FormData) {
   const session = await auth();
   if (!session?.user) {
-    return { ok: false, error: "Debes iniciar sesión" };
+    return { ok: false as const, errorKey: "signInRequired" };
   }
 
   const parsed = schema.safeParse({
@@ -27,12 +27,13 @@ export async function changePassword(formData: FormData) {
   });
 
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.errors[0]?.message ?? "Datos inválidos" };
+    const errorKey = parsed.error.errors[0]?.message ?? "invalidData";
+    return { ok: false as const, errorKey };
   }
 
   const supabase = getSupabaseAdmin();
   if (!supabase) {
-    return { ok: false, error: "Configuración incompleta" };
+    return { ok: false as const, errorKey: "configIncomplete" };
   }
 
   const hashedPassword = await hash(parsed.data.newPassword, 12);
@@ -47,8 +48,8 @@ export async function changePassword(formData: FormData) {
     .eq("id", session.user.id);
 
   if (error) {
-    return { ok: false, error: error.message };
+    return { ok: false as const, errorKey: "error", errorMessage: error.message };
   }
 
-  return { ok: true };
+  return { ok: true as const };
 }

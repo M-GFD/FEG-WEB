@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { getActiveYouthTournamentConfig } from "@/lib/inscripcion-torneos-menores/config";
@@ -5,13 +6,17 @@ import { formatFechaTitle } from "@/lib/calendario-feg";
 import Link from "next/link";
 import { InscripcionTorneoMenoresForm } from "./InscripcionTorneoMenoresForm";
 
-export const metadata = {
-  title: "Inscripción torneos menores | FEG",
-  description: "Inscripción a torneos federativos para jugadores menores y juveniles.",
-};
+export async function generateMetadata() {
+  const t = await getTranslations("meta");
+  return {
+    title: t("tournamentSignupTitle"),
+    description: t("tournamentSignupDescription"),
+  };
+}
 
 export default async function InscripcionTorneosMenoresPage() {
   const config = await getActiveYouthTournamentConfig();
+  const t = await getTranslations("tournamentSignup");
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
@@ -21,16 +26,16 @@ export default async function InscripcionTorneosMenoresPage() {
 
         <header className="mt-6">
           <p className="inline-flex rounded-full border border-[var(--feg-green)]/20 bg-white/80 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
-            Torneos menores
+            {t("badge")}
           </p>
           <h1 className="mt-4 font-heading text-3xl font-semibold uppercase tracking-tight text-[var(--feg-ink)] md:text-4xl">
-            Inscripción a torneos
+            {t("title")}
           </h1>
         </header>
 
         {!config ? (
           <p className="mt-8 rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-8 text-center text-[var(--feg-green)]">
-            No hay torneo con inscripciones abiertas en este momento.
+            {t("empty")}
           </p>
         ) : (
           <>
@@ -43,22 +48,21 @@ export default async function InscripcionTorneosMenoresPage() {
                 {config.extraLine ? ` · ${config.extraLine}` : ""}
               </p>
               <p className="mt-1 text-sm font-semibold text-[var(--feg-ink)]">
-                Sede: {config.venue}
+                {t("venue", { venue: config.venue })}
               </p>
             </div>
 
             <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-950">
-              <strong>Importante:</strong> el jugador debe estar{" "}
-              <strong>empadronado</strong>. Las inscripciones las cargan profesores y/o
-              responsables de clubes asociados. Si el DNI no aparece en el padrón, primero
-              completá el{" "}
-              <Link
-                href="/empadronamiento-menores"
-                className="font-semibold text-[var(--feg-green-2)] underline-offset-2 hover:underline"
-              >
-                empadronamiento anual FEG
-              </Link>
-              .
+              {t.rich("importantBody", {
+                link: (chunks) => (
+                  <Link
+                    href="/empadronamiento-menores"
+                    className="font-semibold text-[var(--feg-green-2)] underline-offset-2 hover:underline"
+                  >
+                    {chunks}
+                  </Link>
+                ),
+              })}
             </div>
 
             <div className="mt-8">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { PublicPlayerCard } from "@/components/players/PublicPlayerCard";
@@ -16,6 +17,7 @@ export default async function ClubDetailPage({ params }: Props) {
   if (!club) notFound();
 
   const players = await getPublicPlayersByClubId(club.id);
+  const t = await getTranslations("clubs");
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
@@ -23,14 +25,14 @@ export default async function ClubDetailPage({ params }: Props) {
       <main className="mx-auto max-w-7xl px-6 pb-16 pt-8 lg:px-8">
         <nav className="mb-6 text-sm font-medium text-[var(--feg-green-2)]">
           <Link href="/clubes" className="underline-offset-2 hover:underline">
-            ← Clubes
+            {t("backToClubs")}
           </Link>
         </nav>
         <BackToHome />
 
         <header className="mb-10 rounded-2xl border border-[var(--feg-green)]/12 bg-white p-6 shadow-[0_14px_40px_rgba(0,36,3,0.08)] sm:p-8">
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-[var(--feg-bg)] px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)]">
-            Club afiliado
+            {t("affiliatedBadge")}
           </p>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -39,7 +41,7 @@ export default async function ClubDetailPage({ params }: Props) {
               </h1>
               {club.code && (
                 <p className="mt-2 font-heading text-sm font-semibold uppercase tracking-wider text-[var(--feg-green-2)]">
-                  Código {club.code}
+                  {t("code", { code: club.code })}
                 </p>
               )}
             </div>
@@ -52,15 +54,15 @@ export default async function ClubDetailPage({ params }: Props) {
           )}
           <p className="mt-4 text-sm font-medium text-[var(--feg-green)]">
             {players.length === 0
-              ? "Aún no hay jugadores en el padrón para este club."
-              : `${players.length} jugador${players.length === 1 ? "" : "es"} matriculado${players.length === 1 ? "" : "s"}.`}
+              ? t("noPlayers")
+              : t("playerCount", { count: players.length })}
           </p>
         </header>
 
         {players.length > 0 ? (
           <section>
             <h2 className="mb-4 font-heading text-lg font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
-              Jugadores
+              {t("playersSection")}
             </h2>
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {players.map((p) => (

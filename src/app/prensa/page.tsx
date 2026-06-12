@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { getApprovedPhotos } from "@/lib/data";
@@ -14,6 +15,8 @@ function isAllowedImageUrl(url: string) {
 
 export default async function PrensaPublicPage() {
   const photos = await getApprovedPhotos(60);
+  const t = await getTranslations("press");
+  const tCommon = await getTranslations("common");
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
@@ -22,20 +25,19 @@ export default async function PrensaPublicPage() {
         <BackToHome />
         <header className="mb-12 text-center">
           <p className="mx-auto mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
-            Galería
+            {t("badge")}
           </p>
           <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
-            Prensa
+            {t("title")}
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-[var(--feg-green)]">
-            Imágenes de torneos y actividades de la Federación Entrerriana de Golf,
-            aprobadas por el equipo de prensa.
+            {t("subtitle")}
           </p>
         </header>
 
         {photos.length === 0 ? (
           <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-12 text-center text-[var(--feg-green)]">
-            Aún no hay fotos publicadas en la galería.
+            {t("empty")}
           </p>
         ) : (
           <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
@@ -49,10 +51,9 @@ export default async function PrensaPublicPage() {
                     p.featured ? "ring-2 ring-[var(--feg-yellow)] ring-offset-2 ring-offset-[var(--feg-bg)]" : ""
                   }`}
                 >
-                  {/* URLs pueden ser de cualquier origen (clubes suben enlaces públicos) */}
                   <img
                     src={safeUrl}
-                    alt={p.caption || "Foto de la federación"}
+                    alt={p.caption || tCommon("photoFederationAlt")}
                     className="h-auto w-full object-cover"
                     loading="lazy"
                   />
@@ -64,7 +65,7 @@ export default async function PrensaPublicPage() {
                   {p.featured && (
                     <div className="border-t border-[var(--feg-green)]/10 px-3 py-2">
                       <span className="text-xs font-semibold uppercase tracking-wide text-[var(--feg-green-2)]">
-                        Destacada
+                        {t("featured")}
                       </span>
                     </div>
                   )}

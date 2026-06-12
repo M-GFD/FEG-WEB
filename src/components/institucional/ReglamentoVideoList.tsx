@@ -1,8 +1,19 @@
+import { getTranslations } from "next-intl/server";
 import type { ReglamentoVideoRow } from "@/lib/data";
 
 export type ReglamentoVideoItem = ReglamentoVideoRow;
 
-function ReglamentoVideoPlayer({ url, mimeType, title }: { url: string; mimeType: string; title: string }) {
+async function ReglamentoVideoPlayer({
+  url,
+  mimeType,
+  title,
+  unsupportedLabel,
+}: {
+  url: string;
+  mimeType: string;
+  title: string;
+  unsupportedLabel: string;
+}) {
   if (mimeType === "image/gif") {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -22,16 +33,18 @@ function ReglamentoVideoPlayer({ url, mimeType, title }: { url: string; mimeType
       className="w-full rounded-2xl border border-[var(--feg-green)]/12 bg-black shadow-[0_14px_40px_rgba(0,36,3,0.12)]"
     >
       <source src={url} type={mimeType} />
-      Tu navegador no puede reproducir este video.
+      {unsupportedLabel}
     </video>
   );
 }
 
-export function ReglamentoVideoList({ videos }: { videos: ReglamentoVideoItem[] }) {
+export async function ReglamentoVideoList({ videos }: { videos: ReglamentoVideoItem[] }) {
+  const t = await getTranslations("regulationVideos");
+
   if (videos.length === 0) {
     return (
       <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-10 text-center text-[var(--feg-green)]">
-        Todavía no hay videos explicativos publicados.
+        {t("empty")}
       </p>
     );
   }
@@ -56,6 +69,7 @@ export function ReglamentoVideoList({ videos }: { videos: ReglamentoVideoItem[] 
               url={video.videoUrl}
               mimeType={video.mimeType}
               title={video.title}
+              unsupportedLabel={t("unsupported")}
             />
           </div>
         </article>

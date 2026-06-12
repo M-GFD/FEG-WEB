@@ -3,6 +3,7 @@
 import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { resetPassword } from "./actions";
 import { FegLogo } from "@/components/layout/FegLogo";
 
@@ -12,6 +13,8 @@ function ResetPasswordInner() {
   const token = sp.get("token") ?? "";
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
+  const t = useTranslations("auth.resetPassword");
+  const tCommon = useTranslations("common");
 
   const disabled = useMemo(() => !email || !token, [email, token]);
 
@@ -19,7 +22,13 @@ function ResetPasswordInner() {
     setError(null);
     const res = await resetPassword(formData);
     if (!res.ok) {
-      setError(res.error || "No se pudo restablecer la contraseña");
+      if ("errorMessage" in res && res.errorMessage) {
+        setError(res.errorMessage);
+      } else if (res.errorKey === "failed") {
+        setError(t("failed"));
+      } else {
+        setError(t(`errors.${res.errorKey}` as "errors.invalidData"));
+      }
       return;
     }
     setOk(true);
@@ -33,18 +42,18 @@ function ResetPasswordInner() {
         </div>
 
         <h1 className="mt-2 text-center font-heading text-2xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
-          Nueva contraseña
+          {t("title")}
         </h1>
 
         {ok ? (
           <div className="mt-6 rounded-xl bg-[var(--feg-green-2)]/10 p-4 text-sm text-[var(--feg-green-2)]">
-            Contraseña actualizada. Ya podés iniciar sesión.
+            {t("success")}
             <div className="mt-3">
               <Link
                 href="/auth/signin?reset=1"
                 className="font-semibold text-[var(--feg-green-2)] underline-offset-2 hover:underline"
               >
-                Ir a iniciar sesión →
+                {t("goToSignIn")}
               </Link>
             </div>
           </div>
@@ -55,7 +64,7 @@ function ResetPasswordInner() {
 
             <div>
               <label htmlFor="password" className="mb-1 block text-sm font-medium text-[var(--feg-green)]">
-                Nueva contraseña
+                {t("newPassword")}
               </label>
               <input
                 id="password"
@@ -64,14 +73,17 @@ function ResetPasswordInner() {
                 required
                 autoComplete="new-password"
                 className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-4 py-2.5 text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
-                placeholder="••••••••"
+                placeholder={tCommon("passwordPlaceholder")}
                 disabled={disabled}
               />
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium text-[var(--feg-green)]">
-                Confirmar contraseña
+              <label
+                htmlFor="confirmPassword"
+                className="mb-1 block text-sm font-medium text-[var(--feg-green)]"
+              >
+                {t("confirmPassword")}
               </label>
               <input
                 id="confirmPassword"
@@ -80,15 +92,13 @@ function ResetPasswordInner() {
                 required
                 autoComplete="new-password"
                 className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-4 py-2.5 text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
-                placeholder="••••••••"
+                placeholder={tCommon("passwordPlaceholder")}
                 disabled={disabled}
               />
             </div>
 
             {disabled && (
-              <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
-                El enlace no es válido. Solicitá uno nuevo.
-              </p>
+              <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">{t("invalidLink")}</p>
             )}
 
             {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
@@ -98,14 +108,14 @@ function ResetPasswordInner() {
               disabled={disabled}
               className="w-full rounded-xl bg-[var(--feg-ink)] py-3 font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Guardar contraseña
+              {t("submit")}
             </button>
           </form>
         )}
 
         <p className="mt-4 text-center text-sm text-[var(--feg-green)]">
           <Link href="/auth/signin" className="font-medium underline-offset-2 hover:text-[var(--feg-ink)] hover:underline">
-            Volver a iniciar sesión
+            {t("backToSignIn")}
           </Link>
         </p>
       </div>
@@ -114,11 +124,13 @@ function ResetPasswordInner() {
 }
 
 export default function ResetPasswordPage() {
+  const tCommon = useTranslations("common");
+
   return (
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-[var(--feg-bg)] text-[var(--feg-green)]">
-          Cargando…
+          {tCommon("loading")}
         </div>
       }
     >
@@ -126,4 +138,3 @@ export default function ResetPasswordPage() {
     </Suspense>
   );
 }
-

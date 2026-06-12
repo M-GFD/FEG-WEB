@@ -10,12 +10,12 @@ const schema = z
   .object({
     email: z.string().min(1).email().transform((v) => v.trim().toLowerCase()),
     token: z.string().min(10),
-    password: z.string().min(6, "Mínimo 6 caracteres"),
+    password: z.string().min(6, "passwordMin"),
     confirmPassword: z.string(),
   })
   .refine((d) => d.password === d.confirmPassword, {
     path: ["confirmPassword"],
-    message: "Las contraseñas no coinciden",
+    message: "passwordMismatch",
   });
 
 export async function resetPassword(formData: FormData) {
@@ -27,18 +27,15 @@ export async function resetPassword(formData: FormData) {
   });
 
   if (!parsed.success) {
-    const msg = parsed.error.errors[0]?.message ?? "Datos inválidos";
-    return { ok: false as const, error: msg };
+    const errorKey = parsed.error.errors[0]?.message ?? "invalidData";
+    return { ok: false as const, errorKey };
   }
 
   const { email, token, password } = parsed.data;
   const consumed = await consumeUserToken({ purpose: "reset", email, token });
   if (!consumed.ok) {
-    const msg =
-      consumed.reason === "expired"
-        ? "El enlace expiró. Solicitá uno nuevo."
-        : "El enlace no es válido. Solicitá uno nuevo.";
-    return { ok: false as const, error: msg };
+    const errorKey = consumed.reason === "expired" ? "expired" : "invalid";
+    return { ok: false as const, errorKey };
   }
 
   const hashed = await hash(password, 12);
@@ -50,7 +47,7 @@ export async function resetPassword(formData: FormData) {
       .from("User")
       .update({ password: hashed, updatedAt: now, mustChangePassword: false })
       .eq("email", email);
-    if (error) return { ok: false as const, error: error.message };
+    if (error) return { ok: false as const, errorKey: "failed", errorMessage: error.message };
     return { ok: true as const };
   }
 
@@ -60,4 +57,3 @@ export async function resetPassword(formData: FormData) {
   });
   return { ok: true as const };
 }
-
