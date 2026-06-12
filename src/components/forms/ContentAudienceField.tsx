@@ -1,8 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
-  CONTENT_AUDIENCE_LABELS,
   CONTENT_AUDIENCE_VALUES,
+  getContentAudienceLabel,
   type ContentAudience,
 } from "@/lib/content-audience";
 
@@ -20,6 +21,8 @@ export function ContentAudienceField({
   onChange,
   legend = "Audiencia",
 }: Props) {
+  const t = useTranslations("audience");
+
   return (
     <fieldset className="space-y-2">
       <legend className="text-sm font-medium text-[var(--feg-green)]">{legend}</legend>
@@ -46,7 +49,7 @@ export function ContentAudienceField({
                 onChange={() => onChange(opt)}
                 className="mt-0.5 h-4 w-4 shrink-0 border-[var(--feg-green)]/40 text-[var(--feg-green-2)] focus:ring-[var(--feg-green-2)]"
               />
-              <span className="text-[var(--feg-ink)]">{CONTENT_AUDIENCE_LABELS[opt]}</span>
+              <span className="text-[var(--feg-ink)]">{getContentAudienceLabel(t, opt)}</span>
             </label>
           );
         })}

@@ -28,84 +28,84 @@ const PER_TYPE = 10;
 const MAX_QUERY = 80;
 
 type StaticPage = {
-  title: string;
+  titleKey: string;
   href: string;
   keywords: string[];
 };
 
 const STATIC_PAGES: StaticPage[] = [
   {
-    title: "Nosotros",
+    titleKey: "aboutUs",
     href: "/institucional",
     keywords: ["nosotros", "institucional", "federación", "misión", "visión", "objetivos", "fe"],
   },
   {
-    title: "Directorio",
+    titleKey: "directory",
     href: "/institucional/directorio",
     keywords: ["directorio", "presidente", "vice", "tesorería", "secretario", "prensa", "comercial", "autoridades"],
   },
   {
-    title: "Reglamentos",
+    titleKey: "regulations",
     href: "/institucional/reglamentos",
     keywords: ["reglamentos", "reglamento", "normativa", "federación", "2026"],
   },
   {
-    title: "Reglamento Menores",
+    titleKey: "regulationsMinors",
     href: "/menores/reglamento",
     keywords: ["reglamento", "menores", "prejuveniles", "juveniles", "junior", "2026"],
   },
   {
-    title: "Reglamento Pre-Juveniles y Juveniles 2026",
+    titleKey: "regulationsPreJuveniles",
     href: "/institucional/reglamentos/pre-juveniles",
     keywords: ["reglamento", "prejuveniles", "juveniles", "pre y juveniles", "menores", "2026"],
   },
   {
-    title: "Reglamento Junior 2026",
+    titleKey: "regulationsJunior",
     href: "/institucional/reglamentos/junior",
     keywords: ["reglamento", "junior", "menores", "2026"],
   },
   {
-    title: "Reglamento Mayores 2026",
+    titleKey: "regulationsMayores",
     href: "/institucional/reglamentos/mayores",
     keywords: ["reglamento", "mayores", "senior", "damas", "2026"],
   },
   {
-    title: "Reglamento ranking juveniles y prejuveniles",
+    titleKey: "regulationsRanking",
     href: "/institucional/reglamento",
     keywords: ["reglamento", "ranking", "juveniles", "prejuveniles", "cupos", "2026", "lineamientos"],
   },
   {
-    title: "Videos explicativos del reglamento",
+    titleKey: "regulationsVideos",
     href: "/institucional/reglamento/videos",
     keywords: ["videos", "explicativos", "reglamento", "tutorial", "juveniles", "prejuveniles"],
   },
   {
-    title: "Rankings",
+    titleKey: "rankings",
     href: "/ranking",
     keywords: ["ranking", "rankings", "puntos", "tabla", "posiciones"],
   },
   {
-    title: "Noticias",
+    titleKey: "news",
     href: "/noticias",
     keywords: ["noticias", "actualidad", "prensa", "novedades"],
   },
   {
-    title: "Calendario",
+    titleKey: "calendar",
     href: "/calendario",
     keywords: ["calendario", "próximos torneos", "proximos torneos", "agenda"],
   },
   {
-    title: "Torneos",
+    titleKey: "tournaments",
     href: "/torneos",
     keywords: ["torneos", "histórico", "fechas", "competencias", "galería", "galeria", "fotos", "imágenes"],
   },
   {
-    title: "Clubes",
+    titleKey: "clubs",
     href: "/clubes",
     keywords: ["clubes", "club", "red federativa", "socios"],
   },
   {
-    title: "Empadronamiento menores",
+    titleKey: "enrollmentMinors",
     href: "/empadronamiento-menores",
     keywords: [
       "empadronamiento",
@@ -123,7 +123,7 @@ const STATIC_PAGES: StaticPage[] = [
     ],
   },
   {
-    title: "Inscripción torneos menores",
+    titleKey: "signupMinors",
     href: "/inscripcion-torneos-menores",
     keywords: [
       "inscripcion",
@@ -137,6 +137,35 @@ const STATIC_PAGES: StaticPage[] = [
     ],
   },
 ];
+
+export type SearchLabels = {
+  labelForType: (type: SearchResultType) => string;
+  staticPageTitle: (key: string) => string;
+  staticSectionDescription: string;
+  clubListFallback: string;
+  clubCode: (code: string) => string;
+  playerClub: (club: string) => string;
+  playerHandicap: (handicap: string) => string;
+  playerDefault: string;
+};
+
+type SearchPageTranslator = (
+  key: string,
+  values?: Record<string, string | number | Date>
+) => string;
+
+export function getSearchLabels(t: SearchPageTranslator): SearchLabels {
+  return {
+    labelForType: (type) => t(`types.${type}`),
+    staticPageTitle: (key) => t(`staticPages.${key}`),
+    staticSectionDescription: t("staticSectionDescription"),
+    clubListFallback: t("clubListFallback"),
+    clubCode: (code) => t("clubCode", { code }),
+    playerClub: (club) => t("playerClub", { club }),
+    playerHandicap: (handicap) => t("playerHandicap", { handicap }),
+    playerDefault: t("playerDefault"),
+  };
+}
 
 function normalizeQuery(raw: string): string {
   return raw
@@ -153,13 +182,14 @@ function normalizeForMatch(s: string): string {
     .replace(/\p{M}/gu, "");
 }
 
-function matchStaticPages(q: string): SiteSearchHit[] {
+function matchStaticPages(q: string, labels: SearchLabels): SiteSearchHit[] {
   const lower = normalizeForMatch(q);
   if (!lower) return [];
 
   const hits: SiteSearchHit[] = [];
   for (const p of STATIC_PAGES) {
-    const titleNorm = normalizeForMatch(p.title);
+    const title = labels.staticPageTitle(p.titleKey);
+    const titleNorm = normalizeForMatch(title);
     const match =
       titleNorm.includes(lower) ||
       lower.includes(titleNorm) ||
@@ -170,9 +200,9 @@ function matchStaticPages(q: string): SiteSearchHit[] {
     if (match) {
       hits.push({
         type: "page",
-        title: p.title,
+        title,
         href: p.href,
-        description: "Sección del sitio",
+        description: labels.staticSectionDescription,
       });
     }
   }
@@ -197,7 +227,7 @@ function formatHandicap(h: number | null): string | null {
   return Number.isInteger(h) ? `${h}` : h.toFixed(1);
 }
 
-async function searchViaSupabase(q: string): Promise<SiteSearchHit[] | null> {
+async function searchViaSupabase(q: string, labels: SearchLabels): Promise<SiteSearchHit[] | null> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return null;
 
@@ -268,9 +298,9 @@ async function searchViaSupabase(q: string): Promise<SiteSearchHit[] | null> {
       type: "club",
       title: r.name,
       href: "/clubes",
-      description: [r.code ? `Cód. ${r.code}` : null, r.address, r.phone]
+      description: [r.code ? labels.clubCode(r.code) : null, r.address, r.phone]
         .filter(Boolean)
-        .join(" · ") || "Ver listado de clubes",
+        .join(" · ") || labels.clubListFallback,
     });
   }
 
@@ -325,9 +355,9 @@ async function searchViaSupabase(q: string): Promise<SiteSearchHit[] | null> {
       type: "player",
       title: `${r.firstName} ${r.lastName}`.trim(),
       href: `/jugadores/${r.id}`,
-      description: [clubName ? `Club: ${clubName}` : null, hStr ? `Handicap ${hStr}` : null]
+      description: [clubName ? labels.playerClub(clubName) : null, hStr ? labels.playerHandicap(hStr) : null]
         .filter(Boolean)
-        .join(" · ") || "Jugador matriculado",
+        .join(" · ") || labels.playerDefault,
       meta: {
         handicap: h,
         club: clubName,
@@ -339,7 +369,7 @@ async function searchViaSupabase(q: string): Promise<SiteSearchHit[] | null> {
   return hits;
 }
 
-async function searchViaPrisma(q: string): Promise<SiteSearchHit[]> {
+async function searchViaPrisma(q: string, labels: SearchLabels): Promise<SiteSearchHit[]> {
   const hits: SiteSearchHit[] = [];
 
   const [newsList, tours, clubs, players, clubMatchPlayers] = await Promise.all([
@@ -445,9 +475,9 @@ async function searchViaPrisma(q: string): Promise<SiteSearchHit[]> {
       type: "club",
       title: c.name,
       href: "/clubes",
-      description: [c.code ? `Cód. ${c.code}` : null, c.address, c.phone]
+      description: [c.code ? labels.clubCode(c.code) : null, c.address, c.phone]
         .filter(Boolean)
-        .join(" · ") || undefined,
+        .join(" · ") || labels.clubListFallback,
     });
   }
 
@@ -461,9 +491,9 @@ async function searchViaPrisma(q: string): Promise<SiteSearchHit[]> {
       type: "player",
       title: `${p.firstName} ${p.lastName}`.trim(),
       href: `/jugadores/${p.id}`,
-      description: [p.club?.name ? `Club: ${p.club.name}` : null, hStr ? `Handicap ${hStr}` : null]
+      description: [p.club?.name ? labels.playerClub(p.club.name) : null, hStr ? labels.playerHandicap(hStr) : null]
         .filter(Boolean)
-        .join(" · ") || undefined,
+        .join(" · ") || labels.playerDefault,
       meta: {
         handicap: h,
         club: p.club?.name ?? null,
@@ -497,23 +527,14 @@ function dedupeAndSort(hits: SiteSearchHit[]): SiteSearchHit[] {
   return out;
 }
 
-const TYPE_LABEL: Record<SearchResultType, string> = {
-  page: "Sitio",
-  news: "Noticia",
-  tournament: "Torneo",
-  club: "Club",
-  player: "Jugador",
-};
-
-export function labelForSearchType(t: SearchResultType): string {
-  return TYPE_LABEL[t];
-}
-
 /**
  * Búsqueda global por noticias, torneos, clubes y jugadores.
  * IMPORTANTE: NUNCA expone correo/DNI/teléfono.
  */
-export async function searchSite(rawQuery: string): Promise<{
+export async function searchSite(
+  rawQuery: string,
+  labels: SearchLabels
+): Promise<{
   query: string;
   hits: SiteSearchHit[];
 }> {
@@ -522,9 +543,10 @@ export async function searchSite(rawQuery: string): Promise<{
     return { query: "", hits: [] };
   }
 
-  const staticHits = matchStaticPages(query);
+  const staticHits = matchStaticPages(query, labels);
 
-  const dbHits = (await searchViaSupabase(query)) ?? (await searchViaPrisma(query));
+  const dbHits =
+    (await searchViaSupabase(query, labels)) ?? (await searchViaPrisma(query, labels));
 
   const hits = dedupeAndSort([...staticHits, ...dbHits]);
   return { query, hits };

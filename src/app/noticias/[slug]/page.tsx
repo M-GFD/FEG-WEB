@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { getNewsBySlug } from "@/lib/data";
@@ -18,6 +19,7 @@ export default async function NoticiaPage({
 
   if (!news) notFound();
 
+  const t = await getTranslations("news");
   const gallery = parseNewsGalleryUrls(news.galleryUrls);
   const when = formatNewsDateParts(news.publishedAt, news.createdAt, {
     day: "numeric",
@@ -34,7 +36,7 @@ export default async function NoticiaPage({
           href="/noticias"
           className="mb-8 inline-flex items-center gap-2 rounded-full border border-[var(--feg-green)]/20 bg-white px-4 py-2 text-sm font-medium text-[var(--feg-green-2)] shadow-sm transition hover:border-[var(--feg-green-2)]/40 hover:bg-[var(--feg-yellow)]/15"
         >
-          ← Volver a noticias
+          {t("backToNews")}
         </Link>
         <article className="rounded-3xl border border-[var(--feg-green)]/12 bg-white p-6 shadow-[0_20px_60px_rgba(0,36,3,0.08)] sm:p-8 md:p-10">
           <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-[var(--feg-green)]/10">
@@ -68,7 +70,7 @@ export default async function NoticiaPage({
             <div className="relative mt-10 aspect-video w-full overflow-hidden rounded-2xl border border-[var(--feg-green)]/10">
               <Image
                 src={gallery[0]}
-                alt={`${news.title} — imagen`}
+                alt={t("imageAlt", { title: news.title })}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 672px"
@@ -77,9 +79,9 @@ export default async function NoticiaPage({
           )}
 
           {gallery.length > 1 && (
-            <section className="mt-12" aria-label="Galería de imágenes">
+            <section className="mt-12" aria-label={t("galleryAria")}>
               <h2 className="font-heading text-xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
-                Galería
+                {t("gallery")}
               </h2>
               <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {gallery.map((url, i) => (
@@ -89,7 +91,7 @@ export default async function NoticiaPage({
                   >
                     <Image
                       src={url}
-                      alt={`${news.title} — imagen ${i + 1}`}
+                      alt={t("imageAltNumbered", { title: news.title, number: i + 1 })}
                       fill
                       className="object-cover"
                       sizes="(max-width: 640px) 100vw, 336px"

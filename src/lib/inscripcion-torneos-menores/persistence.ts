@@ -38,37 +38,33 @@ export type SubmitTournamentRegistrationInput = {
 
 export async function submitYouthTournamentRegistration(
   input: SubmitTournamentRegistrationInput
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true } | { ok: false; errorKey: string }> {
   const config = await getActiveYouthTournamentConfig();
   if (!config) {
-    return { ok: false, error: "No hay torneo abierto para inscripciones." };
+    return { ok: false, errorKey: "noOpenTournament" };
   }
   if (input.tournamentKey !== config.tournamentKey) {
-    return { ok: false, error: "El torneo de inscripción no coincide con el activo." };
+    return { ok: false, errorKey: "tournamentMismatch" };
   }
 
   const lookup = await lookupYouthEnrollmentByDni(input.dni);
   if (!lookup.found) {
-    return {
-      ok: false,
-      error:
-        "El jugador no está empadronado. Debe completar el empadronamiento anual antes de inscribirse.",
-    };
+    return { ok: false, errorKey: "notEnrolled" };
   }
   if (lookup.player.enrollmentId !== input.enrollmentId) {
-    return { ok: false, error: "Los datos del jugador no coinciden con el padrón." };
+    return { ok: false, errorKey: "playerMismatch" };
   }
 
   const supabase = getSupabaseAdmin();
   if (!supabase) {
-    return { ok: false, error: "El servicio no está disponible." };
+    return { ok: false, errorKey: "serviceUnavailable" };
   }
 
   const dniNorm = normalizeDni(input.dni);
   const dniHash = hashDniForLookup(dniNorm);
   const birthDate = parseBirthDateInput(input.birthDate);
   if (!birthDate) {
-    return { ok: false, error: "Fecha de nacimiento inválida." };
+    return { ok: false, errorKey: "invalidBirthDate" };
   }
 
   const now = new Date();
@@ -113,13 +109,10 @@ export async function submitYouthTournamentRegistration(
   const { error } = await supabase.from("YouthTournamentRegistration").insert(row);
   if (error) {
     if (error.code === "23505") {
-      return {
-        ok: false,
-        error: "Este jugador ya está inscripto en el torneo activo.",
-      };
+      return { ok: false, errorKey: "alreadyRegistered" };
     }
     console.error("[submitYouthTournamentRegistration]", error.message);
-    return { ok: false, error: "No se pudo registrar la inscripción." };
+    return { ok: false, errorKey: "saveFailed" };
   }
 
   return { ok: true };

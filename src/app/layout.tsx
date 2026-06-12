@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Oswald, Urbanist } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import "./globals.css";
 import { Providers } from "./providers";
 import { FooterPublicOnly } from "@/components/layout/FooterPublicOnly";
@@ -20,15 +20,18 @@ const urbanist = Urbanist({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "FEG - Federación Entrerriana de Golf",
-  description: "Plataforma de torneos, rankings y gestión",
-  manifest: "/manifest.webmanifest",
-  icons: {
-    icon: [{ url: FEG_LOGO_PUBLIC_PATH, type: FEG_LOGO_MIME }],
-    apple: [{ url: FEG_LOGO_PUBLIC_PATH, type: FEG_LOGO_MIME }],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return {
+    title: t("siteTitle"),
+    description: t("siteDescription"),
+    manifest: "/manifest.webmanifest",
+    icons: {
+      icon: [{ url: FEG_LOGO_PUBLIC_PATH, type: FEG_LOGO_MIME }],
+      apple: [{ url: FEG_LOGO_PUBLIC_PATH, type: FEG_LOGO_MIME }],
+    },
+  };
+}
 
 export default async function RootLayout({
   children,

@@ -9,16 +9,31 @@ export const CONTENT_AUDIENCE_VALUES: ContentAudience[] = [
   "MAYORES",
 ];
 
-export const CONTENT_AUDIENCE_LABELS: Record<ContentAudience, string> = {
-  GENERAL: "General (todo el sitio)",
-  MENORES: "Menores (juveniles / pre-juveniles / junior)",
-  MAYORES: "Mayores (senior / damas)",
+/** Claves i18n bajo el namespace `audience`. */
+export const CONTENT_AUDIENCE_I18N_KEYS: Record<ContentAudience, string> = {
+  GENERAL: "general",
+  MENORES: "minors",
+  MAYORES: "majors",
 };
 
-export const AUDIENCE_SEGMENT_LABELS: Record<AudienceSegment, string> = {
-  menores: "Menores",
-  mayores: "Mayores",
+export const AUDIENCE_SEGMENT_I18N_KEYS: Record<AudienceSegment, string> = {
+  menores: "segmentMinors",
+  mayores: "segmentMayores",
 };
+
+export function getContentAudienceLabel(
+  t: (key: string) => string,
+  audience: ContentAudience
+): string {
+  return t(CONTENT_AUDIENCE_I18N_KEYS[audience]);
+}
+
+export function getAudienceSegmentLabel(
+  t: (key: string) => string,
+  segment: AudienceSegment
+): string {
+  return t(AUDIENCE_SEGMENT_I18N_KEYS[segment]);
+}
 
 const QUERY_KEY = "audiencia";
 

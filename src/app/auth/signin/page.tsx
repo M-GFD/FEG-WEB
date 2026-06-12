@@ -4,9 +4,8 @@ import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-
+import { useTranslations } from "next-intl";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-
 import { FegLogo } from "@/components/layout/FegLogo";
 import { resendVerification } from "@/app/auth/verify-email/actions";
 
@@ -20,6 +19,8 @@ function SignInForm() {
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const t = useTranslations("auth.signIn");
+  const tCommon = useTranslations("common");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -32,11 +33,11 @@ function SignInForm() {
     const password = formData.get("password") as string;
 
     if (!email?.trim()) {
-      setError("Ingresa tu email");
+      setError(t("emailRequired"));
       return;
     }
     if (!password) {
-      setError("Ingresa tu contraseña");
+      setError(t("passwordRequired"));
       return;
     }
 
@@ -51,17 +52,17 @@ function SignInForm() {
 
       if (result?.error) {
         if (result.error === "EMAIL_NOT_VERIFIED") {
-          setError("Tu email aún no está verificado.");
+          setError(t("emailNotVerified"));
           try {
             await resendVerification(email.trim().toLowerCase());
-            setInfo("Te reenviamos el email de verificación.");
+            setInfo(t("verificationResent"));
           } catch {
             setInfo(null);
-            setError("No pudimos reenviar el email. Intentá más tarde.");
+            setError(t("verificationResendFailed"));
           }
           return;
         }
-        setError("Email o contraseña incorrectos");
+        setError(t("invalidCredentials"));
         return;
       }
 
@@ -77,42 +78,32 @@ function SignInForm() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--feg-bg)] px-4 py-10">
       <div className="w-full max-w-sm rounded-2xl border border-[var(--feg-green)]/12 bg-white p-8 shadow-[0_20px_60px_rgba(0,36,3,0.1)]">
         <div className="flex justify-center">
-          <FegLogo
-            size="nav"
-            className="h-16 object-center sm:h-[4.25rem]"
-          />
+          <FegLogo size="nav" className="h-16 object-center sm:h-[4.25rem]" />
         </div>
         <h1 className="mt-2 text-center font-heading text-2xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
-          Iniciar sesión
+          {t("title")}
         </h1>
 
         {registered && (
           <p className="mb-4 mt-4 rounded-xl bg-[var(--feg-green-2)]/10 p-3 text-sm text-[var(--feg-green-2)]">
-            Cuenta creada. Revisá tu email para verificarla antes de ingresar.
+            {t("registered")}
           </p>
         )}
         {verified && (
           <p className="mb-4 mt-4 rounded-xl bg-[var(--feg-green-2)]/10 p-3 text-sm text-[var(--feg-green-2)]">
-            Email verificado. Ya podés iniciar sesión.
+            {t("verified")}
           </p>
         )}
         {reset && (
           <p className="mb-4 mt-4 rounded-xl bg-[var(--feg-green-2)]/10 p-3 text-sm text-[var(--feg-green-2)]">
-            Contraseña actualizada. Ya podés iniciar sesión.
+            {t("resetSuccess")}
           </p>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="mt-6 space-y-4"
-          aria-busy={busy}
-        >
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4" aria-busy={busy}>
           <div>
-            <label
-              htmlFor="email"
-              className="mb-1 block text-sm font-medium text-[var(--feg-green)]"
-            >
-              Email
+            <label htmlFor="email" className="mb-1 block text-sm font-medium text-[var(--feg-green)]">
+              {t("email")}
             </label>
             <input
               id="email"
@@ -122,15 +113,12 @@ function SignInForm() {
               disabled={busy}
               autoComplete="email"
               className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-4 py-2.5 text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
-              placeholder="tu@email.com"
+              placeholder={tCommon("emailPlaceholder")}
             />
           </div>
           <div>
-            <label
-              htmlFor="password"
-              className="mb-1 block text-sm font-medium text-[var(--feg-green)]"
-            >
-              Contraseña
+            <label htmlFor="password" className="mb-1 block text-sm font-medium text-[var(--feg-green)]">
+              {t("password")}
             </label>
             <div className="relative">
               <input
@@ -141,14 +129,14 @@ function SignInForm() {
                 disabled={busy}
                 autoComplete="current-password"
                 className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] py-2.5 pl-4 pr-12 text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
-                placeholder="••••••••"
+                placeholder={tCommon("passwordPlaceholder")}
               />
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => setShowPassword((v) => !v)}
                 className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-[var(--feg-green)] outline-none transition hover:bg-[var(--feg-green)]/10 hover:text-[var(--feg-green-2)] focus-visible:ring-2 focus-visible:ring-[var(--feg-green-2)]/40 disabled:cursor-not-allowed disabled:opacity-40"
-                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                aria-label={showPassword ? t("hidePassword") : t("showPassword")}
                 aria-pressed={showPassword}
               >
                 {showPassword ? (
@@ -163,15 +151,11 @@ function SignInForm() {
                 href="/auth/forgot-password"
                 className="text-sm font-medium text-[var(--feg-green-2)] underline-offset-2 hover:underline"
               >
-                ¿Olvidaste tu contraseña?
+                {t("forgotPassword")}
               </Link>
             </div>
           </div>
-          {error && (
-            <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
-              {error}
-            </p>
-          )}
+          {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
           {info && (
             <p className="rounded-xl bg-[var(--feg-green-2)]/10 p-3 text-sm text-[var(--feg-green-2)]">
               {info}
@@ -184,21 +168,18 @@ function SignInForm() {
           >
             {busy ? (
               <>
-                <Loader2
-                  className="h-5 w-5 shrink-0 animate-spin"
-                  aria-hidden
-                />
-                Entrando…
+                <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden />
+                {t("submitting")}
               </>
             ) : (
-              "Entrar"
+              t("submit")
             )}
           </button>
         </form>
 
         <p className="mt-2 text-center text-sm text-[var(--feg-green)]">
           <Link href="/" className="font-medium underline-offset-2 hover:text-[var(--feg-ink)] hover:underline">
-            Volver al inicio
+            {t("backToHome")}
           </Link>
         </p>
       </div>
@@ -207,11 +188,13 @@ function SignInForm() {
 }
 
 export default function SignInPage() {
+  const tCommon = useTranslations("common");
+
   return (
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center bg-[var(--feg-bg)] text-[var(--feg-green)]">
-          Cargando…
+          {tCommon("loading")}
         </div>
       }
     >

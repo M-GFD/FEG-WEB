@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { HandicapRankingCategoryBlock } from "@/lib/data";
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export function RankingCategoryPager({ categories, initialIndex }: Props) {
+  const t = useTranslations("ranking");
   const [index, setIndex] = useState(initialIndex);
 
   const goPrev = useCallback(() => {
@@ -32,7 +34,7 @@ export function RankingCategoryPager({ categories, initialIndex }: Props) {
   return (
     <div className="space-y-6">
       <nav
-        aria-label="Ir a categoría"
+        aria-label={t("categoryNavAria")}
         className="flex flex-wrap gap-2 border-b border-[var(--feg-green)]/10 pb-4"
       >
         {categories.map((c, idx) => {
@@ -60,14 +62,14 @@ export function RankingCategoryPager({ categories, initialIndex }: Props) {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm font-medium text-[var(--feg-green)]">
-          Categoría{" "}
+          {t("categoryLabel")}{" "}
           <span className="tabular-nums text-[var(--feg-ink)]">
             {pos} / {total}
           </span>
           <span className="mx-2 text-[var(--feg-green)]/40">·</span>
           <span className="text-[var(--feg-green-2)]">{cat.label}</span>
           <span className="ml-1.5 font-normal text-[var(--feg-green)]">
-            ({cat.rows.length} jugador{cat.rows.length === 1 ? "" : "es"})
+            {t("playersInCategory", { count: cat.rows.length })}
           </span>
         </p>
         <div className="flex flex-wrap gap-2">
@@ -77,21 +79,21 @@ export function RankingCategoryPager({ categories, initialIndex }: Props) {
             className="inline-flex items-center justify-center gap-1 rounded-full border border-[var(--feg-green)]/25 bg-white px-4 py-2 text-sm font-semibold text-[var(--feg-green-2)] shadow-sm transition hover:border-[var(--feg-green)]/45 hover:bg-[var(--feg-bg)]"
           >
             <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
-            Anterior
+            {t("prev")}
           </button>
           <button
             type="button"
             onClick={goNext}
             className="inline-flex items-center justify-center gap-1 rounded-full border border-[var(--feg-green)]/25 bg-white px-4 py-2 text-sm font-semibold text-[var(--feg-green-2)] shadow-sm transition hover:border-[var(--feg-green)]/45 hover:bg-[var(--feg-bg)]"
           >
-            Siguiente
+            {t("next")}
             <ChevronRight className="h-4 w-4 shrink-0" aria-hidden />
           </button>
         </div>
       </div>
 
       <section
-        aria-label={`Ranking ${cat.label}`}
+        aria-label={t("rankingAria", { category: cat.label })}
         className="rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.08)]"
       >
         <div className="border-b border-[var(--feg-green)]/10 bg-[var(--feg-green-soft)] px-4 py-4 text-white md:px-6">
@@ -104,16 +106,16 @@ export function RankingCategoryPager({ categories, initialIndex }: Props) {
             <thead className="bg-[var(--feg-green-soft)]/15 text-[var(--feg-green-2)]">
               <tr>
                 <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                  Pos
+                  {t("colPos")}
                 </th>
                 <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                  Jugador
+                  {t("colPlayer")}
                 </th>
                 <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                  Club
+                  {t("colClub")}
                 </th>
                 <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                  Hcp
+                  {t("colHcp")}
                 </th>
               </tr>
             </thead>
@@ -124,7 +126,7 @@ export function RankingCategoryPager({ categories, initialIndex }: Props) {
                     colSpan={4}
                     className="px-4 py-8 text-center text-[var(--feg-green)]"
                   >
-                    Sin jugadores en esta categoría.
+                    {t("emptyCategory")}
                   </td>
                 </tr>
               ) : (

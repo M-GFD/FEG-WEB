@@ -29,28 +29,28 @@ const healthSchema = z.object({
 
 const submitSchema = z
   .object({
-    responsibleName: z.string().min(2, "Nombre del responsable obligatorio"),
-    responsiblePhone: z.string().min(8, "Teléfono del responsable obligatorio"),
-    lastName: z.string().min(1, "Apellido obligatorio"),
-    firstName: z.string().min(1, "Nombres obligatorios"),
+    responsibleName: z.string().min(2, "responsibleNameRequired"),
+    responsiblePhone: z.string().min(8, "responsiblePhoneRequired"),
+    lastName: z.string().min(1, "lastNameRequired"),
+    firstName: z.string().min(1, "firstNameRequired"),
     gender: z.enum(["Varón", "Mujer"]),
-    birthDate: z.string().min(1, "Fecha de nacimiento obligatoria"),
-    dni: z.string().min(7, "DNI obligatorio"),
-    address: z.string().min(3, "Dirección obligatoria"),
+    birthDate: z.string().min(1, "birthDateRequired"),
+    dni: z.string().min(7, "dniRequired"),
+    address: z.string().min(3, "addressRequired"),
     department: z.enum([...EMPADRONAMIENTO_DEPARTMENTS] as [string, ...string[]]),
-    locality: z.string().min(2, "Localidad obligatoria"),
-    phone: z.string().min(8, "Teléfono obligatorio"),
-    email: z.string().email("Correo electrónico inválido"),
+    locality: z.string().min(2, "localityRequired"),
+    phone: z.string().min(8, "phoneRequired"),
+    email: z.string().email("emailInvalid"),
     clubName: z.enum([...EMPADRONAMIENTO_CLUBS] as [string, ...string[]]),
     school: z.string().optional(),
     hasHandicap: z.boolean(),
     matricula: z.string().optional(),
     professors: z.array(z.enum([...EMPADRONAMIENTO_PROFESSORS] as [string, ...string[]])).default([]),
     professorOther: z.string().optional(),
-    tutor1Name: z.string().min(2, "Nombre del tutor 1 obligatorio"),
-    tutor1Dni: z.string().min(7, "DNI del tutor 1 obligatorio"),
-    tutor1Phone: z.string().min(8, "Teléfono del tutor 1 obligatorio"),
-    tutor1Email: z.string().email("Correo del tutor 1 inválido"),
+    tutor1Name: z.string().min(2, "tutor1NameRequired"),
+    tutor1Dni: z.string().min(7, "tutor1DniRequired"),
+    tutor1Phone: z.string().min(8, "tutor1PhoneRequired"),
+    tutor1Email: z.string().email("tutor1EmailInvalid"),
     tutor2Name: z.string().optional(),
     tutor2Dni: z.string().optional(),
     tutor2Email: z.union([z.string().email(), z.literal("")]).optional(),
@@ -61,14 +61,14 @@ const submitSchema = z
     if (data.hasHandicap && !data.matricula?.trim()) {
       ctx.addIssue({
         code: "custom",
-        message: "Matrícula obligatoria si tiene Handicap",
+        message: "matriculaRequired",
         path: ["matricula"],
       });
     }
     if (data.professors.includes("Otro") && !data.professorOther?.trim()) {
       ctx.addIssue({
         code: "custom",
-        message: "Indicá el nombre del profesor",
+        message: "professorOtherRequired",
         path: ["professorOther"],
       });
     }
@@ -76,7 +76,7 @@ const submitSchema = z
       if (!data.healthData.healthInsurance?.trim()) {
         ctx.addIssue({
           code: "custom",
-          message: "Obra social obligatoria",
+          message: "healthInsuranceRequired",
           path: ["healthData", "healthInsurance"],
         });
       }
@@ -84,7 +84,7 @@ const submitSchema = z
     if (data.healthData.takesMedication && !data.healthData.medication?.trim()) {
       ctx.addIssue({
         code: "custom",
-        message: "Indicá la medicación",
+        message: "medicationRequired",
         path: ["healthData", "medication"],
       });
     }
@@ -92,21 +92,21 @@ const submitSchema = z
     if (cond.allergic && !data.healthData.allergiesDetail?.trim()) {
       ctx.addIssue({
         code: "custom",
-        message: "Especifique a qué es alérgico",
+        message: "allergiesRequired",
         path: ["healthData", "allergiesDetail"],
       });
     }
     if (cond.other && !data.healthData.otherConditions?.trim()) {
       ctx.addIssue({
         code: "custom",
-        message: "Describa otras condiciones",
+        message: "otherConditionsRequired",
         path: ["healthData", "otherConditions"],
       });
     }
     if (cond.recentSurgery && !data.healthData.surgeryDetail?.trim()) {
       ctx.addIssue({
         code: "custom",
-        message: "Indicá de qué fue operado",
+        message: "surgeryRequired",
         path: ["healthData", "surgeryDetail"],
       });
     }
@@ -125,7 +125,7 @@ export async function submitYouthEnrollmentForm(raw: unknown) {
   if (!parsed.success) {
     return {
       ok: false as const,
-      error: parsed.error.errors[0]?.message ?? "Datos del formulario inválidos",
+      errorKey: parsed.error.errors[0]?.message ?? "invalidForm",
     };
   }
 

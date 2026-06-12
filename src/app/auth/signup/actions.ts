@@ -15,16 +15,16 @@ const signUpSchema = z
   .object({
     email: z
       .string()
-      .min(1, "El email es obligatorio")
-      .email("Email inválido")
+      .min(1, "emailRequired")
+      .email("emailInvalid")
       .transform((v) => v.trim().toLowerCase()),
-    password: z.string().min(6, "Mínimo 6 caracteres"),
+    password: z.string().min(6, "passwordMin"),
     confirmPassword: z.string(),
-    role: z.enum(ROLES, { required_error: "Selecciona un tipo de cuenta" }),
+    role: z.enum(ROLES, { required_error: "roleRequired" }),
     clubId: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Las contraseñas no coinciden",
+    message: "passwordMismatch",
     path: ["confirmPassword"],
   })
   .refine(
@@ -32,7 +32,7 @@ const signUpSchema = z
       if (data.role === "CLUB") return !!data.clubId?.trim();
       return true;
     },
-    { message: "Selecciona un club", path: ["clubId"] }
+    { message: "clubRequired", path: ["clubId"] }
   );
 
 export async function getClubsForSignup() {
@@ -42,7 +42,7 @@ export async function getClubsForSignup() {
 export async function signUp(formData: FormData) {
   const session = await auth();
   if (!session?.user || session.user.role !== "ADMIN") {
-    return { ok: false, error: "No autorizado" };
+    return { ok: false as const, errorKey: "unauthorized" };
   }
 
   const parsed = signUpSchema.safeParse({
@@ -54,19 +54,15 @@ export async function signUp(formData: FormData) {
   });
 
   if (!parsed.success) {
-    const msg = parsed.error.errors[0]?.message ?? "Datos inválidos";
-    return { ok: false, error: msg };
+    const errorKey = parsed.error.errors[0]?.message ?? "invalidData";
+    return { ok: false as const, errorKey };
   }
 
   const { email, password, role, clubId } = parsed.data;
 
   const supabase = getSupabaseAdmin();
   if (!supabase) {
-    return {
-      ok: false,
-      error:
-        "Configuración incompleta. Añade NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en .env.local",
-    };
+    return { ok: false as const, errorKey: "configIncomplete" };
   }
 
   const { data: existing } = await supabase
@@ -76,7 +72,7 @@ export async function signUp(formData: FormData) {
     .single();
 
   if (existing) {
-    return { ok: false, error: "Ya existe una cuenta con ese email" };
+    return { ok: false as const, errorKey: "emailExists" };
   }
 
   const hashedPassword = await hash(password, 12);
@@ -94,18 +90,17 @@ export async function signUp(formData: FormData) {
   });
 
   if (error) {
-    return { ok: false, error: error.message };
+    return { ok: false as const, errorKey: "registerError", errorMessage: error.message };
   }
 
-  // Verificación obligatoria por email
   try {
     const { token } = await createUserToken({ purpose: "verify", email, ttlMs: 24 * 60 * 60 * 1000 });
     const baseUrl = getBaseUrl();
     const verifyUrl = `${baseUrl}/auth/verify-email?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
     await sendVerifyEmail({ to: email, verifyUrl });
   } catch {
-    // No bloqueamos el alta por fallas de envío, pero el login seguirá bloqueado hasta verificar.
+    /* login blocked until verified */
   }
 
-  return { ok: true };
+  return { ok: true as const };
 }

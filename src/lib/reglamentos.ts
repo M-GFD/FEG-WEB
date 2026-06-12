@@ -2,12 +2,12 @@ export type ReglamentoSlug = "pre-juveniles" | "junior" | "mayores";
 
 export type ReglamentoDefinition = {
   slug: ReglamentoSlug;
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   pdfPath: string;
   downloadFileName: string;
   /** Etiqueta para menús desplegables (sin siglas). */
-  navLabel: string;
+  navLabelKey: string;
   menores: boolean;
   mayores: boolean;
 };
@@ -15,38 +15,48 @@ export type ReglamentoDefinition = {
 export const REGLAMENTOS: ReglamentoDefinition[] = [
   {
     slug: "pre-juveniles",
-    title: "Reglamento Pre-Juveniles y Juveniles 2026",
-    description:
-      "Normativa de la Federación Entrerriana de Golf para competencias de Prejuveniles y Juveniles en la temporada 2026.",
+    titleKey: "preJuveniles.title",
+    descriptionKey: "preJuveniles.description",
     pdfPath: "/reglamentos/pre-juveniles-2026.pdf",
     downloadFileName: "Reglamento-Pre-Juveniles-FEG-2026.pdf",
-    navLabel: "Reglamento Pre y Juveniles",
+    navLabelKey: "preJuveniles.navLabel",
     menores: true,
     mayores: false,
   },
   {
     slug: "junior",
-    title: "Reglamento Junior 2026",
-    description:
-      "Reglamento de la Federación Entrerriana de Golf para la categoría Junior en la temporada 2026.",
+    titleKey: "junior.title",
+    descriptionKey: "junior.description",
     pdfPath: "/reglamentos/junior-2026.pdf",
     downloadFileName: "Reglamento-Junior-FEG-2026.pdf",
-    navLabel: "Reglamento Junior",
+    navLabelKey: "junior.navLabel",
     menores: true,
     mayores: false,
   },
   {
     slug: "mayores",
-    title: "Reglamento Mayores 2026",
-    description:
-      "Normativa de la Federación Entrerriana de Golf para competencias de Mayores en la temporada 2026.",
+    titleKey: "mayores.title",
+    descriptionKey: "mayores.description",
     pdfPath: "/reglamentos/mayores-2026.pdf",
     downloadFileName: "Reglamento-Mayores-FEG-2026.pdf",
-    navLabel: "Reglamento Mayores",
+    navLabelKey: "mayores.navLabel",
     menores: false,
     mayores: true,
   },
 ];
+
+export type ReglamentoTranslator = (key: string) => string;
+
+export function getReglamentoLabels(
+  reglamento: ReglamentoDefinition,
+  t: ReglamentoTranslator
+) {
+  return {
+    title: t(reglamento.titleKey),
+    description: t(reglamento.descriptionKey),
+    navLabel: t(reglamento.navLabelKey),
+  };
+}
 
 export function getReglamentoBySlug(slug: string): ReglamentoDefinition | undefined {
   return REGLAMENTOS.find((r) => r.slug === slug);

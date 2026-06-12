@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   INSCRIPCION_CLUB_OTRO,
   INSCRIPCION_CLUBS,
@@ -26,6 +27,10 @@ type Props = {
 };
 
 export function InscripcionTorneoMenoresForm({ config }: Props) {
+  const t = useTranslations("tournamentSignup");
+  const tc = useTranslations("common");
+  const formError = (key: string) => t(`errors.${key}` as "errors.ackRequired");
+
   const [ack, setAck] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [searching, setSearching] = useState(false);
@@ -111,7 +116,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
       }
       applyPlayer(res.player);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al buscar jugador");
+      setError(e instanceof Error ? e.message : formError("searchFailed"));
     } finally {
       setSearching(false);
     }
@@ -122,15 +127,15 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
     setError(null);
 
     if (!ack) {
-      setError("Debés aceptar las condiciones.");
+      setError(formError("ackRequired"));
       return;
     }
     if (!playerFound || !enrollmentId) {
-      setError("Buscá y confirmá un jugador empadronado por DNI antes de enviar.");
+      setError(formError("playerRequired"));
       return;
     }
     if (!gender || !clubName || hasHandicap === null || dietaryRestriction === null) {
-      setError("Completá todos los campos obligatorios.");
+      setError(formError("fieldsRequired"));
       return;
     }
 
@@ -159,12 +164,12 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
       });
 
       if (!result.ok) {
-        setError(result.error);
+        setError(formError(result.errorKey));
         return;
       }
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error inesperado");
+      setError(err instanceof Error ? err.message : formError("unexpected"));
     } finally {
       setSubmitting(false);
     }
@@ -174,10 +179,10 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
     return (
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center">
         <h2 className="font-heading text-2xl font-semibold text-emerald-900">
-          Inscripción registrada
+          {t("successTitle")}
         </h2>
         <p className="mt-3 text-sm font-medium text-emerald-800">
-          El jugador quedó inscripto en {config.title}.
+          {t("successBody", { tournament: config.title })}
         </p>
       </div>
     );
@@ -192,22 +197,20 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
           onChange={(e) => setAck(e.target.checked)}
           className="mt-1 h-4 w-4"
         />
-        <span className="text-sm font-medium text-[var(--feg-ink)]">
-          He leído y acepto las condiciones — <strong>OK</strong>
-        </span>
+        <span className="text-sm font-medium text-[var(--feg-ink)]">{tc("ackOk")}</span>
       </label>
 
       <fieldset disabled={!ack || submitting} className="space-y-6">
-        <FormSection title="1 — Responsable de la inscripción">
+        <FormSection title={t("sections.responsible")}>
           <div className="space-y-2">
             <FieldLabel htmlFor="resp-name" required>
-              Nombre del responsable
+              {t("fields.responsibleName")}
             </FieldLabel>
             <input
               id="resp-name"
               value={responsibleName}
               onChange={(e) => setResponsibleName(e.target.value)}
-              placeholder="Profesor o responsable del club"
+              placeholder={t("fields.responsibleNamePlaceholder")}
               className={inputClassName}
               required
             />
@@ -215,7 +218,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <FieldLabel htmlFor="resp-phone" required>
-                Teléfono
+                {t("fields.responsiblePhone")}
               </FieldLabel>
               <input
                 id="resp-phone"
@@ -228,7 +231,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
             </div>
             <div className="space-y-2">
               <FieldLabel htmlFor="resp-email" required>
-                Correo electrónico
+                {t("fields.responsibleEmail")}
               </FieldLabel>
               <input
                 id="resp-email"
@@ -242,11 +245,11 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
           </div>
         </FormSection>
 
-        <FormSection title="2 — Búsqueda del jugador por DNI">
+        <FormSection title={t("sections.search")}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="min-w-0 flex-1 space-y-2">
               <FieldLabel htmlFor="dni-search" required>
-                DNI del jugador
+                {t("fields.dniSearch")}
               </FieldLabel>
               <input
                 id="dni-search"
@@ -262,41 +265,38 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
               disabled={searching || dniSearch.replace(/\D/g, "").length < 7}
               className="shrink-0 rounded-full bg-[var(--feg-green-2)] px-6 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 disabled:opacity-50"
             >
-              {searching ? "Buscando…" : "Buscar jugador"}
+              {searching ? t("searching") : t("searchPlayer")}
             </button>
           </div>
 
           {notEnrolled ? (
             <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-900" role="alert">
-              <p className="font-semibold">
-                El jugador no se encuentra empadronado.
-              </p>
+              <p className="font-semibold">{t("notEnrolledTitle")}</p>
               <p className="mt-2">
-                Debe completar el{" "}
+                {t("notEnrolledBody")}{" "}
                 <Link
                   href="/empadronamiento-menores"
                   className="font-semibold underline underline-offset-2"
                 >
-                  empadronamiento anual FEG
-                </Link>{" "}
-                antes de inscribirse al torneo.
+                  {t("enrollmentLink")}
+                </Link>
+                .
               </p>
             </div>
           ) : null}
 
           {playerFound ? (
             <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
-              Jugador encontrado en el padrón. Los datos del jugador se muestran a
-              continuación (solo lectura).
+              {t("playerFound")}
             </p>
           ) : null}
         </FormSection>
 
         <fieldset disabled={disabled || !playerFound} className="space-y-6">
-          <FormSection title="3 — Datos del jugador">
+          <FormSection title={t("sections.player")}>
             <div className="space-y-2">
               <FieldLabel htmlFor="club" required>
-                Club de opción
+                {t("fields.club")}
               </FieldLabel>
               <select
                 id="club"
@@ -306,7 +306,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
                 required
                 disabled={playerLocked}
               >
-                <option value="">Seleccionar…</option>
+                <option value="">{tc("select")}</option>
                 {INSCRIPCION_CLUBS.map((c) => (
                   <option key={c} value={c}>
                     {c}
@@ -318,7 +318,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
             {clubName === INSCRIPCION_CLUB_OTRO ? (
               <div className="space-y-2">
                 <FieldLabel htmlFor="club-other" required>
-                  Nombre del club no perteneciente a la FGL
+                  {t("fields.clubOther")}
                 </FieldLabel>
                 <input
                   id="club-other"
@@ -334,7 +334,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <FieldLabel htmlFor="ln" required>
-                  Apellido
+                  {t("fields.lastName")}
                 </FieldLabel>
                 <input
                   id="ln"
@@ -349,7 +349,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
               </div>
               <div className="space-y-2">
                 <FieldLabel htmlFor="fn" required>
-                  Nombre
+                  {t("fields.firstName")}
                 </FieldLabel>
                 <input
                   id="fn"
@@ -366,7 +366,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
 
             <div className="space-y-2">
               <span className="text-sm font-medium text-[var(--feg-green)]">
-                Sexo <span className="text-red-600">*</span>
+                {t("fields.gender")} <span className="text-red-600">*</span>
               </span>
               <div className="flex gap-4">
                 {(["Varón", "Mujer"] as const).map((g) => (
@@ -379,7 +379,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
                       disabled={playerLocked}
                       required
                     />
-                    {g}
+                    {g === "Varón" ? tc("genderMale") : tc("genderFemale")}
                   </label>
                 ))}
               </div>
@@ -387,12 +387,12 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
 
             <div className="space-y-2">
               <span className="text-sm font-medium text-[var(--feg-green)]">
-                ¿Tiene Handicap? <span className="text-red-600">*</span>
+                {t("fields.hasHandicap")} <span className="text-red-600">*</span>
               </span>
               <div className="flex gap-4">
                 {[
-                  { v: true, l: "Sí" },
-                  { v: false, l: "No" },
+                  { v: true, l: tc("yes") },
+                  { v: false, l: tc("no") },
                 ].map(({ v, l }) => (
                   <label key={l} className="flex items-center gap-2 text-sm font-medium">
                     <input
@@ -412,7 +412,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
             {hasHandicap ? (
               <div className="space-y-2">
                 <FieldLabel htmlFor="mat" required>
-                  Matrícula
+                  {t("fields.matricula")}
                 </FieldLabel>
                 <input
                   id="mat"
@@ -428,7 +428,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <FieldLabel htmlFor="bd" required>
-                  Fecha de nacimiento
+                  {t("fields.birthDate")}
                 </FieldLabel>
                 <input
                   id="bd"
@@ -443,17 +443,17 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
                 />
               </div>
               <div className="space-y-2">
-                <FieldLabel>Edad (hoy)</FieldLabel>
-                <input readOnly value={ageToday ?? "—"} className={inputClassName} />
+                <FieldLabel>{t("fields.ageToday")}</FieldLabel>
+                <input readOnly value={ageToday ?? tc("dash")} className={inputClassName} />
               </div>
               <div className="space-y-2">
-                <FieldLabel>Categoría</FieldLabel>
-                <input readOnly value={category || "—"} className={inputClassName} />
+                <FieldLabel>{t("fields.category")}</FieldLabel>
+                <input readOnly value={category || tc("dash")} className={inputClassName} />
               </div>
             </div>
           </FormSection>
 
-          <FormSection title="4 — Categoría y participación especial">
+          <FormSection title={t("sections.category")}>
             {showPrejuvenilesOption ? (
               <label className="flex items-center gap-2 text-sm font-medium">
                 <input
@@ -461,24 +461,24 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
                   checked={playsPrejuveniles}
                   onChange={(e) => setPlaysPrejuveniles(e.target.checked)}
                 />
-                ¿Juega además la categoría Prejuveniles?
+                {t("fields.playsPrejuveniles")}
               </label>
             ) : (
               <p className="text-sm text-[var(--feg-green)]/70">
-                No hay participaciones especiales para la categoría del jugador.
+                {t("fields.noSpecialParticipation")}
               </p>
             )}
           </FormSection>
 
-          <FormSection title="5 — Restricciones alimentarias">
+          <FormSection title={t("sections.dietary")}>
             <div className="space-y-2">
               <span className="text-sm font-medium text-[var(--feg-green)]">
-                ¿Tiene alguna restricción alimentaria? <span className="text-red-600">*</span>
+                {t("fields.dietaryRestriction")} <span className="text-red-600">*</span>
               </span>
               <div className="flex gap-4">
                 {[
-                  { v: true, l: "Sí" },
-                  { v: false, l: "No" },
+                  { v: true, l: tc("yes") },
+                  { v: false, l: tc("no") },
                 ].map(({ v, l }) => (
                   <label key={l} className="flex items-center gap-2 text-sm font-medium">
                     <input
@@ -496,7 +496,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
             {dietaryRestriction ? (
               <div className="space-y-2">
                 <FieldLabel htmlFor="diet-foods" required>
-                  ¿Qué alimentos no puede consumir?
+                  {t("fields.dietaryFoods")}
                 </FieldLabel>
                 <input
                   id="diet-foods"
@@ -509,12 +509,12 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
             ) : null}
           </FormSection>
 
-          <FormSection title="6 — Comentarios">
+          <FormSection title={t("sections.comments")}>
             <textarea
               value={comments}
               onChange={(e) => setComments(e.target.value)}
               rows={4}
-              placeholder="Solicitudes específicas póngalas aquí."
+              placeholder={t("fields.commentsPlaceholder")}
               className={inputClassName}
             />
           </FormSection>
@@ -530,7 +530,7 @@ export function InscripcionTorneoMenoresForm({ config }: Props) {
             disabled={disabled || !playerFound}
             className="w-full rounded-full bg-[var(--feg-yellow)] px-8 py-3 font-heading text-sm font-semibold text-[var(--feg-ink)] transition hover:brightness-95 disabled:opacity-50 sm:w-auto"
           >
-            {submitting ? "Enviando…" : "Inscribir jugador"}
+            {submitting ? tc("submitting") : t("submit")}
           </button>
         </fieldset>
       </fieldset>

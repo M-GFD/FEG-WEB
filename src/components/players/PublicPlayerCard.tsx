@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export type PublicPlayerCardProps = {
   href: string;
@@ -15,6 +18,8 @@ export function PublicPlayerCard({
   category,
   handicapLabel,
 }: PublicPlayerCardProps) {
+  const t = useTranslations("player.card");
+
   return (
     <Link
       href={href}
@@ -23,7 +28,7 @@ export function PublicPlayerCard({
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]">
-            Jugador
+            {t("badge")}
           </p>
           <h2 className="mt-1.5 truncate font-heading text-lg font-semibold leading-snug text-[var(--feg-ink)]">
             {title}
@@ -39,7 +44,7 @@ export function PublicPlayerCard({
         </div>
         <div className="shrink-0 rounded-2xl bg-[var(--feg-green-soft)]/10 px-4 py-3 text-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--feg-green-2)]/80">
-            Handicap
+            {t("handicap")}
           </p>
           <p className="mt-0.5 font-heading text-xl font-semibold text-[var(--feg-ink)]">{handicapLabel}</p>
         </div>

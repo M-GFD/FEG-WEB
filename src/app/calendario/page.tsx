@@ -1,9 +1,7 @@
+import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
-import {
-  AUDIENCE_SEGMENT_LABELS,
-  parseAudienceSegment,
-} from "@/lib/content-audience";
+import { parseAudienceSegment } from "@/lib/content-audience";
 import { getCalendarTableForAudience } from "@/lib/calendario-feg";
 
 type Props = {
@@ -13,8 +11,11 @@ type Props = {
 export default async function CalendarioPage({ searchParams }: Props) {
   const sp = await searchParams;
   const segment = parseAudienceSegment(sp.audiencia) ?? "mayores";
-  const segmentLabel = AUDIENCE_SEGMENT_LABELS[segment];
   const rows = getCalendarTableForAudience(segment);
+
+  const t = await getTranslations("calendar");
+  const tAudience = await getTranslations("audience");
+  const segmentLabel = tAudience(segment);
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
@@ -23,15 +24,13 @@ export default async function CalendarioPage({ searchParams }: Props) {
         <BackToHome />
         <header className="mb-10">
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
-            Temporada 2026 · {segmentLabel}
+            {t("seasonBadge", { audience: segmentLabel })}
           </p>
           <h1 className="font-heading text-4xl font-semibold uppercase tracking-tight md:text-5xl">
-            Calendario {segmentLabel}
+            {t("title", { audience: segmentLabel })}
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[var(--feg-green)]">
-            {segment === "menores"
-              ? "Federación de Golf del Litoral · Prejuveniles, Juveniles y Junior (2° semestre 2026)."
-              : "Federación de Golf del Litoral · Golf Club Social La Paz"}
+            {segment === "menores" ? t("subtitleMenores") : t("subtitleMayores")}
           </p>
         </header>
 
@@ -40,16 +39,16 @@ export default async function CalendarioPage({ searchParams }: Props) {
             <thead className="bg-[var(--feg-green-soft)] text-white">
               <tr>
                 <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                  N°
+                  {t("colNum")}
                 </th>
                 <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                  Fecha
+                  {t("colDate")}
                 </th>
                 <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                  Sede
+                  {t("colVenue")}
                 </th>
                 <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                  Modalidad
+                  {t("colModality")}
                 </th>
               </tr>
             </thead>

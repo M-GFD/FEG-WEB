@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 export type TournamentHistoricRow = {
   id: string;
@@ -23,6 +24,8 @@ export function TorneosHistoricoClient({
 }: {
   tournaments: TournamentHistoricRow[];
 }) {
+  const t = useTranslations("tournamentsHistoric");
+
   const years = useMemo(() => {
     const set = new Set<number>();
     for (const t of tournaments) {
@@ -55,7 +58,7 @@ export function TorneosHistoricoClient({
             htmlFor="sort-antiguedad"
             className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[var(--feg-green-2)]"
           >
-            Orden por fecha
+            {t("sortLabel")}
           </label>
           <select
             id="sort-antiguedad"
@@ -63,8 +66,8 @@ export function TorneosHistoricoClient({
             onChange={(e) => setSort(e.target.value as SortMode)}
             className="rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-3 py-2.5 text-sm font-medium text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
           >
-            <option value="reciente">Más recientes primero</option>
-            <option value="antiguo">Más antiguos primero</option>
+            <option value="reciente">{t("sortRecent")}</option>
+            <option value="antiguo">{t("sortOld")}</option>
           </select>
         </div>
         <div>
@@ -72,7 +75,7 @@ export function TorneosHistoricoClient({
             htmlFor="filter-year"
             className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-[var(--feg-green-2)]"
           >
-            Año
+            {t("yearLabel")}
           </label>
           <select
             id="filter-year"
@@ -83,7 +86,7 @@ export function TorneosHistoricoClient({
             }}
             className="rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-3 py-2.5 text-sm font-medium text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
           >
-            <option value="todos">Todos los años</option>
+            <option value="todos">{t("allYears")}</option>
             {years.map((y) => (
               <option key={y} value={y}>
                 {y}
@@ -92,26 +95,26 @@ export function TorneosHistoricoClient({
           </select>
         </div>
         <p className="text-sm font-medium text-[var(--feg-green)] sm:ml-auto sm:pb-2">
-          {filtered.length} torneo{filtered.length !== 1 ? "s" : ""}
+          {t("tournamentCount", { count: filtered.length })}
         </p>
       </div>
 
       {filtered.length === 0 ? (
         <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-10 text-center text-[var(--feg-green)]">
-          No hay torneos con los filtros elegidos.
+          {t("noFilterResults")}
         </p>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((t) => (
+          {filtered.map((tournament) => (
             <Link
-              key={t.id}
-              href={`/torneos/${t.slug}`}
+              key={tournament.id}
+              href={`/torneos/${tournament.slug}`}
               className="group flex flex-col overflow-hidden rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.08)] transition hover:border-[var(--feg-green-2)]/35 hover:shadow-[0_20px_50px_rgba(0,36,3,0.12)]"
             >
               <div className="relative aspect-[16/10] w-full bg-[var(--feg-bg)]">
-                {t.galleryThumb ? (
+                {tournament.galleryThumb ? (
                   <Image
-                    src={t.galleryThumb}
+                    src={tournament.galleryThumb}
                     alt=""
                     fill
                     className="object-cover transition group-hover:scale-[1.02]"
@@ -120,22 +123,22 @@ export function TorneosHistoricoClient({
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-sm text-[var(--feg-green)]/70">
-                    Sin galería aún
+                    {t("noGallery")}
                   </div>
                 )}
-                {t.galleryCount > 0 && (
+                {tournament.galleryCount > 0 && (
                   <span className="absolute bottom-2 right-2 rounded-full bg-[var(--feg-ink)]/85 px-2.5 py-0.5 text-xs font-semibold text-white">
-                    {t.galleryCount} foto{t.galleryCount !== 1 ? "s" : ""}
+                    {t("photoCount", { count: tournament.galleryCount })}
                   </span>
                 )}
               </div>
               <div className="flex flex-1 flex-col p-5">
                 <h2 className="font-heading text-lg font-semibold uppercase leading-snug tracking-tight text-[var(--feg-ink)] group-hover:text-[var(--feg-green-2)]">
-                  {t.name}
+                  {tournament.name}
                 </h2>
                 <p className="mt-2 text-sm text-[var(--feg-green)]">
-                  {t.club.name} ·{" "}
-                  {new Date(t.date).toLocaleDateString("es-AR", {
+                  {tournament.club.name} ·{" "}
+                  {new Date(tournament.date).toLocaleDateString("es-AR", {
                     day: "numeric",
                     month: "short",
                     year: "numeric",
@@ -143,18 +146,18 @@ export function TorneosHistoricoClient({
                 </p>
                 <span
                   className={`mt-4 inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
-                    t.status === "PUBLISHED"
+                    tournament.status === "PUBLISHED"
                       ? "bg-[var(--feg-green-2)]/15 text-[var(--feg-green-2)]"
-                      : t.status === "IN_PROGRESS"
+                      : tournament.status === "IN_PROGRESS"
                         ? "bg-[var(--feg-yellow)]/35 text-[var(--feg-ink)]"
                         : "bg-[var(--feg-bg)] text-[var(--feg-green)]"
                   }`}
                 >
-                  {t.status === "PUBLISHED"
-                    ? "Resultados publicados"
-                    : t.status === "IN_PROGRESS"
-                      ? "En curso"
-                      : "Borrador / pendiente"}
+                  {tournament.status === "PUBLISHED"
+                    ? t("statusPublished")
+                    : tournament.status === "IN_PROGRESS"
+                      ? t("statusInProgress")
+                      : t("statusDraft")}
                 </span>
               </div>
             </Link>

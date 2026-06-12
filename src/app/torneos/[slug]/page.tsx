@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { getApprovedPhotosForTournament, getTournamentBySlug } from "@/lib/data";
@@ -14,6 +15,7 @@ export default async function TournamentPage({
 
   if (!tournament) notFound();
 
+  const t = await getTranslations("tournamentDetail");
   const entriesWithPosition = tournament.entries ?? [];
   type EntryRow = (typeof entriesWithPosition)[number];
   const gallery = await getApprovedPhotosForTournament(tournament.id);
@@ -28,7 +30,7 @@ export default async function TournamentPage({
             href="/torneos"
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--feg-green)]/20 bg-white px-4 py-2 text-sm font-medium text-[var(--feg-green-2)] shadow-sm transition hover:border-[var(--feg-green-2)]/40 hover:bg-[var(--feg-yellow)]/15"
           >
-            ← Histórico de torneos
+            {t("backToHistoric")}
           </Link>
         </div>
         <header className="mb-10 rounded-3xl border border-[var(--feg-green)]/12 bg-white p-6 shadow-[0_14px_40px_rgba(0,36,3,0.08)] sm:p-8">
@@ -44,8 +46,7 @@ export default async function TournamentPage({
             })}
           </p>
           <p className="mt-4 text-sm leading-relaxed text-[var(--feg-green)]/90">
-            Galería: fotos que el club organizador envió a prensa y fueron aprobadas. Los
-            resultados figuran abajo cuando están publicados.
+            {t("galleryNote")}
           </p>
         </header>
 
@@ -55,7 +56,7 @@ export default async function TournamentPage({
               id="galeria-torneo"
               className="font-heading text-xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]"
             >
-              Galería del torneo
+              {t("galleryTitle")}
             </h2>
             <div className="mt-5 columns-2 gap-3 sm:columns-3 sm:gap-4">
               {gallery.map((p) => (
@@ -65,7 +66,7 @@ export default async function TournamentPage({
                 >
                   <img
                     src={p.url}
-                    alt={p.caption || "Foto del torneo"}
+                    alt={p.caption || t("photoAlt")}
                     className="w-full object-cover"
                     loading="lazy"
                   />
@@ -81,7 +82,7 @@ export default async function TournamentPage({
         )}
 
         <h2 className="mb-5 font-heading text-xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
-          Resultados
+          {t("results")}
         </h2>
         {entriesWithPosition.length > 0 ? (
           <div className="overflow-x-auto rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.08)]">
@@ -89,22 +90,22 @@ export default async function TournamentPage({
               <thead className="bg-[var(--feg-green-soft)] text-white">
                 <tr>
                   <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                    Pos
+                    {t("colPos")}
                   </th>
                   <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                    Jugador
+                    {t("colPlayer")}
                   </th>
                   <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                    Club
+                    {t("colClub")}
                   </th>
                   <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                    Categoría
+                    {t("colCategory")}
                   </th>
                   <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                    Gross
+                    {t("colGross")}
                   </th>
                   <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
-                    Neto
+                    {t("colNeto")}
                   </th>
                 </tr>
               </thead>
@@ -142,7 +143,7 @@ export default async function TournamentPage({
           </div>
         ) : (
           <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-10 text-center text-[var(--feg-green)]">
-            Los resultados aún no están publicados.
+            {t("resultsEmpty")}
           </p>
         )}
       </main>

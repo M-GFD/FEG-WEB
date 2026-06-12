@@ -31,21 +31,21 @@ const submitSchema = z
     if (data.hasHandicap && !data.matricula?.trim()) {
       ctx.addIssue({
         code: "custom",
-        message: "Matrícula obligatoria si tiene Handicap",
+        message: "matriculaRequired",
         path: ["matricula"],
       });
     }
     if (data.clubName === INSCRIPCION_CLUB_OTRO && !data.clubOther?.trim()) {
       ctx.addIssue({
         code: "custom",
-        message: "Indicá el nombre del club",
+        message: "clubOtherRequired",
         path: ["clubOther"],
       });
     }
     if (data.dietaryRestriction && !data.dietaryFoods?.trim()) {
       ctx.addIssue({
         code: "custom",
-        message: "Indicá qué alimentos no puede consumir",
+        message: "dietaryFoodsRequired",
         path: ["dietaryFoods"],
       });
     }
@@ -60,7 +60,7 @@ export async function submitInscripcionTorneoForm(raw: unknown) {
   if (!parsed.success) {
     return {
       ok: false as const,
-      error: parsed.error.errors[0]?.message ?? "Datos inválidos",
+      errorKey: parsed.error.errors[0]?.message ?? "invalidForm",
     };
   }
   return submitYouthTournamentRegistration(parsed.data);
