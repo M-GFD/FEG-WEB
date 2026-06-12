@@ -5,15 +5,40 @@
  *
  * Criterio de “hoy” y comparación de fechas: siempre en Argentina (UTC−3, sin horario de verano).
  */
+import type { AppLocale } from "@/i18n/routing";
 import type { AudienceSegment } from "@/lib/content-audience";
 
 export const FEG_TIME_ZONE = "America/Argentina/Buenos_Aires";
 
+export type CalendarModalityKey =
+  | "mayores18h"
+  | "mayores36h"
+  | "prejuveniles36h"
+  | "junior";
+
+export type CalendarVenueKey = "interfederativo";
+
+export type CalendarEntryRaw = {
+  month: number;
+  day: number;
+  dayEnd?: number;
+  /** Separador entre días en rangos (p. ej. 15/16 de Mayo). */
+  rangeStyle?: "and" | "slash";
+  sede: string;
+  venueKey?: CalendarVenueKey;
+  modalityKey: CalendarModalityKey;
+  year?: number;
+};
+
+export type CalendarTableRowRaw = CalendarEntryRaw & {
+  num: string;
+};
+
+/** Entrada localizada para UI (fecha y modalidad traducidas). */
 export type CalendarEntry = {
-  fecha: string; // Texto humano: "28 de Marzo", "25 y 26 de Julio"
+  fecha: string;
   sede: string;
   modalidad: string;
-  /** Año del torneo (por defecto 2026, la temporada cargada). */
   year?: number;
 };
 
@@ -21,116 +46,198 @@ export type CalendarTableRow = CalendarEntry & {
   num: string;
 };
 
-const SEASON_YEAR = 2026;
-
-export const CALENDARIO_FEG: CalendarEntry[] = [
-  { fecha: "28 de Marzo", sede: "Villa Elisa", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "25 de Abril", sede: "Club Social La Paz", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "9 de Mayo", sede: "Los Bretes", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "15/16 de Mayo", sede: "Interfederativo (cancha a des.)", modalidad: "36H Mayores", year: SEASON_YEAR },
-  { fecha: "30 de Mayo", sede: "Villa Libertador", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "13 de Junio", sede: "Las Colinas", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "4 de Julio", sede: "CUCU", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "15 de Agosto", sede: "Aero Club Villaguay", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "22 de Agosto", sede: "Concordia Golf Club", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "5 de Setiembre", sede: "Gualeguaychú", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "26 de Setiembre", sede: "Santa Elena", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "24 de Octubre", sede: "Colón Golf Club", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { fecha: "14 de Noviembre", sede: "CAE", modalidad: "18H Mayores", year: SEASON_YEAR },
-];
-
-/** 2° semestre FGL — Prejuveniles / Juveniles / Junior (calendario-2026-fgl-juveniles.md). */
-export const CALENDARIO_FEG_MENORES: CalendarEntry[] = [
-  {
-    fecha: "25 y 26 de Julio",
-    sede: "CUCU",
-    modalidad: "36 H. Prejuveniles y Juveniles",
-    year: SEASON_YEAR,
-  },
-  { fecha: "26 de Julio", sede: "CUCU", modalidad: "Junior", year: SEASON_YEAR },
-  {
-    fecha: "22 y 23 de Agosto",
-    sede: "Concordia Golf Club",
-    modalidad: "36 H. Prejuveniles y Juveniles",
-    year: SEASON_YEAR,
-  },
-  { fecha: "23 de Agosto", sede: "Concordia Golf Club", modalidad: "Junior", year: SEASON_YEAR },
-  {
-    fecha: "27 de Setiembre",
-    sede: "Club de Campo Libertador SM.",
-    modalidad: "Junior",
-    year: SEASON_YEAR,
-  },
-];
-
-export const CALENDARIO_FEG_MAYORES_TABLE: CalendarTableRow[] = [
-  { num: "1°", fecha: "28 de Marzo", sede: "Villa Elisa", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { num: "2°", fecha: "25 de Abril", sede: "Club Social La Paz", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { num: "3°", fecha: "9 de Mayo", sede: "Los Bretes", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { num: "—", fecha: "15/16 de Mayo", sede: "Interfederativo (cancha a des.)", modalidad: "36H Mayores", year: SEASON_YEAR },
-  { num: "4°", fecha: "30 de Mayo", sede: "Villa Libertador", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { num: "5°", fecha: "13 de Junio", sede: "Las Colinas", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { num: "6°", fecha: "4 de Julio", sede: "CUCU", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { num: "7°", fecha: "15 de Agosto", sede: "Aero Club Villaguay", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { num: "8°", fecha: "22 de Agosto", sede: "Concordia Golf Club", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { num: "9°", fecha: "5 de Setiembre", sede: "Gualeguaychú", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { num: "10°", fecha: "26 de Setiembre", sede: "Santa Elena", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { num: "11°", fecha: "24 de Octubre", sede: "Colón Golf Club", modalidad: "18H Mayores", year: SEASON_YEAR },
-  { num: "12°", fecha: "14 de Noviembre", sede: "CAE", modalidad: "18H Mayores", year: SEASON_YEAR },
-];
-
-export const CALENDARIO_FEG_MENORES_TABLE: CalendarTableRow[] = [
-  {
-    num: "3°",
-    fecha: "25 y 26 de Julio",
-    sede: "CUCU",
-    modalidad: "36 H. Prejuveniles y Juveniles",
-    year: SEASON_YEAR,
-  },
-  { num: "4°", fecha: "26 de Julio", sede: "CUCU", modalidad: "Junior", year: SEASON_YEAR },
-  {
-    num: "4°",
-    fecha: "22 y 23 de Agosto",
-    sede: "Concordia Golf Club",
-    modalidad: "36 H. Prejuveniles y Juveniles",
-    year: SEASON_YEAR,
-  },
-  { num: "5°", fecha: "23 de Agosto", sede: "Concordia Golf Club", modalidad: "Junior", year: SEASON_YEAR },
-  {
-    num: "6°",
-    fecha: "27 de Setiembre",
-    sede: "Club de Campo Libertador SM.",
-    modalidad: "Junior",
-    year: SEASON_YEAR,
-  },
-];
-
-const MONTH_MAP: Record<string, number> = {
-  enero: 0,
-  febrero: 1,
-  marzo: 2,
-  abril: 3,
-  mayo: 4,
-  junio: 5,
-  julio: 6,
-  agosto: 7,
-  setiembre: 8,
-  septiembre: 8,
-  octubre: 9,
-  noviembre: 10,
-  diciembre: 11,
+export type CalendarLabels = {
+  modality: (key: CalendarModalityKey) => string;
+  venue: (raw: CalendarEntryRaw) => string;
 };
 
-/** Y/M/D del torneo según el texto del calendario (mes 0–11). Usa el primer día si hay rango. */
-function parseEntryYmd(entry: CalendarEntry): { y: number; m: number; d: number } {
-  const parts = entry.fecha.split(" de ");
-  const dayPart = parts[0]?.split("/")[0]?.trim() ?? "1";
-  const firstDay = dayPart.split(/\s+y\s+/i)[0]?.trim() ?? dayPart;
-  const monthStr = parts[1]?.trim().toLowerCase();
-  const d = parseInt(firstDay, 10);
-  const m = MONTH_MAP[monthStr ?? ""] ?? 0;
-  const y = entry.year ?? SEASON_YEAR;
-  return { y, m, d: Number.isFinite(d) ? d : 1 };
+const SEASON_YEAR = 2026;
+
+const LOCALE_TAG: Record<AppLocale, string> = {
+  es: "es-AR",
+  en: "en-US",
+  pt: "pt-BR",
+};
+
+const CALENDARIO_RAW_MAYORES: CalendarEntryRaw[] = [
+  { month: 2, day: 28, sede: "Villa Elisa", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { month: 3, day: 25, sede: "Club Social La Paz", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { month: 4, day: 9, sede: "Los Bretes", modalityKey: "mayores18h", year: SEASON_YEAR },
+  {
+    month: 4,
+    day: 15,
+    dayEnd: 16,
+    rangeStyle: "slash",
+    sede: "Interfederativo (cancha a des.)",
+    venueKey: "interfederativo",
+    modalityKey: "mayores36h",
+    year: SEASON_YEAR,
+  },
+  { month: 4, day: 30, sede: "Villa Libertador", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { month: 5, day: 13, sede: "Las Colinas", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { month: 6, day: 4, sede: "CUCU", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { month: 7, day: 15, sede: "Aero Club Villaguay", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { month: 7, day: 22, sede: "Concordia Golf Club", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { month: 8, day: 5, sede: "Gualeguaychú", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { month: 8, day: 26, sede: "Santa Elena", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { month: 9, day: 24, sede: "Colón Golf Club", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { month: 10, day: 14, sede: "CAE", modalityKey: "mayores18h", year: SEASON_YEAR },
+];
+
+/** 2° semestre FGL — Prejuveniles / Juveniles / Junior. */
+const CALENDARIO_RAW_MENORES: CalendarEntryRaw[] = [
+  {
+    month: 6,
+    day: 25,
+    dayEnd: 26,
+    sede: "CUCU",
+    modalityKey: "prejuveniles36h",
+    year: SEASON_YEAR,
+  },
+  { month: 6, day: 26, sede: "CUCU", modalityKey: "junior", year: SEASON_YEAR },
+  {
+    month: 7,
+    day: 22,
+    dayEnd: 23,
+    sede: "Concordia Golf Club",
+    modalityKey: "prejuveniles36h",
+    year: SEASON_YEAR,
+  },
+  { month: 7, day: 23, sede: "Concordia Golf Club", modalityKey: "junior", year: SEASON_YEAR },
+  {
+    month: 8,
+    day: 27,
+    sede: "Club de Campo Libertador SM.",
+    modalityKey: "junior",
+    year: SEASON_YEAR,
+  },
+];
+
+const CALENDARIO_RAW_MAYORES_TABLE: CalendarTableRowRaw[] = [
+  { num: "1°", month: 2, day: 28, sede: "Villa Elisa", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { num: "2°", month: 3, day: 25, sede: "Club Social La Paz", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { num: "3°", month: 4, day: 9, sede: "Los Bretes", modalityKey: "mayores18h", year: SEASON_YEAR },
+  {
+    num: "—",
+    month: 4,
+    day: 15,
+    dayEnd: 16,
+    rangeStyle: "slash",
+    sede: "Interfederativo (cancha a des.)",
+    venueKey: "interfederativo",
+    modalityKey: "mayores36h",
+    year: SEASON_YEAR,
+  },
+  { num: "4°", month: 4, day: 30, sede: "Villa Libertador", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { num: "5°", month: 5, day: 13, sede: "Las Colinas", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { num: "6°", month: 6, day: 4, sede: "CUCU", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { num: "7°", month: 7, day: 15, sede: "Aero Club Villaguay", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { num: "8°", month: 7, day: 22, sede: "Concordia Golf Club", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { num: "9°", month: 8, day: 5, sede: "Gualeguaychú", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { num: "10°", month: 8, day: 26, sede: "Santa Elena", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { num: "11°", month: 9, day: 24, sede: "Colón Golf Club", modalityKey: "mayores18h", year: SEASON_YEAR },
+  { num: "12°", month: 10, day: 14, sede: "CAE", modalityKey: "mayores18h", year: SEASON_YEAR },
+];
+
+const CALENDARIO_RAW_MENORES_TABLE: CalendarTableRowRaw[] = [
+  {
+    num: "3°",
+    month: 6,
+    day: 25,
+    dayEnd: 26,
+    sede: "CUCU",
+    modalityKey: "prejuveniles36h",
+    year: SEASON_YEAR,
+  },
+  { num: "4°", month: 6, day: 26, sede: "CUCU", modalityKey: "junior", year: SEASON_YEAR },
+  {
+    num: "4°",
+    month: 7,
+    day: 22,
+    dayEnd: 23,
+    sede: "Concordia Golf Club",
+    modalityKey: "prejuveniles36h",
+    year: SEASON_YEAR,
+  },
+  { num: "5°", month: 7, day: 23, sede: "Concordia Golf Club", modalityKey: "junior", year: SEASON_YEAR },
+  {
+    num: "6°",
+    month: 8,
+    day: 27,
+    sede: "Club de Campo Libertador SM.",
+    modalityKey: "junior",
+    year: SEASON_YEAR,
+  },
+];
+
+function monthName(raw: CalendarEntryRaw, locale: AppLocale): string {
+  const tag = LOCALE_TAG[locale];
+  const year = raw.year ?? SEASON_YEAR;
+  return new Intl.DateTimeFormat(tag, { month: "long", timeZone: "UTC" }).format(
+    new Date(Date.UTC(year, raw.month, 1))
+  );
+}
+
+export function formatCalendarDate(raw: CalendarEntryRaw, locale: AppLocale): string {
+  const tag = LOCALE_TAG[locale];
+  const year = raw.year ?? SEASON_YEAR;
+  const month = monthName(raw, locale);
+
+  if (raw.dayEnd != null && raw.dayEnd !== raw.day) {
+    if (raw.rangeStyle === "slash") {
+      if (locale === "es") return `${raw.day}/${raw.dayEnd} de ${month}`;
+      if (locale === "pt") return `${raw.day}/${raw.dayEnd} de ${month}`;
+      return `${raw.day}/${raw.dayEnd} ${month}`;
+    }
+    if (locale === "es") return `${raw.day} y ${raw.dayEnd} de ${month}`;
+    if (locale === "pt") return `${raw.day} e ${raw.dayEnd} de ${month}`;
+    return `${raw.day} and ${raw.dayEnd} ${month}`;
+  }
+
+  return new Intl.DateTimeFormat(tag, { day: "numeric", month: "long", timeZone: "UTC" }).format(
+    new Date(Date.UTC(year, raw.month, raw.day))
+  );
+}
+
+/** Texto canónico en español (claves de torneo, DB, etc.). */
+export function formatCalendarDateEs(raw: CalendarEntryRaw): string {
+  return formatCalendarDate(raw, "es");
+}
+
+export function createCalendarLabels(t: (key: string) => string): CalendarLabels {
+  return {
+    modality: (key) => t(`modalities.${key}`),
+    venue: (raw) => (raw.venueKey ? t(`venues.${raw.venueKey}`) : raw.sede),
+  };
+}
+
+export function localizeCalendarEntry(
+  raw: CalendarEntryRaw,
+  locale: AppLocale,
+  labels: CalendarLabels
+): CalendarEntry {
+  return {
+    fecha: formatCalendarDate(raw, locale),
+    sede: labels.venue(raw),
+    modalidad: labels.modality(raw.modalityKey),
+    year: raw.year,
+  };
+}
+
+export function localizeCalendarTableRow(
+  raw: CalendarTableRowRaw,
+  locale: AppLocale,
+  labels: CalendarLabels
+): CalendarTableRow {
+  return {
+    num: raw.num,
+    ...localizeCalendarEntry(raw, locale, labels),
+  };
+}
+
+function parseRawYmd(raw: CalendarEntryRaw): { y: number; m: number; d: number } {
+  const y = raw.year ?? SEASON_YEAR;
+  return { y, m: raw.month, d: raw.day };
 }
 
 function ymdToComparable(y: number, m: number, d: number): number {
@@ -148,38 +255,78 @@ function getTodayYmdInFeG(now: Date): { y: number; m: number; d: number } {
   return { y, m: mo - 1, d: day };
 }
 
-function parseEntryDate(entry: CalendarEntry): Date {
-  const { y, m, d } = parseEntryYmd(entry);
+function parseRawDate(raw: CalendarEntryRaw): Date {
+  const { y, m, d } = parseRawYmd(raw);
   return new Date(Date.UTC(y, m, d, 12, 0, 0));
 }
 
-export type CalendarEntryWithDate = CalendarEntry & { _parsed: Date };
+export type CalendarEntryWithDate = CalendarEntry & {
+  _parsed: Date;
+  _raw: CalendarEntryRaw;
+};
 
-function withParsedDates(entries: CalendarEntry[]): CalendarEntryWithDate[] {
-  return entries.map((entry) => ({ ...entry, _parsed: parseEntryDate(entry) }));
+function withParsedDates(
+  entries: CalendarEntryRaw[],
+  locale: AppLocale,
+  labels: CalendarLabels
+): CalendarEntryWithDate[] {
+  return entries.map((raw) => ({
+    ...localizeCalendarEntry(raw, locale, labels),
+    _parsed: parseRawDate(raw),
+    _raw: raw,
+  }));
 }
 
-export function getCalendarTableForAudience(segment: AudienceSegment): CalendarTableRow[] {
-  return segment === "menores" ? CALENDARIO_FEG_MENORES_TABLE : CALENDARIO_FEG_MAYORES_TABLE;
+export function getCalendarTableRawForAudience(segment: AudienceSegment): CalendarTableRowRaw[] {
+  return segment === "menores" ? CALENDARIO_RAW_MENORES_TABLE : CALENDARIO_RAW_MAYORES_TABLE;
 }
 
-export function getCalendarEntriesForAudience(segment: AudienceSegment): CalendarEntry[] {
-  return segment === "menores" ? CALENDARIO_FEG_MENORES : CALENDARIO_FEG;
+export function getCalendarTableForAudience(
+  segment: AudienceSegment,
+  locale: AppLocale,
+  labels: CalendarLabels
+): CalendarTableRow[] {
+  return getCalendarTableRawForAudience(segment).map((row) =>
+    localizeCalendarTableRow(row, locale, labels)
+  );
+}
+
+export function getCalendarEntriesRawForAudience(segment: AudienceSegment): CalendarEntryRaw[] {
+  return segment === "menores" ? CALENDARIO_RAW_MENORES : CALENDARIO_RAW_MAYORES;
+}
+
+export function getCalendarEntriesForAudience(
+  segment: AudienceSegment,
+  locale: AppLocale,
+  labels: CalendarLabels
+): CalendarEntry[] {
+  return getCalendarEntriesRawForAudience(segment).map((raw) =>
+    localizeCalendarEntry(raw, locale, labels)
+  );
 }
 
 /** Próximas fechas mezclando mayores + menores, ordenadas cronológicamente (Home). */
-export function getUpcomingFegDates(count: number, now: Date = new Date()): CalendarEntryWithDate[] {
-  const all = withParsedDates([...CALENDARIO_FEG, ...CALENDARIO_FEG_MENORES]);
+export function getUpcomingFegDates(
+  count: number,
+  locale: AppLocale,
+  labels: CalendarLabels,
+  now: Date = new Date()
+): CalendarEntryWithDate[] {
+  const all = withParsedDates(
+    [...CALENDARIO_RAW_MAYORES, ...CALENDARIO_RAW_MENORES],
+    locale,
+    labels
+  );
   const today = getTodayYmdInFeG(now);
   const todayCmp = ymdToComparable(today.y, today.m, today.d);
   const upcoming = all
     .filter((e) => {
-      const { y, m, d } = parseEntryYmd(e);
+      const { y, m, d } = parseRawYmd(e._raw);
       return ymdToComparable(y, m, d) >= todayCmp;
     })
     .sort((a, b) => {
-      const ya = parseEntryYmd(a);
-      const yb = parseEntryYmd(b);
+      const ya = parseRawYmd(a._raw);
+      const yb = parseRawYmd(b._raw);
       return ymdToComparable(ya.y, ya.m, ya.d) - ymdToComparable(yb.y, yb.m, yb.d);
     })
     .slice(0, count);
@@ -187,8 +334,8 @@ export function getUpcomingFegDates(count: number, now: Date = new Date()): Cale
   if (upcoming.length > 0) return upcoming;
   return all
     .sort((a, b) => {
-      const ya = parseEntryYmd(a);
-      const yb = parseEntryYmd(b);
+      const ya = parseRawYmd(a._raw);
+      const yb = parseRawYmd(b._raw);
       return ymdToComparable(ya.y, ya.m, ya.d) - ymdToComparable(yb.y, yb.m, yb.d);
     })
     .slice(0, count);
@@ -197,14 +344,16 @@ export function getUpcomingFegDates(count: number, now: Date = new Date()): Cale
 export function getUpcomingFegDatesForAudience(
   segment: AudienceSegment,
   count: number,
+  locale: AppLocale,
+  labels: CalendarLabels,
   now: Date = new Date()
 ): CalendarEntryWithDate[] {
-  const all = withParsedDates(getCalendarEntriesForAudience(segment));
+  const all = withParsedDates(getCalendarEntriesRawForAudience(segment), locale, labels);
   const today = getTodayYmdInFeG(now);
   const todayCmp = ymdToComparable(today.y, today.m, today.d);
   const upcoming = all
     .filter((e) => {
-      const { y, m, d } = parseEntryYmd(e);
+      const { y, m, d } = parseRawYmd(e._raw);
       return ymdToComparable(y, m, d) >= todayCmp;
     })
     .slice(0, count);
@@ -213,12 +362,40 @@ export function getUpcomingFegDatesForAudience(
   return all.slice(0, count);
 }
 
-export function getNextFegDate(now: Date = new Date()): CalendarEntryWithDate | null {
-  return getUpcomingFegDates(1, now)[0] ?? null;
+export function getNextFegDate(
+  locale: AppLocale,
+  labels: CalendarLabels,
+  now: Date = new Date()
+): CalendarEntryWithDate | null {
+  return getUpcomingFegDates(1, locale, labels, now)[0] ?? null;
 }
 
+/** @deprecated Usar formatCalendarDate con locale. Mantiene compatibilidad con textos ES en DB. */
 export function formatFechaTitle(fecha: string): string {
   return fecha
     .replace(/\b([a-zñáéíóú])/i, (m) => m.toUpperCase())
     .replace(/\s+de\s+([a-zñáéíóú])/i, (_, c) => ` de ${c.toUpperCase()}`);
+}
+
+const SPANISH_MODALITY: Record<CalendarModalityKey, string> = {
+  mayores18h: "18H Mayores",
+  mayores36h: "36H Mayores",
+  prejuveniles36h: "36 H. Prejuveniles y Juveniles",
+  junior: "Junior",
+};
+
+/** Etiquetas canónicas en español (gestión, claves de torneo, DB). */
+export function getSpanishCalendarLabels(): CalendarLabels {
+  return {
+    modality: (key) => SPANISH_MODALITY[key],
+    venue: (entry) =>
+      entry.venueKey === "interfederativo"
+        ? "Interfederativo (cancha a des.)"
+        : entry.sede,
+  };
+}
+
+/** Entrada canónica en español (p. ej. claves de inscripción). */
+export function calendarEntryToSpanish(raw: CalendarEntryRaw): CalendarEntry {
+  return localizeCalendarEntry(raw, "es", getSpanishCalendarLabels());
 }

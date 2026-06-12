@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ReglamentoDocument } from "@/components/institucional/ReglamentoDocument";
 import { getReglamentoContent } from "@/lib/reglamentos-content";
 import { getReglamentoLabels, type ReglamentoDefinition } from "@/lib/reglamentos";
+import type { AppLocale } from "@/i18n/routing";
 
 type Props = {
   reglamento: ReglamentoDefinition;
@@ -12,10 +13,11 @@ type Props = {
 };
 
 export async function ReglamentoPageLayout({ reglamento, badge, backHref, backLabel }: Props) {
+  const locale = (await getLocale()) as AppLocale;
   const tCommon = await getTranslations("common");
   const tReg = await getTranslations("regulations");
   const labels = getReglamentoLabels(reglamento, tReg);
-  const sections = getReglamentoContent(reglamento.slug);
+  const sections = getReglamentoContent(reglamento.slug, locale);
 
   return (
     <>

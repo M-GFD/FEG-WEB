@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { requireGestionArea } from "@/lib/gestion-access";
 import { getActiveYouthTournamentConfig } from "@/lib/inscripcion-torneos-menores/config";
-import { getUpcomingFegDatesForAudience } from "@/lib/calendario-feg";
+import { getSpanishCalendarLabels, getUpcomingFegDatesForAudience } from "@/lib/calendario-feg";
 import { TorneoActivoForm } from "./TorneoActivoForm";
 
 export default async function AdminInscripcionTorneosPage() {
@@ -12,7 +12,7 @@ export default async function AdminInscripcionTorneosPage() {
   requireGestionArea(session.user.role, "admin");
 
   const config = await getActiveYouthTournamentConfig();
-  const nextCal = getUpcomingFegDatesForAudience("menores", 1)[0];
+  const nextCal = getUpcomingFegDatesForAudience("menores", 1, "es", getSpanishCalendarLabels())[0];
 
   const initial = config
     ? {

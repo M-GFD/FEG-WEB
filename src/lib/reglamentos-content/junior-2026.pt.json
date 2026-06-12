@@ -1,0 +1,502 @@
+[
+  {
+    "id": "junior-s1",
+    "title": "1. OBJETIVOS",
+    "blocks": [
+      {
+        "type": "bullets",
+        "items": [
+          "Promover em cada clube filiado à FEG o desenvolvimento de novos jogadores desde idades precoces."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Propiciar a amizade e a camaradagem entre jogadores dos diferentes clubes filiados."
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Fomentar os valores do golfe: honestidade, fair play e competição saudável."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "junior-s2",
+    "title": "2. CATEGORIAS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "As categorias são determinadas pela classe/ano de nascimento publicado pela FEG no início da temporada."
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "ALBATROS – Damas e Cavaleiros: jogadores/as que completem 12 ou 13 anos no ano civil.",
+          "EAGLES – Damas e Cavaleiros: jogadores/as que completem 10 ou 11 anos no ano civil.",
+          "BIRDIES – Damas e Cavaleiros: jogadores/as que completem 7, 8 ou 9 anos no ano civil.",
+          "INICIANTES: menores de 7 anos e/ou jogadores/as que, independentemente da idade, tenham começado recentemente a prática do golfe (categoria formativa definida pela FEG)."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "junior-s3",
+    "title": "3. DIAS DE REALIZAÇÃO",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Os torneios Junior serão disputados nas datas estabelecidas pela FEG no calendário anual. Serão realizados aos domingos. A FEG poderá reprogramar datas ou designar dias alternativos por razões organizacionais, climáticas ou extraordinárias, com comunicação oficial."
+      }
+    ]
+  },
+  {
+    "id": "junior-s4",
+    "title": "4. INSCRIÇÕES",
+    "blocks": [
+      {
+        "type": "bullets",
+        "items": [
+          "As inscrições serão recebidas pela FEG por meio de sua plataforma oficial (ou outro meio disponibilizado) até as 18:00 h, 2 dias antes do torneio (quinta-feira anterior ao torneio).",
+          "O clube organizador confeccionará a planilha de saídas e deverá enviá-la ao Coach/Autoridade"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "FEG na sexta-feira até às 12:00 h, no máximo, para revisão e publicação."
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "O clube anfitrião publicará também a planilha de inscritos e horários em seu quadro de avisos local.",
+          "A inscrição deverá ser realizada pelo profissional da escola de menores (ou pessoa designada) e deverá indicar expressamente se o jogador/a participa como Iniciante, conforme seu critério."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "junior-s5",
+    "title": "5. CUSTO DAS INSCRIÇÕES",
+    "blocks": [
+      {
+        "type": "bullets",
+        "items": [
+          "O custo da inscrição fica sujeito às bases e reajustes definidos pela FEG.",
+          "O clube anfitrião cobrará as inscrições, confeccionará cartões e realizará as saídas em tempo e forma.",
+          "A arrecadação das inscrições fica integralmente para o clube anfitrião."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "junior-s6",
+    "title": "6. MODALIDADE DE JOGO",
+    "blocks": [
+      {
+        "type": "bullets",
+        "items": [
+          "INICIANTES: 5 buracos, jogo por golpes, buracos designados pelo Coach/Autoridade FEG.",
+          "BIRDIES: 9 buracos, jogo por golpes, buracos designados pelo Coach/Autoridade FEG.",
+          "EAGLES: 9 buracos, jogo por golpes, buracos designados pelo Coach/Autoridade FEG.",
+          "ALBATROS: 18 buracos, jogo por golpes, percurso/tees designados pelo Coach/Autoridade"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "FEG."
+      }
+    ]
+  },
+  {
+    "id": "junior-s7",
+    "title": "7. REGRAS APLICÁVEIS – COMITÊ – ATRIBUIÇÕES",
+    "blocks": [
+      {
+        "type": "bullets",
+        "items": [
+          "Serão aplicadas as Regras do Golfe vigentes, Regras Locais e as presentes condições. O"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Comitê/Coach FEG poderá dispor adaptações mínimas em Iniciantes e Birdies por razões formativas e de ritmo de jogo."
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Por clima, segurança ou razões operacionais, o Comitê/Coach poderá ajustar horários, reorganizar saídas e/ou modificar a quantidade de buracos para assegurar a finalização do evento (com comunicação oficial)."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "junior-s8",
+    "title": "8. DESENVOLVIMENTO DO TORNEIO (OBRIGAÇÕES DO CLUBE ANFITRIÃO)",
+    "blocks": [
+      {
+        "type": "bullets",
+        "items": [
+          "O início do torneio ficará sujeito à quantidade de jogadores, clima ou outra situação extraordinária.",
+          "Recepção: o clube anfitrião deverá receber os jogadores com café da manhã.",
+          "Prática: o clube anfitrião deverá dispor de uma zona de prática para que os jogadores possam fazer o aquecimento com seus professores, se necessário, e de serviço de"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "DRIVING RANGE OU ZONA IMPROVISADA, previamente anunciada à FEG."
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Os horários e buracos de saída serão confirmados pelo clube em conjunto com o coach da FEG para evitar esperas excessivas.",
+          "Almoço: o clube anfitrião providenciará (por sua conta) o almoço dos jogadores, que poderá ser entregue conforme forem terminando de jogar, ou em horário determinado pelo clube."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Além disso, deverá oferecer 2 cardápios adicionais para familiares dos jogadores."
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "O clube anfitrião deverá ter o campo marcado com as distâncias correspondentes (ponto 9) dois dias antes da realização do torneio; por exemplo, com marcas de tinta no gramado. Isso permitirá que os jogadores possam praticar no campo com suas saídas, e servirá de referência para que o Coach da FEG verifique se estão corretas.",
+          "O clube anfitrião ficará responsável pela recepção dos cartões de score e pelo processamento e publicação/anúncio dos resultados, bem como pela entrega dos prêmios correspondentes.",
+          "Recomenda-se ao clube anfitrião que as bandeiras não estejam colocadas em posições que possam resultar difíceis para os jogadores."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "junior-s9",
+    "title": "9. DISTÂNCIAS DE JOGO (REFERÊNCIA)",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "ALBATROS (Damas e Cavaleiros): saídas padrão do clube; se houver mais de uma saída, utilizar a mais curta para cada categoria (por exemplo: \"Vermelhas para Damas / Brancas ou Azuis para Cavaleiros\", conforme o clube). EAGLES – Cavaleiros (Marcas Azuis)"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Par 3: até 140 yds",
+          "Par 4: até 310 yds",
+          "Par 5: até 430 yds"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "EAGLES – Damas (Marcas Vermelhas)"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Par 3: até 100 yds",
+          "Par 4: até 220 yds",
+          "Par 5: até 330 yds"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "BIRDIES – Cavaleiros (Marcas Brancas)"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Par 3: até 80 yds",
+          "Par 4: até 180 yds",
+          "Par 5: até 270 yds"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "BIRDIES – Damas (Marcas Amarelas)"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Par 3: até 70 yds",
+          "Par 4: até 150 yds",
+          "Par 5: até 240 yds"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "INICIANTES (Estacas ou marcas de distâncias)"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Par 3: 50 yds (amarela)",
+          "Par 4: 100 yds (vermelha)",
+          "Par 5: 150 yds (branca)"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "junior-s10",
+    "title": "10. ETIQUETA / APRESENTAÇÃO",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Os competidores deverão apresentar-se com aspecto cuidado e vestimenta adequada de golfe. Estabelece-se como não recomendável: shorts, camisetas sem gola, calças de moletom, jeans e peças que o Comitê considere inadequadas."
+      }
+    ]
+  },
+  {
+    "id": "junior-s11",
+    "title": "11. CONDIÇÕES DA COMPETIÇÃO",
+    "blocks": [
+      {
+        "type": "bullets",
+        "items": [
+          "Caddies: não é permitido levar caddie, salvo impossibilidade física; nesse caso, poderá auxiliar unicamente no transporte do equipamento.",
+          "São permitidos carrinhos manuais. Não é permitido carrinho a bateria, autopropulsado nem golf cart.",
+          "Conselho (Regra 10): em nenhuma categoria se poderá receber nem solicitar conselho. No entanto, os marcadores poderão orientar ou indicar ao jogador procedimentos previstos pelas Regras do Golfe. Também zelarão pelo cumprimento da proibição de conselho aos jogadores."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Exceção: por se tratar de uma categoria recreativa/formativa que não computa para classificação/vagas AAG, em INICIANTES será permitido que o jogador/a receba conselho pedagógico básico de um (1) acompanhante designado (marcador, pai/mãe ou professor), unicamente com fins de aprendizagem e segurança. Também nesta categoria poderão ser auxiliados por acompanhantes para carregar seu equipamento."
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "O conselho permitido limita-se a: explicação de regras básicas, segurança, ordem de jogo, etiqueta, procedimento e escolha de golpe/objetivo de maneira geral (p. ex., \"mire no meio do fairway\", \"use um taco a menos\").",
+          "Não é permitido: leitura detalhada do green (\"jogue 30 cm à esquerda do buraco\"), indicações de linha exata, cálculo fino de distâncias (\"são 87 yds\"), escolha de taco a utilizar, nem coaching técnico prolongado que atrase o ritmo de jogo.",
+          "O marcador e o Coach/Comitê FEG controlarão que a exceção não afete o ritmo de jogo; diante de reiteração ou abuso, o Comitê poderá revogar a autorização de acompanhamento/conselho para o jogador naquela volta.",
+          "Esta exceção aplica-se somente à categoria INICIANTES e não modifica as condições de Birdies, Eagles e Albatros, onde o conselho está proibido conforme as Regras do Golfe.",
+          "Cartão entregue: considerar-se-á entregue quando o marcador entrega o cartão oficial ao"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Comitê/Recepção de cartões. Marcadores / cartões"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "As categorias INICIANTES, BIRDIES e EAGLES: serão acompanhadas por marcador fornecido pelo clube anfitrião para registrar os golpes de todos os participantes (o clube deve cobrir o total de marcadores).",
+          "Os marcadores não poderão ser familiares dos jogadores do grupo, exceto que, diante da falta dos mesmos e se a saída estiver em risco, poderão atuar dois pais/familiares como marcadores mediante duplo controle e marcação cruzada (não poderão ser marcador de seu próprio familiar, mas sim de seu(s) companheiro(s) de banca).",
+          "Os jogadores da categoria ALBATROS: levarão cartões individuais entre si, atuando cada um como marcador do outro; poderá haver fiscal na banca.",
+          "Os marcadores não poderão dar conselho (exceção categoria Iniciantes), mas sim indicar procedimentos previstos pelas Regras."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Teto de golpes (ritmo de jogo)"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Nas categorias INICIANTES e BIRDIES, a quantidade máxima de golpes a anotar por buraco será de 10; no entanto, o marcador deverá deixar que o jogador termine o buraco, se assim preferir, da mesma forma que seus companheiros.",
+          "É proibido o uso de telefones celulares/dispositivos de áudio enquanto estiverem jogando no campo ou próximos a tees de saída ou greens onde estejam jogando outros competidores."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "junior-s12",
+    "title": "12. CONDUTA E SANÇÕES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Os jogadores deverão observar durante todo o torneio, dentro e fora do campo de golfe, a conduta devida. Considerar-se-ão faltas graves de conduta os seguintes atos:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Arremessar tacos ou gestos antidesportivos.",
+          "Não acatar decisões do Comitê/Coach.",
+          "Falta de respeito a autoridades, marcadores ou outros jogadores.",
+          "Abandonar o campo em plena competição e/ou não apresentar o cartão de jogo sem causa devidamente justificada perante as autoridades do torneio.",
+          "Todo ato de indisciplina dentro das instalações do clube."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Sanções: qualquer infração às normas precedentes será sancionada pelas autoridades do torneio, ou pela FEG, como únicas autoridades competentes e com a intervenção do jogador envolvido e de seus pais, com as seguintes sanções:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Advertência.",
+          "Exclusão da competição.",
+          "Não admissão em futuras competições organizadas pela FEG."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "junior-s13",
+    "title": "13. DESEMPATES DE TORNEIOS (Prêmios)",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Todos os desempates para definir primeiro e segundo lugar serão realizados por desempate automático até a primeira diferença. INICIANTES (5 buracos): Para definir 1° e 2° lugar, os empates serão resolvidos da seguinte maneira:"
+      },
+      {
+        "type": "paragraph",
+        "text": "1. Melhor score no último buraco jogado (buraco 5)."
+      },
+      {
+        "type": "paragraph",
+        "text": "2. Se persistir, melhor score no buraco 4, depois buraco 3, depois buraco 2, depois buraco 1 (primeira"
+      },
+      {
+        "type": "paragraph",
+        "text": "diferença)."
+      },
+      {
+        "type": "paragraph",
+        "text": "3. Se ainda persistir o empate, será definido por sorteio a cargo do Comitê/Coach FEG."
+      },
+      {
+        "type": "paragraph",
+        "text": "Nota: por razões formativas e de organização, não serão disputados desempates no campo na categoria INICIANTES, salvo que o Comitê/Coach disponha excepcionalmente o contrário por condições operacionais. BIRDIES e EAGLES (9 buracos): Para definir 1° e 2° lugar, os empates serão resolvidos da seguinte maneira:"
+      },
+      {
+        "type": "paragraph",
+        "text": "1. Melhor score nos últimos 6 buracos (buracos 4 ao 9)."
+      },
+      {
+        "type": "paragraph",
+        "text": "2. Se persistir: melhor score nos últimos 3 buracos (buracos 7 ao 9)."
+      },
+      {
+        "type": "paragraph",
+        "text": "3. Se persistir: comparação buraco a buraco do 9 ao 1 até a primeira diferença."
+      },
+      {
+        "type": "paragraph",
+        "text": "4. Se não houver diferença, será definido no campo em um buraco de 100 jardas de distância, dando"
+      },
+      {
+        "type": "paragraph",
+        "text": "como vencedor ao jogador/a que fizer menos golpes. A Federación Entrerriana de Golf poderá dispor, em caso de força maior ou para agilizar o torneio, de outra modalidade mais simples de desempate no campo ou sorteio. ALBATROS (18 buracos): Para definir 1° e 2° lugar, os empates serão resolvidos da seguinte maneira:"
+      },
+      {
+        "type": "paragraph",
+        "text": "1. Melhor score nos últimos 9 buracos (buracos 10 ao 18)."
+      },
+      {
+        "type": "paragraph",
+        "text": "2. Se persistir: melhor score nos últimos 6 buracos (13 ao 18)."
+      },
+      {
+        "type": "paragraph",
+        "text": "3. Se persistir: melhor score nos últimos 3 buracos (16 ao 18)."
+      },
+      {
+        "type": "paragraph",
+        "text": "4. Se persistir: comparar do buraco 18 ao 1 até a primeira diferença."
+      },
+      {
+        "type": "paragraph",
+        "text": "5. Se não houver diferença, será definido no campo por \"morte súbita\", no primeiro buraco de"
+      },
+      {
+        "type": "paragraph",
+        "text": "diferença. O Comitê define a sequência de buracos. A Federación Entrerriana de Golf poderá dispor, em caso de força maior ou para agilizar o torneio, de outra modalidade mais simples de desempate no campo ou sorteio."
+      }
+    ]
+  },
+  {
+    "id": "junior-s14",
+    "title": "14. RANKING ANUAL FEG",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Este ranking servirá para designar os jogadores que representarão a FEG no Torneio Nacional Junior. A quantidade de classificados depende da vaga que conceder a AAG em cada categoria e para cada Federação."
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Pontos concedidos por posição, do primeiro ao sexto lugar: 10, 8, 6, 4, 2, 1.",
+          "Em caso de empate entre dois ou mais jogadores, para o ranking anual as posições são consideradas empatadas. Somando-se os pontos a conceder pelas posições empatadas e dividindo pelo número de jogadores empatados. Aplicar-se-á arredondamento para o inteiro imediato superior em caso de resultado decimal.",
+          "O calendário programado contará com 6 datas presenciais mais uma data virtual que somará como bônus.",
+          "O ranking anual será formado com um máximo de 4 (quatro) datas presenciais, considerando as melhores performances, descartando aquelas datas que superem este número.",
+          "A data virtual concede 50% dos pontos regulares e não é descartada: soma-se ao total uma vez computados os descartes.",
+          "A FEG reserva-se o direito de programar novas datas durante o ano e considerá-las computáveis ou não para os efeitos da confecção do Ranking Anual, devendo ser informado de forma fehaciente por todos os meios disponíveis aos clubes filiados."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Desempate do ranking anual:"
+      },
+      {
+        "type": "paragraph",
+        "text": "1) maior quantidade de 1° lugares; 2) maior quantidade de 2° lugares; 3) maior quantidade de 3°"
+      },
+      {
+        "type": "paragraph",
+        "text": "lugares; 4) melhor resultado na última data computável; 5) sorteio."
+      }
+    ]
+  },
+  {
+    "id": "junior-s15",
+    "title": "15. PRÊMIOS – SOUVENIR – SORTEIOS",
+    "blocks": [
+      {
+        "type": "bullets",
+        "items": [
+          "Serão premiados o 1° e 2° de cada categoria."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Adicionalmente, todos os participantes receberão um troféu, medalha comemorativa ou algum \"souvenir\" como lembrança de sua participação. Também poderão ser realizados sorteios entre os participantes de itens de golfe, jogos didáticos, etc. Os mesmos serão fornecidos pelo clube organizador."
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Para estimular o jogo em equipe, a FEG colocará em disputa uma Taça anual, que será entregue na última data ao clube vencedor. Cada clube somará em cada data o total dos pontos que seus jogadores obtiverem."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "junior-s16",
+    "title": "16. APORTE DA FEG",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "A FEG aportará a cada clube anfitrião, para o torneio designado, os prêmios necessários para todas as categorias."
+      }
+    ]
+  },
+  {
+    "id": "junior-s17",
+    "title": "17. DESCUMPRIMENTO DO CLUBE ANFITRIÃO",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "O clube anfitrião que não cumprir o presente regulamento poderá não ser considerado pela FEG ao confeccionar o calendário do ano seguinte."
+      }
+    ]
+  },
+  {
+    "id": "junior-s18",
+    "title": "18. REGRAS PARA O ESPECTADOR (Conselho / Distância)",
+    "blocks": [
+      {
+        "type": "bullets",
+        "items": [
+          "Nenhum treinador/professor/familiar/espectador poderá aproximar-se ou ter contato com o jogador durante a volta, exceto para auxiliá-lo quando for estritamente necessário (água, alimentação, condição médica). Deverão manter uma distância aproximada não inferior a 30 metros.",
+          "A inobservância do enunciado configurará forte presunção de violação da"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Regra 10 (Conselho), que estabelece penalidade de dois golpes."
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Os marcadores serão os encarregados de informar ao Coach da Federación Entrerriana de Golf em caso de observar algum descumprimento desta regra.",
+          "A FEG reserva-se o direito de tomar medidas adicionais contra familiares, acompanhantes, espectadores ou professores que infrinjam estas disposições, bem como tenham atitudes reprováveis em relação aos próprios jogadores, marcadores, autoridades da competição ou terceiros em geral."
+        ]
+      }
+    ]
+  }
+]

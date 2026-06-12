@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
-import { formatFechaTitle, getNextFegDate } from "@/lib/calendario-feg";
+import { formatCalendarDate, getNextFegDate } from "@/lib/calendario-feg";
+import { useCalendarI18n } from "@/lib/calendario-client";
 
 /**
  * Card del Hero con el próximo torneo del calendario FEG. La comparación de fechas
@@ -19,7 +20,8 @@ export function HeroNextTournamentCard() {
 
   const t = useTranslations("heroCard");
   const tCommon = useTranslations("common");
-  const next = useMemo(() => getNextFegDate(now), [now]);
+  const { locale, labels } = useCalendarI18n();
+  const next = useMemo(() => getNextFegDate(locale, labels, now), [locale, labels, now]);
 
   return (
     // Card glass: queda fuera de RevealOnScroll para que el `transform` del reveal
@@ -38,7 +40,7 @@ export function HeroNextTournamentCard() {
                   <span className="text-white">{next.sede}</span>
                   <span className="text-white/75"> – </span>
                   <span className="font-bold text-[var(--feg-yellow)]">
-                    {formatFechaTitle(next.fecha)}
+                    {formatCalendarDate(next._raw, locale)}
                   </span>
                 </p>
                 <div className="mt-3 flex items-center gap-2">

@@ -154,9 +154,23 @@
   },
   "calendar": {
     "badge": "Temporada {year} · {segment}",
-    "title": "Calendario {segment}",
+    "seasonBadge": "Temporada {year} · {audience}",
+    "title": "Calendario {audience}",
     "subtitleMinors": "Federación de Golf del Litoral · Prejuveniles, Juveniles y Junior (2° semestre {year}).",
-    "subtitleMayores": "Federación de Golf del Litoral · Golf Club Social La Paz"
+    "subtitleMayores": "Federación de Golf del Litoral · Golf Club Social La Paz",
+    "colNum": "N.º",
+    "colDate": "Fecha",
+    "colVenue": "Sede",
+    "colModality": "Modalidad",
+    "modalities": {
+      "mayores18h": "18H Mayores",
+      "mayores36h": "36H Mayores",
+      "prejuveniles36h": "36 H. Prejuveniles y Juveniles",
+      "junior": "Junior"
+    },
+    "venues": {
+      "interfederativo": "Interfederativo (cancha a des.)"
+    }
   },
   "ranking": {
     "badge": "Competencia · {segment}",
@@ -322,6 +336,7 @@
     "placeholderName": "Nombre Apellido"
   },
   "regulations": {
+    "documentLabel": "Reglamento",
     "preJuveniles": {
       "title": "Reglamento Pre-Juveniles y Juveniles 2026",
       "description": "Normativa de la Federación Entrerriana de Golf para competencias de Prejuveniles y Juveniles en la temporada 2026.",

@@ -1,0 +1,316 @@
+[
+  {
+    "id": "mayores-s1",
+    "title": "1. OBJETIVOS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "a) Incentivar a prática e a competição de golfe entre jogadores matriculados da categoria maiores, pertencentes às entidades filiadas à Federação. b) Promover um ambiente de camaradagem e amizade entre jogadores de diferentes clubes e cidades. c) Premiar os melhores jogadores de acordo com os resultados obtidos ao longo do ano."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s2",
+    "title": "2. PARTICIPANTES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Participarão do Ranking de Maiores da Federación de Golf del Litoral (FGL) – Ano 2026 todos os jogadores amadores que possuam matrícula e Handicap Index vigente concedido pela Asociación Argentina de Golf (AAG) e que sejam sócios de uma entidade filiada à Federación de Golf del Litoral."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s3",
+    "title": "3. MODALIDADE DE JOGO E SEDES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Os torneios correspondentes ao Ranking de Maiores da Federación de Golf del Litoral serão disputados na modalidade Medal Play em 18 buracos. A Federación de Golf del Litoral estabelecerá as sedes dos torneios e as datas de realização. Em cada torneio serão disputadas simultaneamente as seguintes competições: a) Competição individual do torneio, dividida em categorias. b) Competição por equipes, cujos resultados comporão o Ranking por Equipes de Maiores. c) Competições individuais anuais, correspondentes aos rankings Gross e Senior Neto."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s4",
+    "title": "4. CATEGORIAS DOS TORNEIOS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "DAMAS"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Damas Scratch",
+          "Damas até 30 de handicap",
+          "Damas 31 a 59 de handicap",
+          "Senior Damas (maiores de 50 anos)"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "CAVALEIROS"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Cavaleiros Scratch",
+          "Cavaleiros até 9 de handicap",
+          "Cavaleiros 10 a 16 de handicap",
+          "Cavaleiros 17 a 24 de handicap",
+          "Cavaleiros 25 a 54 de handicap",
+          "Senior Cavaleiros (maiores de 55 anos)"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "As categorias Scratch competirão sem vantagem, enquanto as demais categorias serão disputadas com handicap (score neto). As categorias Scratch e Senior poderão sobrepor-se às demais categorias com handicap, competindo simultaneamente com prêmios acumuláveis."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s5",
+    "title": "5. INSCRIÇÕES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "As inscrições para cada torneio serão recebidas pelo clube anfitrião."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s6",
+    "title": "6. HORÁRIOS DE JOGO",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Os horários de saída e a formação dos grupos de jogo serão elaborados pelo clube anfitrião. Salvo casos de força maior, não poderão participar mais de dois (2) jogadores da mesma entidade filiada na mesma saída."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s7",
+    "title": "7. CONDIÇÕES DE JOGO",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "As competições reger-se-ão pelas Regras de Golfe vigentes aprovadas pela The R&A e pela USGA e pelas condições publicadas pela AAG. O Comitê do Torneio poderá suspender temporariamente o jogo, cancelar voltas ou modificar condições se necessário."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s8",
+    "title": "8. COMPETIÇÃO POR EQUIPES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Cada clube filiado à FGL poderá apresentar em cada Torneio Paralelo de Maiores da FGL uma equipe composta por um mínimo de três (3) e um máximo de quatro (4) jogadores. Os jogadores que integrem a equipe deverão ser designados previamente pelo clube antes do início de cada torneio. Para o cálculo do resultado da equipe, serão computados os três (3) melhores cartões entre os jogadores designados."
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Se a equipe estiver composta por quatro (4) jogadores, será descartado o pior cartão."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Caso um clube não realize a designação prévia e participem mais de três (3) jogadores, serão considerados automaticamente como equipe os quatro (4) jogadores do clube com menor Handicap Index. A representação do jogador será a entidade em que está matriculado ou aquela que o jogador tenha escolhido como representativa, por ser onde desenvolve habitualmente sua atividade, desde que seja filiada à FGL. Em cada data, será determinada a equipe vencedora unicamente para efeito da entrega de prêmios do torneio."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s9",
+    "title": "9. RANKING POR EQUIPES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Para o Ranking Anual por Equipes, a pontuação será atribuída conforme o score neto total da equipe de acordo com a seguinte escala: 7 golpes ou mais abaixo do par – 21 pontos 5 a 6 golpes abaixo do par – 18 pontos 3 a 4 golpes abaixo do par – 15 pontos 1 a 2 golpes abaixo do par – 13 pontos Par do campo – 11 pontos 1 a 2 golpes acima do par – 9 pontos 3 a 4 golpes acima do par – 7 pontos 5 a 6 golpes acima do par – 6 pontos 7 a 8 golpes acima do par – 5 pontos 9 a 10 golpes acima do par – 4 pontos 11 a 12 golpes acima do par – 3 pontos 13 a 14 golpes acima do par – 2 pontos 15 ou mais golpes acima do par – 1 ponto Para a classificação final, serão computadas as seis (6) melhores datas obtidas por cada equipe. As pontuações obtidas em determinadas datas do calendário terão ponderação especial. As duas datas anteriores à final concederão pontuação multiplicada por 1,5. Última data: os pontos obtidos serão duplicados."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s10",
+    "title": "10. DESEMPATES DO RANKING POR EQUIPES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "1. Melhor score neto obtido em uma data."
+      },
+      {
+        "type": "paragraph",
+        "text": "2. Segundo melhor score neto obtido."
+      },
+      {
+        "type": "paragraph",
+        "text": "3. Terceiro melhor score neto obtido e assim sucessivamente."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s11",
+    "title": "11. RANKINGS INDIVIDUAIS ANUAIS",
+    "blocks": [
+      {
+        "type": "bullets",
+        "items": [
+          "Gross Damas",
+          "Gross Cavaleiros",
+          "Senior Neto Damas",
+          "Senior Neto Cavaleiros"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mayores-s12",
+    "title": "12. PONTUAÇÃO DOS RANKINGS INDIVIDUAIS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "1° — 20 pontos 2° — 10 pontos 3° — 8 pontos 4° — 5 pontos 5° — 2 pontos 6° — 1 ponto Para a classificação final, serão computadas as seis (6) melhores datas."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s13",
+    "title": "13. DESEMPATES DO RANKING INDIVIDUAL",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "1. Maior quantidade de primeiros lugares"
+      },
+      {
+        "type": "paragraph",
+        "text": "2. Maior quantidade de segundos lugares"
+      },
+      {
+        "type": "paragraph",
+        "text": "3. Melhor resultado em data descartada"
+      },
+      {
+        "type": "paragraph",
+        "text": "4. Sorteio"
+      }
+    ]
+  },
+  {
+    "id": "mayores-s14",
+    "title": "14. PRÊMIOS DOS RANKINGS ANUAIS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Serão concedidos prêmios a:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "1° e 2° lugar Gross Damas",
+          "1° e 2° lugar Gross Cavaleiros",
+          "1° e 2° lugar Senior Neto Damas",
+          "1° e 2° lugar Senior Neto Cavaleiros"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mayores-s15",
+    "title": "15. FORMAÇÃO DE JOGADORES PARA REPRESENTAR A FEDERAÇÃO",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "O jogador e a jogadora classificados em primeiro lugar no Ranking Gross Cavaleiros e Damas da Federación de Golf del Litoral serão designados automaticamente para integrar a equipe que representará a FGL no Torneio Interfederativo, desde que sua média de score gross em torneios de 18 buracos em relação à classificação do campo (Course Rating) não ultrapasse quatro (4) golpes acima dessa classificação para cavaleiros e seis (6) golpes para damas. Para efeito deste cálculo:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Em cada volta, o score gross do jogador será comparado com a classificação do campo a partir dos tees utilizados na competição.",
+          "O score médio resultante será obtido pela média da diferença entre o score gross das datas definitivas pontuáveis após aplicação dos descartes correspondentes e a classificação do campo de cada uma dessas voltas."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Caso o jogador vencedor do ranking não cumpra o requisito esportivo estabelecido, a Federação poderá designar o jogador que considerar mais adequado conforme critérios de mérito esportivo. Os demais jogadores que integrarem a equipe representativa da Federação serão selecionados pela Comissão de Campeonatos da FGL, considerando prioritariamente: a) Posição no Ranking Nacional Amador da AAG, b) Participação e resultados em torneios com pontos para o World Amateur Golf Ranking (WAGR), c) Ranking Mid Amateur, d) Handicap Index vigente, e) Resultados em torneios federativos, f) Outros critérios do comitê da FGL. Para integrar a equipe que representará a Federación de Golf del Litoral no Torneio Nacional Interfederativo de Maiores, os jogadores deverão cumprir os seguintes limites máximos de Handicap Index no momento da designação:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Cavaleiros: Handicap Index máximo de 6,0",
+          "Damas: Handicap Index máximo de 10,0"
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Caso o jogador elegível por ranking não cumpra esses requisitos, a Federación de Golf del Litoral, por meio da Comissão de Campeonatos, poderá designar o jogador ou jogadora que considerar mais adequado dentro dos parâmetros esportivos estabelecidos neste regulamento. Caso não se atinja a quantidade mínima de jogadores necessária para formar a equipe representativa que cumpra os limites de Handicap Index estabelecidos, a Federación de Golf del Litoral poderá decidir não apresentar equipe nessa competição."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s16",
+    "title": "16. PRÊMIOS DOS TORNEIOS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Em cada torneio serão concedidos prêmios ao primeiro e segundo lugar de cada categoria. Os prêmios de cada torneio serão de responsabilidade do clube anfitrião."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s17",
+    "title": "17. DESEMPATES EM TORNEIOS",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Os desempates automáticos serão resolvidos pelos seguintes critérios, nesta ordem: Últimos 9 buracos, últimos 6 buracos, últimos 3 buracos, último buraco de trás para frente, sorteio."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s18",
+    "title": "18. OBRIGAÇÕES DOS COMPETIDORES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Os jogadores deverão respeitar as normas de etiqueta, os regulamentos do clube anfitrião e as decisões do Comitê do Torneio."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s19",
+    "title": "19. SANÇÕES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "O Comitê do Torneio poderá aplicar advertência, desclassificação ou exclusão de futuras competições."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s20",
+    "title": "20. OBRIGAÇÕES DO CLUBE SEDE",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "O clube anfitrião deverá cumprir e fazer cumprir o regulamento, organizar o torneio e apresentar o campo nas melhores condições possíveis."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s21",
+    "title": "21. APORTES",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Cada torneio terá um aporte em dinheiro da Federação destinado ao clube para a organização do evento. O valor será determinado em Assembleia dos membros, assim como a modalidade de pagamento, e será transferido após o recebimento dos resultados do torneio."
+      }
+    ]
+  },
+  {
+    "id": "mayores-s22",
+    "title": "22. MODIFICAÇÕES AO REGULAMENTO",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "A Federación de Golf del Litoral poderá efetuar a qualquer momento modificações, correções ou acréscimos ao presente regulamento."
+      }
+    ]
+  }
+]

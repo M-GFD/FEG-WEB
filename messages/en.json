@@ -154,9 +154,23 @@
   },
   "calendar": {
     "badge": "Season {year} · {segment}",
-    "title": "Calendar {segment}",
+    "seasonBadge": "Season {year} · {audience}",
+    "title": "{audience} calendar",
     "subtitleMinors": "Littoral Golf Federation · Pre-youth, Youth and Junior (2nd semester {year}).",
-    "subtitleMayores": "Littoral Golf Federation · Golf Club Social La Paz"
+    "subtitleMayores": "Littoral Golf Federation · Golf Club Social La Paz",
+    "colNum": "No.",
+    "colDate": "Date",
+    "colVenue": "Venue",
+    "colModality": "Format",
+    "modalities": {
+      "mayores18h": "18H Seniors",
+      "mayores36h": "36H Seniors",
+      "prejuveniles36h": "36H Pre-youth & Youth",
+      "junior": "Junior"
+    },
+    "venues": {
+      "interfederativo": "Inter-federation (venue TBD)"
+    }
   },
   "ranking": {
     "badge": "Competition · {segment}",
@@ -322,6 +336,7 @@
     "placeholderName": "First Last"
   },
   "regulations": {
+    "documentLabel": "Regulations",
     "preJuveniles": {
       "title": "Pre-Youth and Youth Regulations 2026",
       "description": "Entre Ríos Golf Federation regulations for Pre-youth and Youth competitions in the 2026 season.",
