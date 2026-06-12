@@ -8,12 +8,14 @@ import { UpcomingTournamentsTabs } from "@/components/home/UpcomingTournamentsTa
 import { HomeScrollHash } from "@/components/home/HomeScrollHash";
 import { HeroNextTournamentCard } from "@/components/home/HeroNextTournamentCard";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { AppLocale } from "@/i18n/routing";
 
 export default async function HomePage() {
   const t = await getTranslations("home");
   const tCommon = await getTranslations("common");
-  const news = await getNews();
+  const locale = (await getLocale()) as AppLocale;
+  const news = await getNews({ locale });
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">

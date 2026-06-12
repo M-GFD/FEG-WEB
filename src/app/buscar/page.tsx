@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { AppLocale } from "@/i18n/routing";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { PublicPlayerCard } from "@/components/players/PublicPlayerCard";
@@ -56,8 +57,9 @@ function GenericCard({ hit, labels }: { hit: SiteSearchHit; labels: SearchLabels
 export default async function BuscarPage({ searchParams }: Props) {
   const { q: rawQ } = await searchParams;
   const t = await getTranslations("searchPage");
+  const locale = (await getLocale()) as AppLocale;
   const labels = getSearchLabels(t);
-  const { query, hits } = await searchSite(rawQ ?? "", labels);
+  const { query, hits } = await searchSite(rawQ ?? "", labels, locale);
 
   const playerHits = hits.filter((h) => h.type === "player");
   const otherHits = hits.filter((h) => h.type !== "player");

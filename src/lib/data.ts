@@ -3,6 +3,13 @@
  * Usar cuando Prisma no puede conectar (firewall, etc.)
  */
 
+import type { AppLocale } from "@/i18n/routing";
+import {
+  applyTranslationToNews,
+  applyTranslationsToNewsList,
+  fetchTranslationMap,
+  type NewsWithText,
+} from "@/lib/news-translations";
 import { getSupabaseAdmin } from "./supabase";
 import {
   matchesAudienceFilter,
@@ -349,7 +356,10 @@ export async function getPublicPlayersByClubId(clubId: string) {
   }>;
 }
 
-export async function getNews(options?: { audience?: AudienceSegment | null }) {
+export async function getNews(options?: {
+  audience?: AudienceSegment | null;
+  locale?: AppLocale;
+}) {
   const supabase = getSupabaseAdmin();
   if (!supabase) return [];
 
@@ -360,16 +370,17 @@ export async function getNews(options?: { audience?: AudienceSegment | null }) {
     .order("publishedAt", { ascending: false })
     .limit(50);
 
-  const items = data ?? [];
+  let items = data ?? [];
   if (options?.audience) {
-    return items.filter((n) =>
+    items = items.filter((n) =>
       matchesAudienceFilter(
         (n as { audience?: string | null }).audience,
         options.audience!
       )
     );
   }
-  return items;
+
+  return applyTranslationsToNewsList(items, options?.locale ?? "es");
 }
 
 /** Listado de noticias publicadas para gestión (prensa): eliminar en bloque. */
@@ -398,7 +409,7 @@ export async function getPublishedNewsForGestion(limit = 500) {
   }>;
 }
 
-export async function getNewsBySlug(slug: string) {
+export async function getNewsBySlug(slug: string, locale: AppLocale = "es") {
   const supabase = getSupabaseAdmin();
   if (!supabase) return null;
 
@@ -409,7 +420,12 @@ export async function getNewsBySlug(slug: string) {
     .eq("published", true)
     .single();
 
-  return data;
+  if (!data) return null;
+
+  type NewsRow = typeof data & NewsWithText;
+  const article = data as NewsRow;
+  const map = await fetchTranslationMap([article.id], locale);
+  return applyTranslationToNews(article, map.get(article.id));
 }
 
 export async function getRankingEntries(year: number) {

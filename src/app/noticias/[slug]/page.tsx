@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { AppLocale } from "@/i18n/routing";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { getNewsBySlug } from "@/lib/data";
@@ -15,7 +16,8 @@ export default async function NoticiaPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const news = await getNewsBySlug(slug);
+  const locale = (await getLocale()) as AppLocale;
+  const news = await getNewsBySlug(slug, locale);
 
   if (!news) notFound();
 
