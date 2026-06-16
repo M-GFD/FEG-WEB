@@ -88,7 +88,7 @@ function verificationEmailContent(verifyUrl: string) {
   const siteUrl = emailSiteUrl();
 
   const passwordNotice =
-    "La contraseña para la primera vez que inicia sesión debe ser provista por la FEG: es una contraseña genérica, aleatoria y de único uso. Esa contraseña debe cambiarse luego de usarla por única vez.";
+    "La contraseña para la primera vez que inicia sesión debe ser provista por la FEG: es una contraseña de único uso. Esa contraseña debe cambiarse luego de usarla por única vez.";
 
   const text = [
     "Federación Entrerriana de Golf",
