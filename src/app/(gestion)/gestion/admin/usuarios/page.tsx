@@ -6,17 +6,27 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { createUser, getClubsForAdmin } from "./actions";
 
-const ROLE_LABELS: Record<string, string> = {
+const CREATION_ROLES = ["ADMIN", "CLUB", "PRESS", "TREASURER"] as const;
+type CreationRole = (typeof CREATION_ROLES)[number];
+
+const ROLE_LABELS: Record<CreationRole, string> = {
+  ADMIN: "Admin",
   CLUB: "Club",
   PRESS: "Prensa",
   TREASURER: "Tesorería",
 };
 
+function parseRoleParam(roleParam: string | null): CreationRole {
+  if (roleParam && CREATION_ROLES.includes(roleParam as CreationRole)) {
+    return roleParam as CreationRole;
+  }
+  return "CLUB";
+}
+
 function AdminUsuariosForm() {
   const searchParams = useSearchParams();
-  const roleParam = searchParams.get("role") ?? "CLUB";
-  const initialRole =
-    roleParam === "PRESS" || roleParam === "TREASURER" ? roleParam : "CLUB";
+  const roleParam = searchParams.get("role");
+  const initialRole = parseRoleParam(roleParam);
 
   const [role, setRole] = useState(initialRole);
   const [error, setError] = useState<string | null>(null);
@@ -72,8 +82,8 @@ function AdminUsuariosForm() {
         </p>
       </div>
 
-      <div className="flex gap-2">
-        {(["CLUB", "PRESS", "TREASURER"] as const).map((r) => (
+      <div className="flex flex-wrap gap-2">
+        {CREATION_ROLES.map((r) => (
           <button
             key={r}
             type="button"

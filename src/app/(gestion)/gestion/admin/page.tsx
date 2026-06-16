@@ -85,6 +85,12 @@ export default async function GestionAdminHomePage() {
         </h2>
         <div className="flex flex-wrap gap-3">
           <Link
+            href="/gestion/admin/usuarios?role=ADMIN"
+            className="inline-flex rounded-xl bg-[var(--feg-green-2)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-95"
+          >
+            Crear usuario admin
+          </Link>
+          <Link
             href="/gestion/admin/usuarios?role=CLUB"
             className="inline-flex rounded-xl bg-[var(--feg-green-2)] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-95"
           >

@@ -7,7 +7,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import { getClubs } from "@/lib/data";
 import { z } from "zod";
 
-const ALLOWED_ROLES = ["CLUB", "PRESS", "TREASURER"] as const;
+const ALLOWED_ROLES = ["ADMIN", "CLUB", "PRESS", "TREASURER"] as const;
 
 const createUserSchema = z.object({
   email: z
