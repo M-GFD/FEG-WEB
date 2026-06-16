@@ -5,9 +5,7 @@ import { auth } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getClubs } from "@/lib/data";
 import { z } from "zod";
-import { createUserToken } from "@/lib/user-tokens";
-import { getBaseUrl } from "@/lib/app-url";
-import { sendVerifyEmail } from "@/lib/email";
+import { sendAccountVerificationEmail } from "@/lib/account-verification-email";
 
 const ROLES = ["ADMIN", "CLUB", "PRESS", "DIRECTOR", "TREASURER"] as const;
 
@@ -93,14 +91,7 @@ export async function signUp(formData: FormData) {
     return { ok: false as const, errorKey: "registerError", errorMessage: error.message };
   }
 
-  try {
-    const { token } = await createUserToken({ purpose: "verify", email, ttlMs: 24 * 60 * 60 * 1000 });
-    const baseUrl = getBaseUrl();
-    const verifyUrl = `${baseUrl}/auth/verify-email?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
-    await sendVerifyEmail({ to: email, verifyUrl });
-  } catch {
-    /* login blocked until verified */
-  }
+  await sendAccountVerificationEmail(email);
 
   return { ok: true as const };
 }

@@ -21,6 +21,8 @@ function AdminUsuariosForm() {
   const [role, setRole] = useState(initialRole);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [emailWarning, setEmailWarning] = useState<string | null>(null);
+  const [createdEmail, setCreatedEmail] = useState<string | null>(null);
   const [clubs, setClubs] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
@@ -30,10 +32,19 @@ function AdminUsuariosForm() {
   async function handleSubmit(formData: FormData) {
     setError(null);
     setSuccess(false);
+    setEmailWarning(null);
+    setCreatedEmail(null);
     formData.set("role", role);
     const result = await createUser(formData);
     if (result.ok) {
       setSuccess(true);
+      setCreatedEmail(String(formData.get("email") ?? ""));
+      if ("emailSent" in result && result.emailSent === false) {
+        setEmailWarning(
+          result.emailError ??
+            "No se pudo enviar el email de verificación. Revisá RESEND_API_KEY y EMAIL_FROM en el servidor."
+        );
+      }
       (
         document.getElementById("create-user-form") as HTMLFormElement
       )?.reset();
@@ -55,7 +66,9 @@ function AdminUsuariosForm() {
           Crear usuario {ROLE_LABELS[role] ?? ""}
         </h1>
         <p className="mt-1 text-sm text-[var(--feg-green)]">
-          El usuario deberá cambiar la contraseña en su primer acceso.
+          Se enviará un email de verificación al correo indicado. El usuario debe
+          confirmarlo antes de iniciar sesión y cambiar la contraseña temporal en
+          su primer acceso.
         </p>
       </div>
 
@@ -68,6 +81,8 @@ function AdminUsuariosForm() {
               setRole(r);
               setSuccess(false);
               setError(null);
+              setEmailWarning(null);
+              setCreatedEmail(null);
             }}
             className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
               role === r
@@ -159,6 +174,18 @@ function AdminUsuariosForm() {
           {success && (
             <p className="rounded-xl bg-[var(--feg-green-2)]/10 p-3 text-sm text-[var(--feg-green-2)]">
               Usuario {ROLE_LABELS[role] ?? ""} creado correctamente.
+              {createdEmail && !emailWarning && (
+                <>
+                  {" "}
+                  Se envió un email de verificación a{" "}
+                  <span className="font-medium">{createdEmail}</span>.
+                </>
+              )}
+            </p>
+          )}
+          {emailWarning && (
+            <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+              {emailWarning}
             </p>
           )}
           <button

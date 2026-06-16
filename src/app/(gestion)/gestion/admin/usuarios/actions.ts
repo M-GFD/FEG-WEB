@@ -2,6 +2,7 @@
 
 import { hash } from "bcryptjs";
 import { auth } from "@/lib/auth";
+import { sendAccountVerificationEmail } from "@/lib/account-verification-email";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getClubs } from "@/lib/data";
 import { z } from "zod";
@@ -87,7 +88,16 @@ export async function createUser(formData: FormData) {
     return { ok: false, error: error.message };
   }
 
-  return { ok: true };
+  const emailResult = await sendAccountVerificationEmail(parsed.data.email);
+  if (!emailResult.ok) {
+    return {
+      ok: true,
+      emailSent: false,
+      emailError: emailResult.error,
+    };
+  }
+
+  return { ok: true, emailSent: true };
 }
 
 /** Keep backward compat */

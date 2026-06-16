@@ -1,10 +1,9 @@
 "use server";
 
-import { consumeUserToken, createUserToken } from "@/lib/user-tokens";
+import { consumeUserToken } from "@/lib/user-tokens";
+import { sendAccountVerificationEmail } from "@/lib/account-verification-email";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { prisma } from "@/lib/db";
-import { getBaseUrl } from "@/lib/app-url";
-import { sendVerifyEmail } from "@/lib/email";
 
 export async function verifyEmail(emailRaw: string, token: string) {
   const email = String(emailRaw || "").trim().toLowerCase();
@@ -48,9 +47,6 @@ export async function resendVerification(emailRaw: string) {
   if (!user) return { ok: true as const };
   if ((user as { emailVerified?: string | null }).emailVerified) return { ok: true as const };
 
-  const { token } = await createUserToken({ purpose: "verify", email, ttlMs: 24 * 60 * 60 * 1000 });
-  const baseUrl = getBaseUrl();
-  const verifyUrl = `${baseUrl}/auth/verify-email?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`;
-  await sendVerifyEmail({ to: email, verifyUrl });
+  await sendAccountVerificationEmail(email);
   return { ok: true as const };
 }
