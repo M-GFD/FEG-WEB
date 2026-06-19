@@ -35,7 +35,7 @@ export function TournamentDeleteManager({ items }: { items: AdminTournamentRow[]
 
     const statusLabel = STATUS_LABELS[item.status] ?? item.status;
     const ok = window.confirm(
-      `¿Eliminar el torneo "${item.name}"?\n\nClub: ${item.clubName}\nFecha: ${formatTournamentDate(item.date)}\nEstado: ${statusLabel}\n\nSe borrarán inscripciones, tarjetas y resultados asociados. Esta acción no se puede deshacer.`
+      `¿Eliminar el torneo "${item.name}"?\n\nClub: ${item.clubName}\nFecha: ${formatTournamentDate(item.date)}\nEstado: ${statusLabel}\n\nSe borrarán inscripciones, tarjetas, resultados, inscripciones menores vinculadas y el torneo dejará de aparecer en el panel del club y en torneos activos. Esta acción no se puede deshacer.`
     );
     if (!ok) return;
 

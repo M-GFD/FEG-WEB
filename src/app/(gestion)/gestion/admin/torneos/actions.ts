@@ -1,12 +1,14 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getClubs } from "@/lib/data";
 import { slugifyTitle } from "@/lib/slugify";
 import { contentAudienceFromForm } from "@/lib/content-audience";
-import { recalculatePlayerHandicapIndex } from "@/lib/handicap-recalc";
+import {
+  linkYouthSignupConfigToTournament,
+  purgeTournamentCompletely,
+} from "@/lib/tournament-delete";
 import { z } from "zod";
 
 const createTournamentSchema = z.object({
@@ -65,9 +67,10 @@ export async function createTournament(formData: FormData) {
   }
 
   const now = new Date().toISOString();
+  const tournamentId = crypto.randomUUID();
 
   const { error } = await supabase.from("Tournament").insert({
-    id: crypto.randomUUID(),
+    id: tournamentId,
     name: name.trim(),
     slug: finalSlug,
     date: new Date(date).toISOString(),
@@ -83,6 +86,8 @@ export async function createTournament(formData: FormData) {
   if (error) {
     return { ok: false, error: error.message };
   }
+
+  await linkYouthSignupConfigToTournament(supabase, tournamentId, name.trim());
 
   return { ok: true };
 }
@@ -131,33 +136,6 @@ const deleteTournamentSchema = z.object({
   tournamentId: z.string().min(1, "Torneo inválido"),
 });
 
-type RankingDateRow = { tournamentId: string; points: number; position: number };
-
-async function cleanupRankingReferences(
-  supabase: NonNullable<ReturnType<typeof getSupabaseAdmin>>,
-  tournamentId: string
-) {
-  const { data: rows } = await supabase
-    .from("RankingEntry")
-    .select("id, bestDates");
-
-  for (const row of rows ?? []) {
-    const dates = (row.bestDates as RankingDateRow[] | null) ?? [];
-    if (!dates.some((d) => d.tournamentId === tournamentId)) continue;
-
-    const merged = dates
-      .filter((d) => d.tournamentId !== tournamentId)
-      .sort((a, b) => b.points - a.points)
-      .slice(0, 6);
-    const totalPoints = merged.reduce((sum, d) => sum + d.points, 0);
-
-    await supabase
-      .from("RankingEntry")
-      .update({ bestDates: merged, points: totalPoints, updatedAt: new Date().toISOString() })
-      .eq("id", row.id as string);
-  }
-}
-
 export async function deleteTournament(
   tournamentId: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
@@ -180,7 +158,7 @@ export async function deleteTournament(
 
   const { data: tournament } = await supabase
     .from("Tournament")
-    .select("id, name")
+    .select("id, name, clubId")
     .eq("id", id)
     .maybeSingle();
 
@@ -188,34 +166,9 @@ export async function deleteTournament(
     return { ok: false, error: "No se encontró el torneo" };
   }
 
-  const { data: publishedRounds } = await supabase
-    .from("PublishedHandicapRound")
-    .select("playerId")
-    .eq("tournamentId", id);
-
-  const playerIdsToRecalc = [
-    ...new Set((publishedRounds ?? []).map((r) => r.playerId as string)),
-  ];
-
-  await cleanupRankingReferences(supabase, id);
-
-  await supabase.from("Photo").update({ tournamentId: null }).eq("tournamentId", id);
-
-  const { error } = await supabase.from("Tournament").delete().eq("id", id);
-  if (error) {
-    return { ok: false, error: error.message };
-  }
-
-  for (const playerId of playerIdsToRecalc) {
-    await recalculatePlayerHandicapIndex(supabase, playerId);
-  }
-
-  revalidatePath("/gestion/admin/torneos/eliminar");
-  revalidatePath("/gestion/admin/torneos");
-  revalidatePath("/gestion/club");
-  revalidatePath("/torneos");
-  revalidatePath("/ranking");
-  revalidatePath("/buscar");
-
-  return { ok: true };
+  return purgeTournamentCompletely(supabase, {
+    id: tournament.id as string,
+    name: tournament.name as string,
+    clubId: tournament.clubId as string,
+  });
 }

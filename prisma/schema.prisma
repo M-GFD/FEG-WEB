@@ -476,6 +476,8 @@ model YouthTournamentSignupConfig {
   sede        String
   modalidad   String
   tournamentKey String @unique
+  /// Torneo federativo (Tournament.id) al que corresponden las inscripciones menores.
+  tournamentId  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
