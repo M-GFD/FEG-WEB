@@ -56,8 +56,7 @@ export function ContentAudienceField({
       </div>
       <p className="text-xs text-[var(--feg-green)]/80">
         General aparece en todo el sitio. Menores o Mayores también se listan en su apartado
-        filtrado (rankings, calendario, torneos y noticias con{" "}
-        <code className="rounded bg-black/5 px-1">?audiencia=</code>).
+        filtrado (rankings, calendario, torneos y noticias).
       </p>
     </fieldset>
   );
