@@ -30,6 +30,12 @@ export default async function GestionAdminHomePage() {
           >
             Crear torneo
           </Link>
+          <Link
+            href="/gestion/admin/torneos/eliminar"
+            className="inline-flex rounded-xl border border-[var(--feg-green)]/25 bg-white px-4 py-2.5 text-sm font-semibold text-[var(--feg-green-2)] transition hover:bg-[var(--feg-bg)]"
+          >
+            Eliminar torneo
+          </Link>
         </div>
       </section>
 
