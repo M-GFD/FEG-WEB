@@ -804,9 +804,9 @@
     "iosAddToHome": "Agregar a inicio",
     "iosUnderstand": "Entendido",
     "pushDialogAria": "Activar notificaciones",
-    "pushBody": "Recibí avisos cuando haya noticias nuevas. Pulsá o hacé clic en Activar y aceptá en el cuadro del sistema (no solo en esta barra).",
+    "pushBody": "Recibí avisos cuando haya noticias nuevas. Para eso, acepta que te enviemos notificaciones haciendo click o tocando en \"Aceptar\" aquí abajo.",
     "dismiss": "Ahora no",
-    "enable": "Activar",
+    "enable": "Aceptar",
     "errors": {
       "unsupportedBrowser": "Navegador incompatible",
       "subscribeFailed": "No se pudo suscribir al servicio push",

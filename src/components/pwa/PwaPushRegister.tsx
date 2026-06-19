@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { FegLogo } from "@/components/layout/FegLogo";
 
 function urlBase64ToUint8Array(base64String: string): BufferSource {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -144,6 +145,31 @@ async function registerAndPostSubscription(
 
 type OfferMode = "none" | "ios-hint" | "push";
 
+function PushOptInModal({
+  ariaLabel,
+  children,
+}: {
+  ariaLabel: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" role="presentation">
+      <div className="absolute inset-0 bg-[#002403]/45 backdrop-blur-[2px]" aria-hidden="true" />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={ariaLabel}
+        className="relative z-10 w-full max-w-md rounded-2xl border border-[var(--feg-green)]/12 bg-white p-6 shadow-[0_20px_60px_rgba(0,36,3,0.18)] sm:p-8"
+      >
+        <div className="mb-5 flex justify-center">
+          <FegLogo size="nav" className="h-16 object-contain object-center" />
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export function PwaPushRegister() {
   const t = useTranslations("pwa");
   const tc = useTranslations("common");
@@ -243,6 +269,15 @@ export function PwaPushRegister() {
     };
   }, [vapidKey, tryOffer]);
 
+  useEffect(() => {
+    if (mode === "none") return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mode]);
+
   /**
    * requestPermission() debe ejecutarse en el mismo gesto del clic; no hace falta setState antes
    * (en Safari puede anular el permiso real).
@@ -297,54 +332,44 @@ export function PwaPushRegister() {
 
   if (mode === "ios-hint") {
     return (
-      <div
-        role="dialog"
-        aria-label={t("iosDialogAria")}
-        className="fixed bottom-0 left-0 right-0 z-[100] border-t border-[var(--feg-green)]/20 bg-[var(--feg-green)] p-4 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
-        style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
-      >
-        <div className="mx-auto max-w-lg text-sm text-[#FFFFFF]">
-          <p className="font-semibold">{t("iosTitle")}</p>
-          <p className="mt-2 text-[#FFFFFF]/90">
+      <PushOptInModal ariaLabel={t("iosDialogAria")}>
+        <div className="text-sm text-[var(--feg-ink)]">
+          <p className="text-center font-heading text-lg font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
+            {t("iosTitle")}
+          </p>
+          <p className="mt-3 text-center leading-relaxed text-[var(--feg-green)]">
             {t.rich("iosBody", {
-              strong: (chunks) => <strong className="text-[#FFFFFF]">{chunks}</strong>,
+              strong: (chunks) => <strong className="text-[var(--feg-green-2)]">{chunks}</strong>,
             })}
           </p>
           <button
             type="button"
             onClick={onDismissIosHint}
-            className="mt-4 w-full rounded-xl border border-white/40 py-2.5 text-sm font-medium text-[#FFFFFF] sm:w-auto sm:px-6"
+            className="mt-6 w-full rounded-xl bg-[var(--feg-green-2)] py-3 text-sm font-semibold text-white transition hover:brightness-95"
           >
             {t("iosUnderstand")}
           </button>
         </div>
-      </div>
+      </PushOptInModal>
     );
   }
 
   if (mode !== "push") return null;
 
   return (
-    <div
-      role="dialog"
-      aria-label={t("pushDialogAria")}
-      className="fixed bottom-0 left-0 right-0 z-[100] border-t border-white/10 bg-[var(--feg-green)] p-4 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]"
-      style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))" }}
-    >
-      <div className="mx-auto flex max-w-lg flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-sm text-[#FFFFFF]">
-          <p>{t("pushBody")}</p>
-          {subscribeError && (
-            <p className="mt-2 text-xs text-red-200" role="alert">
-              {subscribeError}
-            </p>
-          )}
-        </div>
-        <div className="flex shrink-0 gap-2">
+    <PushOptInModal ariaLabel={t("pushDialogAria")}>
+      <div className="text-sm text-[var(--feg-ink)]">
+        <p className="text-center leading-relaxed text-[var(--feg-green)]">{t("pushBody")}</p>
+        {subscribeError && (
+          <p className="mt-3 text-center text-xs text-red-700" role="alert">
+            {subscribeError}
+          </p>
+        )}
+        <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
           <button
             type="button"
             onClick={onDismissPush}
-            className="rounded-xl bg-[var(--feg-green-2)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95"
+            className="w-full rounded-xl bg-[var(--feg-green-2)] px-4 py-3 text-sm font-semibold text-white transition hover:brightness-95 sm:w-auto sm:min-w-[8.5rem]"
           >
             {t("dismiss")}
           </button>
@@ -352,12 +377,12 @@ export function PwaPushRegister() {
             type="button"
             onClick={onEnablePush}
             disabled={busy}
-            className="rounded-xl bg-[var(--feg-yellow)] px-4 py-2 text-sm font-semibold text-[var(--feg-ink)] transition hover:brightness-95 disabled:opacity-60"
+            className="w-full rounded-xl bg-[var(--feg-yellow)] px-4 py-3 text-sm font-semibold text-[var(--feg-ink)] transition hover:brightness-95 disabled:opacity-60 sm:w-auto sm:min-w-[8.5rem]"
           >
             {busy ? tc("busy") : t("enable")}
           </button>
         </div>
       </div>
-    </div>
+    </PushOptInModal>
   );
 }
