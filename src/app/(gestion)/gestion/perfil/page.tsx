@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { requireGestionArea } from "@/lib/gestion-access";
+import { PerfilChangePassword } from "./PerfilChangePassword";
 
 const roleLabels: Record<string, string> = {
   ADMIN: "Administrador",
@@ -49,6 +50,8 @@ export default async function GestionPerfilPage() {
           )}
         </dl>
       </div>
+
+      <PerfilChangePassword />
     </div>
   );
 }
