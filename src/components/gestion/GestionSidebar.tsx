@@ -82,7 +82,7 @@ export function GestionSidebar({ role }: { role: Role }) {
             type="submit"
             className="w-full rounded-xl bg-[var(--feg-yellow)] px-3 py-2.5 text-sm font-semibold text-[var(--feg-ink)] transition hover:brightness-95"
           >
-            Salir
+            Cerrar sesión
           </button>
         </form>
       </div>
