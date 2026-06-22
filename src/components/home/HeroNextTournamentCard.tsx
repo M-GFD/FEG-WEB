@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { formatCalendarDate, getNextFegDate } from "@/lib/calendario-feg";
 import { useCalendarI18n } from "@/lib/calendario-client";
+import { HOME_GLASS_CARD_CLASS } from "@/components/home/homeGlassCard";
 
 /**
  * Card del Hero con el próximo torneo del calendario FEG. La comparación de fechas
@@ -27,7 +28,7 @@ export function HeroNextTournamentCard() {
     // Card glass: queda fuera de RevealOnScroll para que el `transform` del reveal
     // NO aísle el backdrop-filter (idéntico patrón que la card Institucional del Home).
     <div className="ml-auto w-full max-w-sm shrink-0">
-      <div className="relative w-full rounded-2xl bg-white/14 backdrop-blur-sm shadow-[0_20px_60px_rgba(0,36,3,0.18)]">
+      <div className={HOME_GLASS_CARD_CLASS}>
         <RevealOnScroll revealIndex={3} yOffset={32} className="block">
           <div className="p-5">
             <div className="inline-flex rounded-full bg-[var(--feg-green)] px-3 py-1.5 text-[10px] font-semibold text-white ring-1 ring-black/10">

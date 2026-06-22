@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { formatCalendarDate, getUpcomingFegDates, type CalendarEntryWithDate } from "@/lib/calendario-feg";
 import { useCalendarI18n } from "@/lib/calendario-client";
+import { HOME_GLASS_CARD_CLASS } from "@/components/home/homeGlassCard";
 
 const PLACEHOLDER_IMAGES = [
   "/feg%20image%20(1).webp",
@@ -34,31 +35,36 @@ function UpcomingTournamentCard({
   locale,
 }: TournamentCardProps & { locale: string }) {
   return (
-    <RevealOnScroll revealIndex={revealIndex} yOffset={20} className="min-w-0">
-      <article
+    <div className="min-w-0">
+      {/* Glass fuera de RevealOnScroll: el transform del reveal aísla backdrop-filter si envuelve la card. */}
+      <div
         onMouseEnter={() => onActivate(index)}
         onClick={() => onActivate(index)}
-        onFocus={() => onActivate(index)}
-        tabIndex={0}
-        className={`relative w-full rounded-2xl bg-white/14 shadow-[0_20px_60px_rgba(0,36,3,0.18)] backdrop-blur-sm transition-[box-shadow,background-color] duration-300 outline-none ${
-          isActive ? "bg-white/20 ring-1 ring-white/25" : "ring-1 ring-white/10"
+        className={`${HOME_GLASS_CARD_CLASS} transition-[background-color] duration-300 outline-none ${
+          isActive ? "bg-white/20" : ""
         }`}
       >
-        <div className="p-5">
-          <p className="min-w-0 text-xl font-semibold leading-snug">
-            <span className="text-white">{entry.sede}</span>
-            <span className="text-white/75"> – </span>
-            <span className="font-bold text-[var(--feg-yellow)]">
-              {formatCalendarDate(entry._raw, locale as "es" | "en" | "pt")}
-            </span>
-          </p>
+        <RevealOnScroll revealIndex={revealIndex} yOffset={20} className="block">
+          <div
+            className="p-5"
+            tabIndex={0}
+            onFocus={() => onActivate(index)}
+          >
+            <p className="min-w-0 text-xl font-semibold leading-snug">
+              <span className="text-white">{entry.sede}</span>
+              <span className="text-white/75"> – </span>
+              <span className="font-bold text-[var(--feg-yellow)]">
+                {formatCalendarDate(entry._raw, locale as "es" | "en" | "pt")}
+              </span>
+            </p>
 
-          <div className="mt-3 inline-flex w-fit rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white">
-            {entry.modalidad}
+            <div className="mt-3 inline-flex w-fit rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white">
+              {entry.modalidad}
+            </div>
           </div>
-        </div>
-      </article>
-    </RevealOnScroll>
+        </RevealOnScroll>
+      </div>
+    </div>
   );
 }
 
@@ -95,10 +101,10 @@ export function UpcomingTournamentsTabs() {
     <section
       id="proximos-torneos"
       data-header-theme="dark"
-      className="relative scroll-mt-28 overflow-hidden lg:scroll-mt-24"
+      className="relative scroll-mt-28 lg:scroll-mt-24"
       onMouseLeave={() => setActiveImageIdx(0)}
     >
-      <div className="absolute inset-0 bg-[var(--feg-bg)]">
+      <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
         {PLACEHOLDER_IMAGES.map((src, i) => (
           <Image
             key={src}
