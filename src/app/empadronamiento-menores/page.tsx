@@ -5,10 +5,10 @@ import { EMPADRONAMIENTO_SEASON_YEAR } from "@/lib/empadronamiento-menores/const
 import { EmpadronamientoMenoresForm } from "./EmpadronamientoMenoresForm";
 
 export async function generateMetadata() {
-  const t = await getTranslations("meta");
+  const tMeta = await getTranslations("meta");
   return {
-    title: t("enrollmentTitle"),
-    description: t("enrollmentDescription", { year: EMPADRONAMIENTO_SEASON_YEAR }),
+    title: tMeta("enrollmentTitle"),
+    description: tMeta("enrollmentDescription", { year: EMPADRONAMIENTO_SEASON_YEAR }),
   };
 }
 

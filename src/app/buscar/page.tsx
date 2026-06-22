@@ -82,21 +82,21 @@ export default async function BuscarPage({ searchParams }: Props) {
             </p>
           ) : (
             <p className="mt-3 text-base font-medium text-[var(--feg-green)]">
-              {t("emptyPrompt")}
+              {t("hint")}
             </p>
           )}
         </header>
 
         {!query ? null : hits.length === 0 ? (
           <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-10 text-center text-[var(--feg-green)]">
-            {t("noResults")}
+            {t("empty")}
           </p>
         ) : (
           <div className="space-y-10">
             {otherHits.length > 0 && (
               <section>
                 <h2 className="mb-3 font-heading text-sm font-semibold uppercase tracking-[0.16em] text-[var(--feg-green-2)]">
-                  {t("sectionMixed")}
+                  {t("sectionSite")}
                 </h2>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {otherHits.map((h) => (

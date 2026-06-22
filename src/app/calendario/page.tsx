@@ -32,7 +32,7 @@ export default async function CalendarioPage({ searchParams }: Props) {
             {t("title", { audience: segmentLabel })}
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[var(--feg-green)]">
-            {segment === "menores" ? t("subtitleMenores", { year: 2026 }) : t("subtitleMayores")}
+            {segment === "menores" ? t("subtitleMinors", { year: 2026 }) : t("subtitleMayores")}
           </p>
         </header>
 

@@ -195,7 +195,11 @@
     "previous": "Previous",
     "next": "Next",
     "rankingSectionAria": "Ranking {category}",
-    "emptyCategory": "No players in this category."
+    "emptyCategory": "No players in this category.",
+    "colPos": "Pos.",
+    "colPlayer": "Player",
+    "colClub": "Club",
+    "colHcp": "HCP"
   },
   "tournamentsHistoric": {
     "badge": "Federation · {segment}",
@@ -222,7 +226,15 @@
     "galleryNote": "Gallery: photos the host club sent to press and were approved. Results appear below when published.",
     "galleryTitle": "Tournament gallery",
     "gallerySectionAria": "tournament-gallery",
-    "resultsEmpty": "Results are not published yet."
+    "resultsEmpty": "Results are not published yet.",
+    "results": "Results",
+    "photoAlt": "Tournament photo",
+    "colPos": "Pos.",
+    "colPlayer": "Player",
+    "colClub": "Club",
+    "colCategory": "Category",
+    "colGross": "Gross",
+    "colNeto": "Net"
   },
   "youthTournament": {
     "badge": "Next tournament · Registration open",
@@ -238,6 +250,10 @@
     "playersCount": "{count} registered players · View roster →",
     "rosterPending": "Roster pending upload",
     "affiliatedBadge": "Affiliated club",
+    "backToClubs": "← Clubs",
+    "code": "Code {code}",
+    "noPlayers": "No registered players at this club.",
+    "playersSection": "Registered players",
     "rosterEmpty": "No players on the roster for this club yet.",
     "rosterCount": "{count, plural, one {# registered player.} other {# registered players.}}"
   },

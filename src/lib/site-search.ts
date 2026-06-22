@@ -160,12 +160,12 @@ export function getSearchLabels(t: SearchPageTranslator): SearchLabels {
   return {
     labelForType: (type) => t(`types.${type}`),
     staticPageTitle: (key) => t(`staticPages.${key}`),
-    staticSectionDescription: t("staticSectionDescription"),
-    clubListFallback: t("clubListFallback"),
+    staticSectionDescription: t("pageDescription"),
+    clubListFallback: t("clubFallback"),
     clubCode: (code) => t("clubCode", { code }),
     playerClub: (club) => t("playerClub", { club }),
     playerHandicap: (handicap) => t("playerHandicap", { handicap }),
-    playerDefault: t("playerDefault"),
+    playerDefault: t("playerRegistered"),
   };
 }
 

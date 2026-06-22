@@ -39,7 +39,7 @@ export function MenoresProximoTorneoCard({ config }: Props) {
         href="/inscripcion-torneos-menores"
         className="mt-6 inline-flex rounded-full bg-[var(--feg-yellow)] px-8 py-3 font-heading text-sm font-semibold text-[var(--feg-ink)] transition hover:brightness-95"
       >
-        {t("signUp")}
+        {t("signup")}
       </Link>
     </div>
   );

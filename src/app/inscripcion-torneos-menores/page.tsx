@@ -7,10 +7,10 @@ import Link from "next/link";
 import { InscripcionTorneoMenoresForm } from "./InscripcionTorneoMenoresForm";
 
 export async function generateMetadata() {
-  const t = await getTranslations("meta");
+  const tMeta = await getTranslations("meta");
   return {
-    title: t("tournamentSignupTitle"),
-    description: t("tournamentSignupDescription"),
+    title: tMeta("tournamentSignupTitle"),
+    description: tMeta("tournamentSignupDescription"),
   };
 }
 

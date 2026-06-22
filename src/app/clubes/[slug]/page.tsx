@@ -55,7 +55,7 @@ export default async function ClubDetailPage({ params }: Props) {
           <p className="mt-4 text-sm font-medium text-[var(--feg-green)]">
             {players.length === 0
               ? t("noPlayers")
-              : t("playerCount", { count: players.length })}
+              : t("rosterCount", { count: players.length })}
           </p>
         </header>
 

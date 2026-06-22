@@ -67,7 +67,7 @@ export function TorneosHistoricoClient({
             className="rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-3 py-2.5 text-sm font-medium text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
           >
             <option value="reciente">{t("sortRecent")}</option>
-            <option value="antiguo">{t("sortOld")}</option>
+            <option value="antiguo">{t("sortOldest")}</option>
           </select>
         </div>
         <div>
@@ -86,7 +86,7 @@ export function TorneosHistoricoClient({
             }}
             className="rounded-xl border border-[var(--feg-green)]/20 bg-[var(--feg-bg)] px-3 py-2.5 text-sm font-medium text-[var(--feg-ink)] outline-none ring-[var(--feg-green-2)]/30 focus:ring-2"
           >
-            <option value="todos">{t("allYears")}</option>
+            <option value="todos">{t("yearAll")}</option>
             {years.map((y) => (
               <option key={y} value={y}>
                 {y}
@@ -95,13 +95,13 @@ export function TorneosHistoricoClient({
           </select>
         </div>
         <p className="text-sm font-medium text-[var(--feg-green)] sm:ml-auto sm:pb-2">
-          {t("tournamentCount", { count: filtered.length })}
+          {t("count", { count: filtered.length })}
         </p>
       </div>
 
       {filtered.length === 0 ? (
         <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/70 p-10 text-center text-[var(--feg-green)]">
-          {t("noFilterResults")}
+          {t("filterEmpty")}
         </p>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

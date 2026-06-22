@@ -38,7 +38,7 @@ export default async function RankingPage({ searchParams }: Props) {
         <BackToHome />
         <header className="mb-8">
           <p className="mb-3 inline-flex rounded-full border border-[var(--feg-green)]/25 bg-white/90 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-[var(--feg-green-2)] shadow-sm">
-            {t("badge", { audience: segmentLabel })}
+            {t("badge", { segment: segmentLabel })}
           </p>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -47,7 +47,10 @@ export default async function RankingPage({ searchParams }: Props) {
               </h1>
               {totalJugadores > 0 ? (
                 <p className="mt-2 text-xs text-[var(--feg-green-2)]/80">
-                  {t("stats", { players: totalJugadores, categories: categories.length })}
+                  {t("stats", {
+                    totalPlayers: totalJugadores,
+                    categoryCount: categories.length,
+                  })}
                 </p>
               ) : null}
             </div>
@@ -56,7 +59,7 @@ export default async function RankingPage({ searchParams }: Props) {
                 href="/institucional/reglamento"
                 className="inline-flex shrink-0 items-center justify-center rounded-full bg-[var(--feg-ink)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_14px_40px_rgba(0,0,0,0.12)] transition hover:brightness-110"
               >
-                {t("regulationsLink")}
+                {t("regulationLink")}
               </Link>
             ) : null}
           </div>
@@ -64,7 +67,7 @@ export default async function RankingPage({ searchParams }: Props) {
 
         {categories.length === 0 ? (
           <div className="rounded-2xl border border-[var(--feg-green)]/12 bg-white px-6 py-12 text-center text-[var(--feg-green)] shadow-[0_14px_40px_rgba(0,36,3,0.08)]">
-            {t("empty", { audience: segmentLabel.toLowerCase() })}
+            {t("empty", { segment: segmentLabel.toLowerCase() })}
           </div>
         ) : (
           <RankingCategoryPager

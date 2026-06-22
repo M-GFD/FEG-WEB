@@ -195,7 +195,11 @@
     "previous": "Anterior",
     "next": "Próximo",
     "rankingSectionAria": "Ranking {category}",
-    "emptyCategory": "Sem jogadores nesta categoria."
+    "emptyCategory": "Sem jogadores nesta categoria.",
+    "colPos": "Pos.",
+    "colPlayer": "Jogador",
+    "colClub": "Clube",
+    "colHcp": "HCP"
   },
   "tournamentsHistoric": {
     "badge": "Federação · {segment}",
@@ -222,7 +226,15 @@
     "galleryNote": "Galeria: fotos que o clube organizador enviou à imprensa e foram aprovadas. Os resultados aparecem abaixo quando publicados.",
     "galleryTitle": "Galeria do torneio",
     "gallerySectionAria": "galeria-torneo",
-    "resultsEmpty": "Os resultados ainda não foram publicados."
+    "resultsEmpty": "Os resultados ainda não foram publicados.",
+    "results": "Resultados",
+    "photoAlt": "Foto do torneio",
+    "colPos": "Pos.",
+    "colPlayer": "Jogador",
+    "colClub": "Clube",
+    "colCategory": "Categoria",
+    "colGross": "Gross",
+    "colNeto": "Neto"
   },
   "youthTournament": {
     "badge": "Próximo torneio · Inscrições abertas",
@@ -238,6 +250,10 @@
     "playersCount": "{count} jogadores matriculados · Ver cadastro →",
     "rosterPending": "Cadastro pendente de carga",
     "affiliatedBadge": "Clube filiado",
+    "backToClubs": "← Clubes",
+    "code": "Código {code}",
+    "noPlayers": "Sem jogadores matriculados neste clube.",
+    "playersSection": "Jogadores matriculados",
     "rosterEmpty": "Ainda não há jogadores no cadastro deste clube.",
     "rosterCount": "{count, plural, one {# jogador matriculado.} other {# jogadores matriculados.}}"
   },

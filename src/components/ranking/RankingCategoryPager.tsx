@@ -69,7 +69,7 @@ export function RankingCategoryPager({ categories, initialIndex }: Props) {
           <span className="mx-2 text-[var(--feg-green)]/40">·</span>
           <span className="text-[var(--feg-green-2)]">{cat.label}</span>
           <span className="ml-1.5 font-normal text-[var(--feg-green)]">
-            {t("playersInCategory", { count: cat.rows.length })}
+            {t("categoryPlayers", { count: cat.rows.length })}
           </span>
         </p>
         <div className="flex flex-wrap gap-2">
@@ -79,7 +79,7 @@ export function RankingCategoryPager({ categories, initialIndex }: Props) {
             className="inline-flex items-center justify-center gap-1 rounded-full border border-[var(--feg-green)]/25 bg-white px-4 py-2 text-sm font-semibold text-[var(--feg-green-2)] shadow-sm transition hover:border-[var(--feg-green)]/45 hover:bg-[var(--feg-bg)]"
           >
             <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
-            {t("prev")}
+            {t("previous")}
           </button>
           <button
             type="button"
@@ -93,7 +93,7 @@ export function RankingCategoryPager({ categories, initialIndex }: Props) {
       </div>
 
       <section
-        aria-label={t("rankingAria", { category: cat.label })}
+        aria-label={t("rankingSectionAria", { category: cat.label })}
         className="rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-[0_14px_40px_rgba(0,36,3,0.08)]"
       >
         <div className="border-b border-[var(--feg-green)]/10 bg-[var(--feg-green-soft)] px-4 py-4 text-white md:px-6">
