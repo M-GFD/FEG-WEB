@@ -65,6 +65,24 @@ function canShowIosInstallHint(): boolean {
 
 const RESHOW_AFTER_HIDDEN_SEC = 45;
 const IOS_HINT_DISMISS_KEY = "feg_ios_pwa_push_hint_dismissed";
+/** Una sola vez por dispositivo: el modal de push ya se mostró (aceptó, rechazó o cerró). */
+const PUSH_PROMPTED_KEY = "feg_push_opt_in_prompted";
+
+function readStorageFlag(key: string): boolean {
+  try {
+    return localStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writeStorageFlag(key: string): void {
+  try {
+    localStorage.setItem(key, "1");
+  } catch {
+    /* ignore */
+  }
+}
 
 async function resolveVapidPublicKey(): Promise<string | null> {
   const fromEnv =
@@ -202,6 +220,9 @@ export function PwaPushRegister() {
       return "ios-hint";
     }
     if (canOfferRealPushOptIn()) {
+      if (readStorageFlag(PUSH_PROMPTED_KEY)) {
+        return "none";
+      }
       return "push";
     }
     return "none";
@@ -209,7 +230,11 @@ export function PwaPushRegister() {
 
   const tryOffer = useCallback(() => {
     if (!vapidKey) return;
-    setMode(computeOfferMode());
+    const next = computeOfferMode();
+    if (next === "push") {
+      writeStorageFlag(PUSH_PROMPTED_KEY);
+    }
+    setMode(next);
   }, [vapidKey, computeOfferMode]);
 
   useEffect(() => {
@@ -296,6 +321,7 @@ export function PwaPushRegister() {
       setBusy(true);
       try {
         if (perm !== "granted") {
+          writeStorageFlag(PUSH_PROMPTED_KEY);
           setMode("none");
           return;
         }
@@ -317,6 +343,7 @@ export function PwaPushRegister() {
   }, [vapidKey, t]);
 
   const onDismissPush = () => {
+    writeStorageFlag(PUSH_PROMPTED_KEY);
     setSubscribeError(null);
     setMode("none");
   };
