@@ -18,14 +18,12 @@ import {
 import {
   formatHandicapRankingCell,
   handicapSortValue,
-  keyForRankingCategory,
-  labelForRankingCategory,
+  resolveMayoresRankingTier,
   slugifyRankingCategoryKey,
   sortHandicapRankingCategoryBlocks,
 } from "./handicap-ranking";
 import {
   compareYouthCategoryBlocks,
-  isMayoresPlayerCategory,
   isYouthPlayerCategory,
   resolveYouthCategoryTier,
 } from "./youth-categories";
@@ -487,6 +485,9 @@ type PlayerRankingRow = {
   handicap: number;
   handicapIndex: number | null;
   category: string | null;
+  gender: string | null;
+  birthYear: number | null;
+  age: number | null;
   clubId: string;
 };
 
@@ -499,7 +500,9 @@ async function fetchAllPlayersForHandicapRanking(
   for (;;) {
     const { data, error } = await supabase
       .from("Player")
-      .select("id,firstName,lastName,handicap,handicapIndex,category,clubId")
+      .select(
+        "id,firstName,lastName,handicap,handicapIndex,category,gender,birthYear,age,clubId"
+      )
       .range(from, from + pageSize - 1);
     if (error) {
       console.error("[getHandicapRankingsByCategory]", error.message);
@@ -514,9 +517,10 @@ async function fetchAllPlayersForHandicapRanking(
 }
 
 /**
- * Rankings por categoría (`Player.category`), ordenados por handicap ascendente
+ * Rankings por categoría federativa, ordenados por handicap ascendente
  * (menor = mejor). Excluye jugadores sin handicap válido o con handicap ≤ 0.
- * Los datos se leen en cada request (handicaps actualizados en DB).
+ * Menores: Junior §2 + Prejuveniles/Juveniles/Sub 23 §II.
+ * Mayores: categorías del reglamento FGL §4.
  */
 export async function getHandicapRankingsByCategory(options?: {
   audience?: AudienceSegment;
@@ -549,23 +553,27 @@ export async function getHandicapRankingsByCategory(options?: {
       if (!isYouthPlayerCategory(p.category)) continue;
       const tier = resolveYouthCategoryTier(p.category);
       if (!tier) continue;
-      const gKey = tier.groupKey;
-      const label = tier.label;
       const hLabel = formatHandicapRankingCell(p);
-      if (!byKey.has(gKey)) byKey.set(gKey, { label, list: [] });
-      byKey.get(gKey)!.list.push({ ...p, sort, hLabel });
+      if (!byKey.has(tier.groupKey)) byKey.set(tier.groupKey, { label: tier.label, list: [] });
+      byKey.get(tier.groupKey)!.list.push({ ...p, sort, hLabel });
       continue;
     }
 
-    if (!isMayoresPlayerCategory(p.category)) continue;
+    const tier = resolveMayoresRankingTier({
+      category: p.category,
+      gender: p.gender,
+      handicap: p.handicap,
+      handicapIndex: p.handicapIndex,
+      birthYear: p.birthYear,
+      age: p.age,
+    });
+    if (!tier) continue;
 
-    const gKey = keyForRankingCategory(p.category);
-    const label = labelForRankingCategory(p.category);
     const hLabel = formatHandicapRankingCell(p);
-    if (!byKey.has(gKey)) {
-      byKey.set(gKey, { label, list: [] });
+    if (!byKey.has(tier.groupKey)) {
+      byKey.set(tier.groupKey, { label: tier.label, list: [] });
     }
-    byKey.get(gKey)!.list.push({ ...p, sort, hLabel });
+    byKey.get(tier.groupKey)!.list.push({ ...p, sort, hLabel });
   }
 
   function tiebreak(a: PlayerRankingRow, b: PlayerRankingRow): number {

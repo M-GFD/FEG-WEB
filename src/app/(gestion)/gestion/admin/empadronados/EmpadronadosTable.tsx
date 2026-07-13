@@ -21,46 +21,82 @@ function uniqueSorted(values: string[]): string[] {
   );
 }
 
+/** Extrae año desde fecha DD/MM/YYYY o ISO. */
+function birthYearFrom(fechaNacimiento: string): string {
+  const s = fechaNacimiento.trim();
+  const dmy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (dmy) return dmy[3];
+  const iso = s.match(/^(\d{4})/);
+  return iso?.[1] ?? "";
+}
+
 export function EmpadronadosTable({ rows }: Props) {
   const [search, setSearch] = useState("");
   const [club, setClub] = useState("");
   const [categoria, setCategoria] = useState("");
+  const [anioNacimiento, setAnioNacimiento] = useState("");
+  const [handicap, setHandicap] = useState("");
 
   const clubs = useMemo(() => uniqueSorted(rows.map((r) => r.club)), [rows]);
   const categorias = useMemo(
     () => uniqueSorted(rows.map((r) => r.categoria)),
     [rows]
   );
+  const aniosNacimiento = useMemo(() => {
+    const years = rows
+      .map((r) => birthYearFrom(r.fechaNacimiento))
+      .filter(Boolean);
+    return [...new Set(years)].sort((a, b) => Number(b) - Number(a));
+  }, [rows]);
 
   const filtered = useMemo(() => {
     const q = normalize(search);
     return rows.filter((r) => {
       if (club && r.club !== club) return false;
       if (categoria && r.categoria !== categoria) return false;
+      if (anioNacimiento && birthYearFrom(r.fechaNacimiento) !== anioNacimiento) {
+        return false;
+      }
+      if (handicap) {
+        const h = (r.tieneHandicap || "").trim();
+        if (handicap === "Si" && h !== "Sí") return false;
+        if (handicap === "No" && h !== "No") return false;
+      }
       if (q) {
         const fullName = normalize(`${r.apellido} ${r.nombre} ${r.nombre} ${r.apellido}`);
         if (!fullName.includes(q)) return false;
       }
       return true;
     });
-  }, [rows, search, club, categoria]);
+  }, [rows, search, club, categoria, anioNacimiento, handicap]);
 
-  const hasFilters = Boolean(search || club || categoria);
+  const hasFilters = Boolean(search || club || categoria || anioNacimiento || handicap);
+
+  function clearFilters() {
+    setSearch("");
+    setClub("");
+    setCategoria("");
+    setAnioNacimiento("");
+    setHandicap("");
+  }
+
+  const selectClass =
+    "w-full rounded-xl border border-[var(--feg-green)]/20 bg-white px-4 py-2.5 text-sm text-[var(--feg-ink)] outline-none transition focus:border-[var(--feg-green-2)] focus:ring-2 focus:ring-[var(--feg-green)]/15";
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_auto_auto_auto]">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <input
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar por nombre o apellido…"
-          className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-white px-4 py-2.5 text-sm text-[var(--feg-ink)] outline-none transition focus:border-[var(--feg-green-2)] focus:ring-2 focus:ring-[var(--feg-green)]/15"
+          className={`sm:col-span-2 xl:col-span-2 ${selectClass}`}
         />
         <select
           value={club}
           onChange={(e) => setClub(e.target.value)}
-          className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-white px-4 py-2.5 text-sm text-[var(--feg-ink)] outline-none transition focus:border-[var(--feg-green-2)] focus:ring-2 focus:ring-[var(--feg-green)]/15"
+          className={selectClass}
         >
           <option value="">Todos los clubes</option>
           {clubs.map((c) => (
@@ -72,7 +108,7 @@ export function EmpadronadosTable({ rows }: Props) {
         <select
           value={categoria}
           onChange={(e) => setCategoria(e.target.value)}
-          className="w-full rounded-xl border border-[var(--feg-green)]/20 bg-white px-4 py-2.5 text-sm text-[var(--feg-ink)] outline-none transition focus:border-[var(--feg-green-2)] focus:ring-2 focus:ring-[var(--feg-green)]/15"
+          className={selectClass}
         >
           <option value="">Todas las categorías</option>
           {categorias.map((c) => (
@@ -81,20 +117,42 @@ export function EmpadronadosTable({ rows }: Props) {
             </option>
           ))}
         </select>
-        {hasFilters ? (
+        <select
+          value={anioNacimiento}
+          onChange={(e) => setAnioNacimiento(e.target.value)}
+          className={selectClass}
+          aria-label="Filtrar por año de nacimiento"
+        >
+          <option value="">Año de nacimiento</option>
+          {aniosNacimiento.map((y) => (
+            <option key={y} value={y}>
+              {y}
+            </option>
+          ))}
+        </select>
+        <select
+          value={handicap}
+          onChange={(e) => setHandicap(e.target.value)}
+          className={selectClass}
+          aria-label="Filtrar por handicap"
+        >
+          <option value="">Handicap (todos)</option>
+          <option value="Si">Con handicap</option>
+          <option value="No">Sin handicap</option>
+        </select>
+      </div>
+
+      {hasFilters ? (
+        <div className="flex justify-end">
           <button
             type="button"
-            onClick={() => {
-              setSearch("");
-              setClub("");
-              setCategoria("");
-            }}
+            onClick={clearFilters}
             className="rounded-xl border border-[var(--feg-green)]/25 bg-white px-4 py-2.5 text-sm font-semibold text-[var(--feg-green-2)] transition hover:bg-[var(--feg-bg)]"
           >
-            Limpiar
+            Limpiar filtros
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       {filtered.length === 0 ? (
         <p className="rounded-2xl border-2 border-dashed border-[var(--feg-green)]/25 bg-white/80 p-8 text-center text-[var(--feg-green)]">
@@ -102,15 +160,33 @@ export function EmpadronadosTable({ rows }: Props) {
         </p>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-sm">
-          <table className="w-full min-w-[760px] text-left text-sm">
+          <table className="w-full min-w-[920px] text-left text-sm">
             <thead className="bg-[var(--feg-green-soft)] text-white">
               <tr>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Jugador</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Categoría</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">DNI</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Club</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Localidad</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Fecha</th>
+                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
+                  Jugador
+                </th>
+                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
+                  Categoría
+                </th>
+                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
+                  Nacimiento
+                </th>
+                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
+                  Handicap
+                </th>
+                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
+                  DNI
+                </th>
+                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
+                  Club
+                </th>
+                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
+                  Localidad
+                </th>
+                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
+                  Registro
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -121,13 +197,30 @@ export function EmpadronadosTable({ rows }: Props) {
                 >
                   <td className="px-4 py-3 font-medium text-[var(--feg-ink)]">
                     {r.apellido}, {r.nombre}
-                    <span className="ml-1 text-xs text-[var(--feg-green)]">({r.sexo})</span>
+                    <span className="ml-1 text-xs text-[var(--feg-green)]">
+                      ({r.sexo})
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-[var(--feg-ink)]">{r.categoria}</td>
+                  <td className="px-4 py-3 tabular-nums text-[var(--feg-ink)]">
+                    {r.fechaNacimiento || "—"}
+                  </td>
+                  <td className="px-4 py-3 text-[var(--feg-ink)]">
+                    {r.tieneHandicap || "—"}
+                    {r.tieneHandicap === "Sí" && r.matricula ? (
+                      <span className="ml-1 text-xs text-[var(--feg-green)]">
+                        ({r.matricula})
+                      </span>
+                    ) : null}
+                  </td>
                   <td className="px-4 py-3 text-[var(--feg-green)]">{r.dni || "—"}</td>
                   <td className="px-4 py-3 text-[var(--feg-green)]">{r.club}</td>
-                  <td className="px-4 py-3 text-[var(--feg-green)]">{r.localidad || "—"}</td>
-                  <td className="px-4 py-3 text-xs text-[var(--feg-green)]">{r.fechaRegistro}</td>
+                  <td className="px-4 py-3 text-[var(--feg-green)]">
+                    {r.localidad || "—"}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-[var(--feg-green)]">
+                    {r.fechaRegistro}
+                  </td>
                 </tr>
               ))}
             </tbody>

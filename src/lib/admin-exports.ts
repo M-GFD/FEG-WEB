@@ -275,7 +275,7 @@ export async function fetchEmpadronadosRows(
       departamento: "",
       localidad: "",
       escuela: "",
-      tieneHandicap: row.matricula ? "Sí" : "",
+      tieneHandicap: row.matricula ? "Sí" : "No",
       matricula: row.matricula ?? "",
       profesores: "",
       tutor1Nombre: "",

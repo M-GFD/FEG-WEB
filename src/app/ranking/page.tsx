@@ -6,6 +6,7 @@ import { RankingCategoryPager } from "@/components/ranking/RankingCategoryPager"
 import { getHandicapRankingsByCategory } from "@/lib/data";
 import { parseAudienceSegment } from "@/lib/content-audience";
 import { getInitialHandicapRankingCategoryIndex } from "@/lib/handicap-ranking";
+import { getInitialYouthRankingCategoryIndex } from "@/lib/youth-categories";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +21,7 @@ export default async function RankingPage({ searchParams }: Props) {
   const categories = await getHandicapRankingsByCategory({ audience: segment });
   const initialCategoryIndex =
     segment === "menores"
-      ? Math.max(
-          0,
-          categories.findIndex((c) => c.groupKey === "juveniles")
-        )
+      ? getInitialYouthRankingCategoryIndex(categories)
       : getInitialHandicapRankingCategoryIndex(categories);
   const totalJugadores = categories.reduce((n, c) => n + c.rows.length, 0);
 

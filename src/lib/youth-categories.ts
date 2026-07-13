@@ -1,8 +1,7 @@
 /**
- * Categorías menores según documentación FGL/AAG:
- * - ranking-juveniles-prejuveniles-2026.md
- * - empadronamiento-fgl-2026.md
- * - categorias_alcanzadas_FEG.md
+ * Categorías de rankings Menores según reglamentos FEG/FGL 2026:
+ * - Reglamento Junior FEG §2: Albatros, Eagles, Birdies, Principiantes
+ * - Reglamento Prejuveniles/Juveniles FGL §II: Juveniles (M18), Prejuveniles (M15), Sub 23
  */
 
 export type YouthCategoryTier = {
@@ -13,22 +12,18 @@ export type YouthCategoryTier = {
   order: number;
 };
 
-/** Birdies 2017–2019, Eagles 2015–2016, Albatros 2013–2014 (categorias_alcanzadas_FEG). */
+/**
+ * Orden: Sub 23 → Juveniles (M18) → Prejuveniles (M15) → Junior (Albatros…Principiantes).
+ */
 export const YOUTH_CATEGORY_TIERS: YouthCategoryTier[] = [
-  { groupKey: "juveniles", label: "Juveniles", order: 0 },
-  { groupKey: "prejuveniles", label: "Prejuveniles", order: 1 },
-  { groupKey: "junior", label: "Junior", order: 2 },
-  { groupKey: "cab-14", label: "CAB-14", order: 3 },
-  { groupKey: "cab-18", label: "CAB-18", order: 4 },
-  { groupKey: "dam-14", label: "DAM-14", order: 5 },
-  { groupKey: "dam-18", label: "DAM-18", order: 6 },
-  { groupKey: "albatros", label: "Albatros", order: 7 },
-  { groupKey: "aguila", label: "Águila", order: 8 },
-  { groupKey: "birdie", label: "Birdie", order: 9 },
-  { groupKey: "principiante", label: "Principiante", order: 10 },
+  { groupKey: "sub23", label: "Sub 23", order: 0 },
+  { groupKey: "juveniles_m18", label: "Juveniles (M18)", order: 1 },
+  { groupKey: "prejuveniles_m15", label: "Prejuveniles (M15)", order: 2 },
+  { groupKey: "albatros", label: "Albatros", order: 3 },
+  { groupKey: "eagles", label: "Eagles", order: 4 },
+  { groupKey: "birdies", label: "Birdies", order: 5 },
+  { groupKey: "principiantes", label: "Principiantes", order: 6 },
 ];
-
-const YOUTH_LEGACY_BAND_KEYS = new Set(["cab-14", "cab-18", "dam-14", "dam-18"]);
 
 function normalizeCategory(raw: string | null | undefined): string {
   return String(raw ?? "")
@@ -44,14 +39,17 @@ function tierByGroupKey(groupKey: string): YouthCategoryTier | undefined {
   return YOUTH_CATEGORY_TIERS.find((t) => t.groupKey === groupKey);
 }
 
-/** Bandas CAB/DAM juveniles (p. ej. CAB-14, DAM 18, CAB14). */
+/**
+ * Bandas legacy CAB/DAM 14|18 → categorías oficiales M15/M18.
+ * CAB-14 / DAM-14 ≈ Prejuveniles; CAB-18 / DAM-18 ≈ Juveniles.
+ */
 function resolveLegacyYouthBand(k: string): YouthCategoryTier | null {
-  if (YOUTH_LEGACY_BAND_KEYS.has(k)) return tierByGroupKey(k) ?? null;
   const m = k.match(/^(cab|dam)[-\s]?(\d+)$/);
   if (!m) return null;
-  const key = `${m[1]}-${m[2]}`;
-  if (!YOUTH_LEGACY_BAND_KEYS.has(key)) return null;
-  return tierByGroupKey(key) ?? null;
+  const age = Number(m[2]);
+  if (age === 18) return tierByGroupKey("juveniles_m18") ?? null;
+  if (age === 14 || age === 15) return tierByGroupKey("prejuveniles_m15") ?? null;
+  return null;
 }
 
 /** Resuelve tier menores a partir del texto de categoría del jugador en DB. */
@@ -64,13 +62,36 @@ export function resolveYouthCategoryTier(
   const legacyBand = resolveLegacyYouthBand(k);
   if (legacyBand) return legacyBand;
 
-  if (k === "junior") return YOUTH_CATEGORY_TIERS[2];
-  if (k.startsWith("pre") && k.includes("juvenil")) return YOUTH_CATEGORY_TIERS[1];
-  if (k.startsWith("juvenil")) return YOUTH_CATEGORY_TIERS[0];
+  if (k.includes("sub 23") || k === "sub23" || k.includes("sub-23")) {
+    return tierByGroupKey("sub23") ?? null;
+  }
+
+  if (k.includes("m18") || (k.includes("juvenil") && !k.includes("pre"))) {
+    return tierByGroupKey("juveniles_m18") ?? null;
+  }
+
+  if (
+    k.includes("m15") ||
+    (k.includes("pre") && k.includes("juvenil")) ||
+    k === "pre juveniles" ||
+    k === "pre-juveniles"
+  ) {
+    return tierByGroupKey("prejuveniles_m15") ?? null;
+  }
+
   if (k.includes("albatros")) return tierByGroupKey("albatros") ?? null;
-  if (k.includes("aguila")) return tierByGroupKey("aguila") ?? null;
-  if (k.includes("birdie")) return tierByGroupKey("birdie") ?? null;
-  if (k.includes("principiante")) return tierByGroupKey("principiante") ?? null;
+
+  // Reglamento Junior: EAGLES; padrón/empadronamiento suele usar Águila / Aguila.
+  if (k.includes("eagle") || k.includes("aguila")) {
+    return tierByGroupKey("eagles") ?? null;
+  }
+
+  if (k.includes("birdie")) return tierByGroupKey("birdies") ?? null;
+
+  if (k.includes("principiante")) return tierByGroupKey("principiantes") ?? null;
+
+  // "Junior" genérico sin subcategoría → no agrupar (evitar mezclar edades).
+  if (k === "junior" || k === "juniors") return null;
 
   return null;
 }
@@ -79,38 +100,16 @@ export function isYouthPlayerCategory(raw: string | null | undefined): boolean {
   return resolveYouthCategoryTier(raw) !== null;
 }
 
-/** Mayores: no menores; incluye Sub 23, senior, damas, bandas CAB, enum Prisma, etc. */
+/** Mayores: categorías del Ranking de Mayores FGL (no menores / Sub 23 / Junior). */
 export function isMayoresPlayerCategory(raw: string | null | undefined): boolean {
   const k = normalizeCategory(raw);
   if (!k) return false;
   if (isYouthPlayerCategory(raw)) return false;
-  if (k.includes("sub 23") || k.includes("sub23")) return true;
-  if (k.includes("senior") || k.includes("damas") || k.includes("dama")) return true;
-  if (YOUTH_LEGACY_BAND_KEYS.has(k)) return false;
-  if (k.startsWith("cab") || k.includes("caballero")) return true;
-  if (
-    k.includes("scratch") ||
-    k.includes("hasta_") ||
-    k.includes("hasta ") ||
-    /^caballeros_/.test(k)
-  ) {
-    return true;
-  }
-  // Categorías enum Prisma en minúsculas con guiones bajos
-  const prismaMayores = [
-    "damas_scratch",
-    "damas_hasta_30",
-    "damas_31_59",
-    "senior_damas_50",
-    "caballeros_scratch",
-    "caballeros_hasta_9",
-    "caballeros_10_16",
-    "caballeros_17_24",
-    "caballeros_25_54",
-    "senior_caballeros_55",
-  ];
-  if (prismaMayores.includes(k.replace(/-/g, "_"))) return true;
-  return true; // resto no juvenil con categoría cargada
+  if (k.includes("sub 23") || k.includes("sub23") || k.includes("sub-23")) return false;
+  if (k.includes("junior") || k.includes("albatros") || k.includes("birdie")) return false;
+  if (k.includes("aguila") || k.includes("eagle") || k.includes("principiante")) return false;
+  if (k.includes("juvenil")) return false;
+  return true;
 }
 
 export function compareYouthCategoryBlocks(
@@ -123,4 +122,12 @@ export function compareYouthCategoryBlocks(
   const tb = tier(b.groupKey);
   if (ta !== tb) return ta - tb;
   return a.label.localeCompare(b.label, "es", { sensitivity: "base" });
+}
+
+/** Índice inicial del paginador menores: Juveniles (M18) si hay filas. */
+export function getInitialYouthRankingCategoryIndex(
+  sorted: { groupKey: string }[]
+): number {
+  const i = sorted.findIndex((c) => c.groupKey === "juveniles_m18");
+  return i >= 0 ? i : 0;
 }
