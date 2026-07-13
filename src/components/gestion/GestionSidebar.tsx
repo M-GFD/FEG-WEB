@@ -45,14 +45,14 @@ export function GestionSidebar({ role }: { role: Role }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-full shrink-0 flex-col border-b border-white/10 bg-[var(--feg-green-soft)] text-white md:w-64 md:border-b-0 md:border-r md:border-white/10">
-      <div className="border-b border-white/10 p-5">
+    <aside className="flex w-full shrink-0 flex-col border-b border-white/10 bg-[var(--feg-green-soft)] text-white md:sticky md:top-0 md:h-dvh md:max-h-dvh md:w-64 md:shrink-0 md:self-start md:overflow-hidden md:border-b-0 md:border-r md:border-white/10">
+      <div className="shrink-0 border-b border-white/10 p-5">
         <p className="font-heading text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[var(--feg-yellow)]">
           Gestión FEG
         </p>
         <p className="mt-1 text-sm text-white/70">Panel interno</p>
       </div>
-      <nav className="flex flex-1 flex-col gap-1 px-2 py-4">
+      <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain px-2 py-4">
         {links.map((item) => {
           const active = linkActive(pathname, item.href);
           return (
@@ -70,7 +70,7 @@ export function GestionSidebar({ role }: { role: Role }) {
           );
         })}
       </nav>
-      <div className="mt-auto space-y-2 border-t border-white/10 p-4">
+      <div className="mt-auto shrink-0 space-y-2 border-t border-white/10 p-4">
         <Link
           href="/"
           className="block w-full rounded-xl border border-white/20 bg-white/5 px-3 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-white/10"

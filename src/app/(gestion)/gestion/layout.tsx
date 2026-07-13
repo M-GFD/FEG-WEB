@@ -19,10 +19,10 @@ export default async function GestionLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
-      <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col md:flex-row">
+    <div className="min-h-dvh bg-[var(--feg-bg)] text-[var(--feg-ink)]">
+      <div className="mx-auto flex min-h-dvh max-w-[1600px] flex-col md:flex-row md:items-stretch">
         <GestionSidebar role={session.user.role} />
-        <main className="flex-1 px-4 py-6 md:px-8 lg:py-8">{children}</main>
+        <main className="min-w-0 flex-1 px-4 py-6 md:px-8 lg:py-8">{children}</main>
       </div>
     </div>
   );
