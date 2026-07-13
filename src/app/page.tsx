@@ -14,7 +14,6 @@ import type { AppLocale } from "@/i18n/routing";
 export default async function HomePage() {
   const t = await getTranslations("home");
   const tCommon = await getTranslations("common");
-  const tNav = await getTranslations("nav");
   const locale = (await getLocale()) as AppLocale;
   const news = await getNews({ locale });
 
@@ -87,7 +86,7 @@ export default async function HomePage() {
                 href="/empadronamiento-menores"
                 className="rounded-full bg-[#f3e12b] px-3 py-1.5 text-xs font-semibold text-[#146638] transition hover:brightness-95"
               >
-                {tNav("enrollment")}
+                {t("enrollmentBannerCta")}
               </Link>
             </div>
           </RevealOnScroll>
