@@ -10,6 +10,7 @@ type HeaderTheme = "dark" | "light";
 type Props = {
   theme?: HeaderTheme;
   className?: string;
+  headerVisible?: boolean;
 };
 
 const AUTO_READ_MS = 3000;
@@ -28,7 +29,11 @@ function formatShortDate(iso: string) {
   }
 }
 
-export function HeaderNotifications({ theme = "light", className = "" }: Props) {
+export function HeaderNotifications({
+  theme = "light",
+  className = "",
+  headerVisible = true,
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const { items, loading, load, markAsReadByIds } = useSiteNotifications();
@@ -74,6 +79,10 @@ export function HeaderNotifications({ theme = "light", className = "" }: Props) 
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!headerVisible) setOpen(false);
+  }, [headerVisible]);
 
   useEffect(() => {
     if (!open) return;

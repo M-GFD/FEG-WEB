@@ -14,6 +14,38 @@ import type { NavDropdownItem } from "@/lib/nav-dropdowns";
 /** Margen horizontal del header (padding del contenedor + reserva). */
 const HEADER_HORIZONTAL_RESERVE_PX = 40;
 
+const HEADER_SCROLL_DELTA_PX = 8;
+const HEADER_SCROLL_TOP_ALWAYS_VISIBLE_PX = 48;
+
+function useHeaderScrollVisibility() {
+  const [visible, setVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
+
+  useEffect(() => {
+    lastScrollYRef.current = window.scrollY;
+
+    function onScroll() {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollYRef.current;
+
+      if (currentY <= HEADER_SCROLL_TOP_ALWAYS_VISIBLE_PX) {
+        setVisible(true);
+      } else if (delta > HEADER_SCROLL_DELTA_PX) {
+        setVisible(false);
+      } else if (delta < -HEADER_SCROLL_DELTA_PX) {
+        setVisible(true);
+      }
+
+      lastScrollYRef.current = currentY;
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return visible;
+}
+
 type Props = {
   primaryLinks: readonly HeaderNavLink[];
   navDropdownItems: NavDropdownItem[];
@@ -25,6 +57,7 @@ type Props = {
  */
 export function HeaderBar({ primaryLinks, navDropdownItems }: Props) {
   const [useMobileLayout, setUseMobileLayout] = useState(true);
+  const headerVisible = useHeaderScrollVisibility();
   const measureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,7 +81,11 @@ export function HeaderBar({ primaryLinks, navDropdownItems }: Props) {
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-0 z-50 bg-transparent pt-4">
+      <header
+        className={`fixed left-0 right-0 top-0 z-50 bg-transparent pt-4 transition-transform duration-300 ease-out will-change-transform ${
+          headerVisible ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
         <div className="relative mx-auto min-h-16 max-w-7xl px-6 md:max-w-none md:px-4 md:py-2 lg:px-6">
           <div
             ref={measureRef}
@@ -81,17 +118,20 @@ export function HeaderBar({ primaryLinks, navDropdownItems }: Props) {
               />
               <HeaderNotifications
                 theme="light"
+                headerVisible={headerVisible}
                 className="flex h-11 w-full max-w-[2.75rem] justify-center justify-self-center"
               />
               <MobileHeaderMenu
                 primaryLinks={primaryLinks}
                 navDropdownItems={navDropdownItems}
+                headerVisible={headerVisible}
               />
             </div>
           ) : (
             <HeaderDesktopRail
               primaryLinks={[...primaryLinks]}
               navDropdownItems={navDropdownItems}
+              headerVisible={headerVisible}
             />
           )}
         </div>

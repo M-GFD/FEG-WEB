@@ -16,10 +16,11 @@ type HeaderTheme = "dark" | "light";
 type Props = {
   primaryLinks: HeaderNavLink[];
   navDropdownItems: NavDropdownItem[];
+  headerVisible?: boolean;
 };
 
 /** Desktop: NavBar centrada en el header; solo se renderiza si hay espacio (ver HeaderBar). */
-export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
+export function HeaderDesktopRail({ primaryLinks, navDropdownItems, headerVisible = true }: Props) {
   const pathname = usePathname();
   const tNav = useTranslations("nav");
   const [theme, setTheme] = useState<HeaderTheme>("light");
@@ -87,7 +88,7 @@ export function HeaderDesktopRail({ primaryLinks, navDropdownItems }: Props) {
 
       <div className="relative z-20 ml-auto flex shrink-0 items-center justify-end gap-2">
         <LocaleSwitcher headerContrast={theme} />
-        <HeaderNotifications theme={theme} className="shrink-0" />
+        <HeaderNotifications theme={theme} headerVisible={headerVisible} className="shrink-0" />
         <div className="w-[13.75rem] shrink-0">
           <NavSearch variant="desktop" className="w-full" />
         </div>

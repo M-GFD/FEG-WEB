@@ -12,11 +12,16 @@ export type MobileNavLink = { href: string; label: string };
 type Props = {
   primaryLinks: readonly MobileNavLink[];
   navDropdownItems: NavDropdownItem[];
+  headerVisible?: boolean;
 };
 
 const PANEL_TRANSITION_MS = 300;
 
-export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
+export function MobileHeaderMenu({
+  primaryLinks,
+  navDropdownItems,
+  headerVisible = true,
+}: Props) {
   const tNav = useTranslations("nav");
   const [open, setOpen] = useState(false);
   const [renderPanel, setRenderPanel] = useState(false);
@@ -44,6 +49,10 @@ export function MobileHeaderMenu({ primaryLinks, navDropdownItems }: Props) {
     const timer = window.setTimeout(() => setRenderPanel(false), PANEL_TRANSITION_MS);
     return () => window.clearTimeout(timer);
   }, [open]);
+
+  useEffect(() => {
+    if (!headerVisible) close();
+  }, [headerVisible, close]);
 
   useEffect(() => {
     if (!open) return;
