@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { EmpadronadoExportRow } from "@/lib/admin-exports";
+import { EmpadronadoEditModal } from "./EmpadronadoEditModal";
 
 type Props = {
   rows: EmpadronadoExportRow[];
@@ -36,6 +37,7 @@ export function EmpadronadosTable({ rows }: Props) {
   const [categoria, setCategoria] = useState("");
   const [anioNacimiento, setAnioNacimiento] = useState("");
   const [handicap, setHandicap] = useState("");
+  const [editing, setEditing] = useState<EmpadronadoExportRow | null>(null);
 
   const clubs = useMemo(() => uniqueSorted(rows.map((r) => r.club)), [rows]);
   const categorias = useMemo(
@@ -160,7 +162,7 @@ export function EmpadronadosTable({ rows }: Props) {
         </p>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-sm">
-          <table className="w-full min-w-[920px] text-left text-sm">
+          <table className="w-full min-w-[980px] text-left text-sm">
             <thead className="bg-[var(--feg-green-soft)] text-white">
               <tr>
                 <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
@@ -187,12 +189,15 @@ export function EmpadronadosTable({ rows }: Props) {
                 <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
                   Registro
                 </th>
+                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((r, i) => (
+              {filtered.map((r) => (
                 <tr
-                  key={`${r.dni}-${i}`}
+                  key={`${r.source}-${r.recordId}`}
                   className="border-t border-[var(--feg-green)]/10 hover:bg-[var(--feg-bg)]/60"
                 >
                   <td className="px-4 py-3 font-medium text-[var(--feg-ink)]">
@@ -221,6 +226,15 @@ export function EmpadronadosTable({ rows }: Props) {
                   <td className="px-4 py-3 text-xs text-[var(--feg-green)]">
                     {r.fechaRegistro}
                   </td>
+                  <td className="px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() => setEditing(r)}
+                      className="rounded-full border border-[var(--feg-green)]/20 bg-white px-3 py-1.5 text-xs font-semibold text-[var(--feg-green-2)] transition hover:bg-[var(--feg-bg)]"
+                    >
+                      Editar
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -232,6 +246,10 @@ export function EmpadronadosTable({ rows }: Props) {
           </p>
         </div>
       )}
+
+      {editing ? (
+        <EmpadronadoEditModal row={editing} onClose={() => setEditing(null)} />
+      ) : null}
     </div>
   );
 }

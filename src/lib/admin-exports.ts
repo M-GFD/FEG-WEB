@@ -83,7 +83,13 @@ function formatDateTime(value: string | null | undefined): string {
 
 // ----------------- Empadronados -----------------
 
+/** Origen del registro en el padrón unificado (no se exporta a Excel). */
+export type EmpadronadoSource = "enrollment" | "player";
+
 export type EmpadronadoExportRow = {
+  /** ID en YouthEnrollment o Player según `source`. */
+  recordId: string;
+  source: EmpadronadoSource;
   apellido: string;
   nombre: string;
   sexo: string;
@@ -198,6 +204,8 @@ export async function fetchEmpadronadosRows(
     if (row.dniHash) seenDniHash.add(row.dniHash);
     const health = row.healthData as EmpadronamientoHealthData | null;
     rows.push({
+      recordId: row.id,
+      source: "enrollment",
       apellido: row.lastName ?? "",
       nombre: row.firstName ?? "",
       sexo: row.gender ?? "",
@@ -235,7 +243,7 @@ export async function fetchEmpadronadosRows(
   // 2) Padrón ya cargado en la tabla Player (importado / sincronizado).
   const { data: players, error: playerError } = await supabase
     .from("Player")
-    .select("firstName,lastName,gender,birthDate,birthYear,category,matricula,dniEnc,dniHash,createdAt,club:Club(name)")
+    .select("id,firstName,lastName,gender,birthDate,birthYear,category,matricula,dniEnc,dniHash,createdAt,club:Club(name)")
     .like("id", "player_youth_%")
     .order("lastName", { ascending: true });
 
@@ -259,6 +267,8 @@ export async function fetchEmpadronadosRows(
       (birthYear ? String(new Date().getFullYear() - birthYear) : "");
 
     rows.push({
+      recordId: row.id,
+      source: "player",
       apellido: row.lastName ?? "",
       nombre: row.firstName ?? "",
       sexo: normalizeGender(row.gender),
