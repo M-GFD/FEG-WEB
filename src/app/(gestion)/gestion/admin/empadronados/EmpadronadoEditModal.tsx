@@ -44,6 +44,7 @@ type FormState = {
   localidad: string;
   escuela: string;
   tieneHandicap: "Sí" | "No" | "";
+  handicap: string;
   matricula: string;
   profesores: string;
   tutor1Nombre: string;
@@ -81,6 +82,7 @@ function rowToForm(row: EmpadronadoExportRow): FormState {
     localidad: row.localidad,
     escuela: row.escuela,
     tieneHandicap: handicap,
+    handicap: row.handicap ?? "",
     matricula: row.matricula,
     profesores: row.profesores,
     tutor1Nombre: row.tutor1Nombre,
@@ -304,9 +306,11 @@ export function EmpadronadoEditModal({ row, onClose }: Props) {
                 <select
                   id="tieneHandicap"
                   value={form.tieneHandicap}
-                  onChange={(e) =>
-                    set("tieneHandicap", e.target.value as FormState["tieneHandicap"])
-                  }
+                  onChange={(e) => {
+                    const next = e.target.value as FormState["tieneHandicap"];
+                    set("tieneHandicap", next);
+                    if (next !== "Sí") set("handicap", "");
+                  }}
                   className={fieldClass}
                 >
                   <option value="">—</option>
@@ -314,6 +318,23 @@ export function EmpadronadoEditModal({ row, onClose }: Props) {
                   <option value="No">No</option>
                 </select>
               </Field>
+              {form.tieneHandicap === "Sí" ? (
+                <Field id="handicap" label="Handicap">
+                  <input
+                    id="handicap"
+                    type="number"
+                    inputMode="decimal"
+                    step="any"
+                    min={0}
+                    max={54}
+                    required
+                    value={form.handicap}
+                    onChange={(e) => set("handicap", e.target.value)}
+                    className={fieldClass}
+                    placeholder="Ej: 12 o 12.4"
+                  />
+                </Field>
+              ) : null}
               <Field id="matricula" label="Matrícula">
                 <input
                   id="matricula"

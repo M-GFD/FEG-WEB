@@ -30,6 +30,20 @@ function safeDecrypt(value: string | null | undefined): string {
   }
 }
 
+function formatHandicapValue(
+  handicap: number | null | undefined,
+  handicapIndex: number | null | undefined
+): string {
+  const value =
+    typeof handicapIndex === "number" && !Number.isNaN(handicapIndex)
+      ? handicapIndex
+      : typeof handicap === "number" && !Number.isNaN(handicap) && handicap !== 0
+        ? handicap
+        : null;
+  if (value == null) return "";
+  return Number.isInteger(value) ? String(value) : String(Math.round(value * 10) / 10);
+}
+
 function yesNo(value: boolean | null | undefined): string {
   if (value === true) return "Sí";
   if (value === false) return "No";
@@ -107,6 +121,8 @@ export type EmpadronadoExportRow = {
   localidad: string;
   escuela: string;
   tieneHandicap: string;
+  /** Valor numérico del handicap (Index); vacío si no aplica. */
+  handicap: string;
   matricula: string;
   profesores: string;
   tutor1Nombre: string;
@@ -141,6 +157,7 @@ export const EMPADRONADOS_COLUMNS: ExportColumn<EmpadronadoExportRow>[] = [
   { key: "localidad", header: "Localidad", width: 16 },
   { key: "escuela", header: "Escuela", width: 20 },
   { key: "tieneHandicap", header: "Tiene handicap", width: 12 },
+  { key: "handicap", header: "Handicap", width: 10 },
   { key: "matricula", header: "Matrícula", width: 12 },
   { key: "profesores", header: "Profesores", width: 24 },
   { key: "tutor1Nombre", header: "Tutor 1", width: 20 },
@@ -189,6 +206,21 @@ export async function fetchEmpadronadosRows(
   const seenDniHash = new Set<string>();
   const rows: EmpadronadoExportRow[] = [];
 
+  // Handicaps viven en Player; se usan para enriquecer filas de YouthEnrollment.
+  const handicapByDniHash = new Map<string, string>();
+  const { data: youthPlayersForHcp } = await supabase
+    .from("Player")
+    .select("dniHash,handicap,handicapIndex")
+    .like("id", "player_youth_%");
+  for (const p of youthPlayersForHcp ?? []) {
+    const hash = p.dniHash as string | null;
+    if (!hash) continue;
+    handicapByDniHash.set(
+      hash,
+      formatHandicapValue(p.handicap, p.handicapIndex)
+    );
+  }
+
   // 1) Empadronamientos cargados por el formulario web (datos completos).
   const { data: enrollments, error } = await supabase
     .from("YouthEnrollment")
@@ -223,6 +255,7 @@ export async function fetchEmpadronadosRows(
       localidad: row.locality ?? "",
       escuela: row.school ?? "",
       tieneHandicap: yesNo(row.hasHandicap),
+      handicap: row.dniHash ? handicapByDniHash.get(row.dniHash) ?? "" : "",
       matricula: row.matricula ?? "",
       profesores: professorsSummary(row.professors, row.professorOther),
       tutor1Nombre: row.tutor1Name ?? "",
@@ -243,7 +276,9 @@ export async function fetchEmpadronadosRows(
   // 2) Padrón ya cargado en la tabla Player (importado / sincronizado).
   const { data: players, error: playerError } = await supabase
     .from("Player")
-    .select("id,firstName,lastName,gender,birthDate,birthYear,category,matricula,dniEnc,dniHash,createdAt,club:Club(name)")
+    .select(
+      "id,firstName,lastName,gender,birthDate,birthYear,category,matricula,handicap,handicapIndex,dniEnc,dniHash,createdAt,club:Club(name)"
+    )
     .like("id", "player_youth_%")
     .order("lastName", { ascending: true });
 
@@ -265,6 +300,7 @@ export async function fetchEmpadronadosRows(
     const edad =
       dynamicAge(row.birthDate) ||
       (birthYear ? String(new Date().getFullYear() - birthYear) : "");
+    const handicapStr = formatHandicapValue(row.handicap, row.handicapIndex);
 
     rows.push({
       recordId: row.id,
@@ -285,7 +321,8 @@ export async function fetchEmpadronadosRows(
       departamento: "",
       localidad: "",
       escuela: "",
-      tieneHandicap: row.matricula ? "Sí" : "No",
+      tieneHandicap: handicapStr || row.matricula ? "Sí" : "No",
+      handicap: handicapStr,
       matricula: row.matricula ?? "",
       profesores: "",
       tutor1Nombre: "",

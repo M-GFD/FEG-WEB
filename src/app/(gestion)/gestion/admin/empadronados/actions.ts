@@ -42,6 +42,7 @@ const updateSchema = z.object({
   localidad: z.string().optional(),
   escuela: z.string().optional(),
   tieneHandicap: z.enum(["Sí", "No", ""]),
+  handicap: z.string().optional(),
   matricula: z.string().optional(),
   profesores: z.string().optional(),
   tutor1Nombre: z.string().optional(),
@@ -100,6 +101,26 @@ function hasHandicapFrom(value: string | undefined): boolean {
   return (value ?? "").trim() === "Sí";
 }
 
+/** Acepta entero o decimal con `.` o `,`. */
+function parseHandicapInput(
+  raw: string | undefined,
+  hasHandicap: boolean
+): { ok: true; value: number | null } | { ok: false; error: string } {
+  if (!hasHandicap) return { ok: true, value: null };
+  const s = (raw ?? "").trim().replace(",", ".");
+  if (!s) {
+    return { ok: false, error: "Indicá el handicap del jugador" };
+  }
+  if (!/^-?\d+(\.\d+)?$/.test(s)) {
+    return { ok: false, error: "El handicap debe ser un número entero o decimal" };
+  }
+  const n = Number(s);
+  if (!Number.isFinite(n) || n < 0 || n > 54) {
+    return { ok: false, error: "El handicap debe estar entre 0 y 54" };
+  }
+  return { ok: true, value: n };
+}
+
 /** YouthEnrollment exige String en varios Enc; vacío → cifrado de marcador. */
 function encRequired(value: string | undefined): string {
   return encryptSensitive((value ?? "").trim() || "-")!;
@@ -156,6 +177,11 @@ export async function updateEmpadronado(
     (computedCategory === "Fuera de rango" ? "Fuera de rango" : computedCategory);
   const hasHandicap = hasHandicapFrom(data.tieneHandicap);
   const matricula = hasHandicap ? data.matricula?.trim() || null : null;
+  const handicapParsed = parseHandicapInput(data.handicap, hasHandicap);
+  if (!handicapParsed.ok) {
+    return { ok: false, error: handicapParsed.error };
+  }
+  const handicapValue = handicapParsed.value;
   const now = new Date().toISOString();
 
   if (data.source === "enrollment") {
@@ -168,6 +194,7 @@ export async function updateEmpadronado(
       category,
       hasHandicap,
       matricula,
+      handicapValue,
       now,
     });
   }
@@ -180,6 +207,7 @@ export async function updateEmpadronado(
     category,
     hasHandicap,
     matricula,
+    handicapValue,
     now,
   });
 }
@@ -193,10 +221,21 @@ async function updateEnrollment(args: {
   category: string;
   hasHandicap: boolean;
   matricula: string | null;
+  handicapValue: number | null;
   now: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
-  const { data, isoBirth, dniCanonical, genderLabel, ageDec31, category, hasHandicap, matricula, now } =
-    args;
+  const {
+    data,
+    isoBirth,
+    dniCanonical,
+    genderLabel,
+    ageDec31,
+    category,
+    hasHandicap,
+    matricula,
+    handicapValue,
+    now,
+  } = args;
   const supabase = getSupabaseAdmin();
   if (!supabase) return { ok: false, error: "Servicio no disponible" };
 
@@ -290,6 +329,7 @@ async function updateEnrollment(args: {
       clubId: clubMatch.id,
       hasHandicap,
       matricula,
+      handicapValue,
     });
   }
 
@@ -305,10 +345,20 @@ async function updatePlayer(args: {
   category: string;
   hasHandicap: boolean;
   matricula: string | null;
+  handicapValue: number | null;
   now: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
-  const { data, isoBirth, dniCanonical, genderLabel, category, hasHandicap, matricula, now } =
-    args;
+  const {
+    data,
+    isoBirth,
+    dniCanonical,
+    genderLabel,
+    category,
+    hasHandicap,
+    matricula,
+    handicapValue,
+    now,
+  } = args;
   const supabase = getSupabaseAdmin();
   if (!supabase) return { ok: false, error: "Servicio no disponible" };
 
@@ -337,7 +387,12 @@ async function updatePlayer(args: {
     birthYear,
     category,
     clubId: clubMatch.id,
-    handicap: hasHandicap ? 1 : 0,
+    handicap: hasHandicap
+      ? handicapValue != null
+        ? Math.round(handicapValue)
+        : 1
+      : 0,
+    handicapIndex: hasHandicap ? handicapValue : null,
     matricula,
     dniEnc: encryptSensitive(dniCanonical),
     dniHash: hashDniForLookup(dniCanonical),

@@ -16,6 +16,8 @@ export type SyncPlayerPadronInput = {
   clubId: string;
   hasHandicap: boolean;
   matricula: string | null;
+  /** Handicap Index (entero o decimal). Si no viene y hasHandicap, se usa 1 como marca. */
+  handicapValue?: number | null;
 };
 
 function buildYouthPlayerId(
@@ -64,12 +66,24 @@ export async function upsertPlayerFromYouthEnrollment(
     input.clubId
   );
 
+  const handicapValue =
+    input.hasHandicap &&
+    typeof input.handicapValue === "number" &&
+    !Number.isNaN(input.handicapValue)
+      ? input.handicapValue
+      : null;
+
   const row = {
     id,
     matricula: input.matricula,
     firstName: input.firstName.trim(),
     lastName: input.lastName.trim(),
-    handicap: input.hasHandicap ? 1 : 0,
+    handicap: input.hasHandicap
+      ? handicapValue != null
+        ? Math.round(handicapValue)
+        : 1
+      : 0,
+    handicapIndex: input.hasHandicap ? handicapValue : null,
     category: input.category,
     birthYear,
     birthDate: input.birthDate,

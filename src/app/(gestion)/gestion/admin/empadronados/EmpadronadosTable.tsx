@@ -212,9 +212,14 @@ export function EmpadronadosTable({ rows }: Props) {
                   </td>
                   <td className="px-4 py-3 text-[var(--feg-ink)]">
                     {r.tieneHandicap || "—"}
+                    {r.tieneHandicap === "Sí" && r.handicap ? (
+                      <span className="ml-1 text-xs text-[var(--feg-green)]">
+                        ({r.handicap})
+                      </span>
+                    ) : null}
                     {r.tieneHandicap === "Sí" && r.matricula ? (
                       <span className="ml-1 text-xs text-[var(--feg-green)]">
-                        ({r.matricula})
+                        mat. {r.matricula}
                       </span>
                     ) : null}
                   </td>
