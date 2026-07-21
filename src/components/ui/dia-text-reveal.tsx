@@ -147,12 +147,15 @@ export function DiaTextReveal({
 
   const indexRef = useRef(0);
   const hasPlayedRef = useRef(false);
+  const completedRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const playRef = useRef<() => void>(null!);
   const stopRef = useRef<(() => void) | null>(null);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [measuredWidths, setMeasuredWidths] = useState<number[]>([]);
+  /** Tras el sweep, pintar con color sólido (evita texto gris si el clip queda a medias). */
+  const [settled, setSettled] = useState(false);
 
   const sweepPos = useMotionValue(SWEEP_START);
 
@@ -173,6 +176,8 @@ export function DiaTextReveal({
     const { duration: d, delay: del, repeat: rep, repeatDelay: rd, texts: ts } =
       optsRef.current;
 
+    completedRef.current = false;
+    setSettled(false);
     sweepPos.set(SWEEP_START);
 
     const controls = animate(sweepPos, SWEEP_END, {
@@ -180,6 +185,9 @@ export function DiaTextReveal({
       delay: del,
       ease: sweepEase,
       onComplete() {
+        completedRef.current = true;
+        hasPlayedRef.current = true;
+        setSettled(true);
         if (!rep) return;
         timerRef.current = setTimeout(() => {
           const next = (indexRef.current + 1) % ts.length;
@@ -196,16 +204,24 @@ export function DiaTextReveal({
   useEffect(() => {
     if (prefersReducedMotion) {
       sweepPos.set(SWEEP_END);
+      completedRef.current = true;
+      hasPlayedRef.current = true;
+      setSettled(true);
       return;
     }
     if (startOnView && !isInView) return;
     if (once && hasPlayedRef.current) return;
-    hasPlayedRef.current = true;
+
     playRef.current();
 
     return () => {
       stopRef.current?.();
       clearTimeout(timerRef.current);
+      // Strict Mode corta el effect a mitad: no marcar como reproducido
+      // para que el remount vuelva a animar hasta el blanco final.
+      if (!completedRef.current) {
+        sweepPos.set(SWEEP_END);
+      }
     };
   }, [isInView, startOnView, once, prefersReducedMotion, sweepPos]);
 
@@ -222,22 +238,38 @@ export function DiaTextReveal({
   return (
     <motion.span
       ref={spanRef}
-      className={cn("align-bottom leading-[100%] text-inherit", className)}
-      style={{
-        transform: "translateY(-2px)",
-        color: "transparent",
-        backgroundClip: "text",
-        WebkitBackgroundClip: "text",
-        backgroundSize: "100% 100%",
-        backgroundImage,
-        ...(isMulti && {
-          display: "inline-block",
-          overflow: "hidden",
-          whiteSpace: "nowrap",
-          verticalAlign: "text-center",
-          ...(fixedW != null && { width: fixedW }),
-        }),
-      }}
+      className={cn("align-bottom leading-[100%]", className)}
+      style={
+        settled
+          ? {
+              transform: "translateY(-2px)",
+              color: textColor,
+              WebkitTextFillColor: textColor,
+              ...(isMulti && {
+                display: "inline-block",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                verticalAlign: "text-center",
+                ...(fixedW != null && { width: fixedW }),
+              }),
+            }
+          : {
+              transform: "translateY(-2px)",
+              color: "transparent",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              backgroundSize: "100% 100%",
+              backgroundImage,
+              ...(isMulti && {
+                display: "inline-block",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                verticalAlign: "text-center",
+                ...(fixedW != null && { width: fixedW }),
+              }),
+            }
+      }
       animate={animatedW != null ? { width: animatedW } : undefined}
       transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
       {...props}
