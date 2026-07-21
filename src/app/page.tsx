@@ -7,7 +7,6 @@ import { getGolfPlaceholder } from "@/lib/placeholders";
 import { UpcomingTournamentsTabs } from "@/components/home/UpcomingTournamentsTabs";
 import { HomeScrollHash } from "@/components/home/HomeScrollHash";
 import { HeroNextTournamentCard } from "@/components/home/HeroNextTournamentCard";
-import { HeroHeadline } from "@/components/home/HeroHeadline";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { AppLocale } from "@/i18n/routing";
@@ -42,14 +41,33 @@ export default async function HomePage() {
 
           <div className="relative z-10 flex min-h-0 min-w-0 w-full flex-1 flex-col justify-between">
             <div className="mx-auto w-full max-w-7xl shrink-0 px-4 pb-6 pt-12 sm:px-6 lg:px-8">
-              <HeroHeadline
-                line1={t("heroLine1")}
-                line2={t("heroLine2")}
-                line3={t("heroLine3")}
-                titleDesktop={t("heroTitleDesktop")}
-                titleDesktop2={t("heroTitleDesktop2")}
-                subtitle={t("heroSubtitle")}
-              />
+              <div className="mx-auto max-w-2xl text-center">
+                <RevealOnScroll revealIndex={1} yOffset={24} className="block w-full">
+                  <h1 className="font-heading font-semibold leading-[1.08] text-center text-[#FFFFFF] [text-shadow:0_2px_14px_rgba(0,0,0,0.45),0_1px_4px_rgba(0,0,0,0.55)] max-md:px-0 max-md:tracking-tight sm:leading-[1.06] md:text-balance md:text-[56px] md:leading-[1.05]">
+                    <span className="inline-flex flex-col items-center uppercase md:hidden">
+                      <span className="block whitespace-nowrap text-center text-[clamp(calc(1.81rem+4pt),calc(8vw+4pt),calc(2.71rem+4pt))] max-[380px]:text-[calc(1.75rem+4pt)]">
+                        {t("heroLine1")}
+                      </span>
+                      <span className="block whitespace-nowrap text-center text-[clamp(calc(1.81rem+4pt),calc(8vw+4pt),calc(2.71rem+4pt))] max-[380px]:text-[calc(1.75rem+4pt)]">
+                        {t("heroLine2")}
+                      </span>
+                      <span className="block whitespace-nowrap text-center text-[clamp(calc(1.81rem+4pt),calc(8vw+4pt),calc(2.71rem+4pt))] max-[380px]:text-[calc(1.75rem+4pt)]">
+                        {t("heroLine3")}
+                      </span>
+                    </span>
+                    <span className="hidden md:inline md:text-[56px]">
+                      {t("heroTitleDesktop")}
+                      <br />
+                      {t("heroTitleDesktop2")}
+                    </span>
+                  </h1>
+                </RevealOnScroll>
+                <RevealOnScroll revealIndex={2} yOffset={18} className="block w-full">
+                  <p className="mx-auto mt-4 max-w-xl text-[0.95rem] font-medium leading-relaxed text-[#FFFFFF] [text-shadow:0_1px_10px_rgba(0,0,0,0.42)] sm:text-base sm:leading-normal md:text-lg">
+                    {t("heroSubtitle")}
+                  </p>
+                </RevealOnScroll>
+              </div>
             </div>
 
             <div className="mx-auto w-full max-w-7xl shrink-0 px-4 pb-12 pt-4 sm:px-6 lg:px-8">
