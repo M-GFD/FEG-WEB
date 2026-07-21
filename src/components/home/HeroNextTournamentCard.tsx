@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
-import { formatCalendarDate, getNextFegDate } from "@/lib/calendario-feg";
+import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
+import {
+  formatCalendarDate,
+  getNextFegDate,
+  isMenoresCalendarModality,
+} from "@/lib/calendario-feg";
 import { useCalendarI18n } from "@/lib/calendario-client";
 import { HOME_GLASS_CARD_CLASS } from "@/components/home/homeGlassCard";
 
@@ -23,6 +27,12 @@ export function HeroNextTournamentCard() {
   const tCommon = useTranslations("common");
   const { locale, labels } = useCalendarI18n();
   const next = useMemo(() => getNextFegDate(locale, labels, now), [locale, labels, now]);
+
+  const isMenores = next
+    ? isMenoresCalendarModality(next._raw.modalityKey)
+    : false;
+  const ctaHref = isMenores ? "/inscripcion-torneos-menores" : "/calendario";
+  const ctaLabel = isMenores ? t("signup") : tCommon("viewCalendar");
 
   return (
     // Card glass: queda fuera de RevealOnScroll para que el `transform` del reveal
@@ -48,12 +58,9 @@ export function HeroNextTournamentCard() {
                   <div className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white">
                     {next.modalidad}
                   </div>
-                  <Link
-                    href="/calendario"
-                    className="ml-auto inline-flex items-center justify-center rounded-full bg-[#f3e12b] px-3 py-1.5 text-xs font-semibold text-[#146638] transition hover:brightness-95"
-                  >
-                    {tCommon("viewCalendar")}
-                  </Link>
+                  <InteractiveHoverButton href={ctaHref} className="ml-auto shrink-0">
+                    {ctaLabel}
+                  </InteractiveHoverButton>
                 </div>
               </>
             ) : (
@@ -62,12 +69,9 @@ export function HeroNextTournamentCard() {
                   {t("noUpcoming")}
                 </div>
                 <div className="mt-3 flex items-center gap-2">
-                  <Link
-                    href="/calendario"
-                    className="ml-auto inline-flex items-center justify-center rounded-full bg-[#f3e12b] px-3 py-1.5 text-xs font-semibold text-[#146638] transition hover:brightness-95"
-                  >
+                  <InteractiveHoverButton href="/calendario" className="ml-auto shrink-0">
                     {tCommon("viewCalendar")}
-                  </Link>
+                  </InteractiveHoverButton>
                 </div>
               </>
             )}

@@ -123,7 +123,8 @@
   },
   "heroCard": {
     "nextTournament": "Próximo torneio",
-    "noUpcoming": "Sem torneios próximos na agenda."
+    "noUpcoming": "Sem torneios próximos na agenda.",
+    "signup": "Inscrever-se"
   },
   "meta": {
     "siteTitle": "FEG - Federação Entrerriana de Golfe",

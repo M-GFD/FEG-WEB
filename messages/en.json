@@ -123,7 +123,8 @@
   },
   "heroCard": {
     "nextTournament": "Next tournament",
-    "noUpcoming": "No upcoming tournaments on the schedule."
+    "noUpcoming": "No upcoming tournaments on the schedule.",
+    "signup": "Register"
   },
   "meta": {
     "siteTitle": "FEG - Entre Ríos Golf Federation",

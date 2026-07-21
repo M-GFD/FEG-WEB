@@ -16,6 +16,11 @@ export type CalendarModalityKey =
   | "prejuveniles36h"
   | "junior";
 
+/** Modalidades del calendario de menores / juveniles / junior. */
+export function isMenoresCalendarModality(key: CalendarModalityKey): boolean {
+  return key === "prejuveniles36h" || key === "junior";
+}
+
 export type CalendarVenueKey = "interfederativo";
 
 export type CalendarEntryRaw = {
