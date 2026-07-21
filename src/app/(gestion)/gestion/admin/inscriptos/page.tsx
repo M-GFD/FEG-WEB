@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { requireGestionArea } from "@/lib/gestion-access";
 import { fetchInscriptosRows } from "@/lib/admin-exports";
+import { InscriptosTable } from "./InscriptosTable";
 
 export const metadata = {
   title: "Inscriptos a torneos | Gestión FEG",
@@ -48,50 +49,7 @@ export default async function AdminInscriptosPage() {
           Aún no hay inscripciones a torneos.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-sm">
-          <table className="w-full min-w-[820px] text-left text-sm">
-            <thead className="bg-[var(--feg-green-soft)] text-white">
-              <tr>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Torneo</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Jugador</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Categoría</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">DNI</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Club</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">HC</th>
-                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">Fecha</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => (
-                <tr
-                  key={`${r.dni}-${i}`}
-                  className="border-t border-[var(--feg-green)]/10 hover:bg-[var(--feg-bg)]/60"
-                >
-                  <td className="px-4 py-3 text-xs text-[var(--feg-green)]">{r.torneo}</td>
-                  <td className="px-4 py-3 font-medium text-[var(--feg-ink)]">
-                    {r.apellido}, {r.nombre}
-                    <span className="ml-1 text-xs text-[var(--feg-green)]">({r.sexo})</span>
-                  </td>
-                  <td className="px-4 py-3 text-[var(--feg-ink)]">
-                    {r.categoria}
-                    {r.juegaPrejuveniles === "Sí" ? (
-                      <span className="ml-1 text-xs text-[var(--feg-green-2)]">+ Prejuv.</span>
-                    ) : null}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--feg-green)]">{r.dni || "—"}</td>
-                  <td className="px-4 py-3 text-[var(--feg-green)]">{r.club}</td>
-                  <td className="px-4 py-3 text-[var(--feg-green)]">
-                    {r.tieneHandicap === "Sí" ? r.matricula || "Sí" : "No"}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-[var(--feg-green)]">{r.fechaInscripcion}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p className="border-t border-[var(--feg-green)]/10 px-4 py-3 text-xs text-[var(--feg-green)]">
-            Total: {rows.length} inscripto{rows.length === 1 ? "" : "s"}
-          </p>
-        </div>
+        <InscriptosTable rows={rows} />
       )}
     </div>
   );

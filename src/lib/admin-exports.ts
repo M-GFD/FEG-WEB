@@ -352,6 +352,8 @@ export async function fetchEmpadronadosRows(
 // ----------------- Inscriptos a torneos -----------------
 
 export type InscriptoExportRow = {
+  /** ID en YouthTournamentRegistration (no se exporta a Excel). */
+  recordId: string;
   torneo: string;
   apellido: string;
   nombre: string;
@@ -364,6 +366,8 @@ export type InscriptoExportRow = {
   tieneHandicap: string;
   matricula: string;
   juegaPrejuveniles: string;
+  /** No se exporta a Excel; usado en edición admin. */
+  esPrincipiante: string;
   responsable: string;
   responsableTelefono: string;
   responsableEmail: string;
@@ -416,7 +420,26 @@ export async function fetchInscriptosRows(
     return [];
   }
 
+  const enrollmentIds = [
+    ...new Set(
+      (data ?? [])
+        .map((r) => r.enrollmentId as string | null)
+        .filter((id): id is string => Boolean(id))
+    ),
+  ];
+  const dniByEnrollmentId = new Map<string, string>();
+  if (enrollmentIds.length > 0) {
+    const { data: enrollments } = await supabase
+      .from("YouthEnrollment")
+      .select("id,dniEnc")
+      .in("id", enrollmentIds);
+    for (const e of enrollments ?? []) {
+      dniByEnrollmentId.set(e.id, safeDecrypt(e.dniEnc));
+    }
+  }
+
   return (data ?? []).map((row): InscriptoExportRow => ({
+    recordId: row.id,
     torneo: row.tournamentKey ?? "",
     apellido: row.lastName ?? "",
     nombre: row.firstName ?? "",
@@ -424,11 +447,12 @@ export async function fetchInscriptosRows(
     fechaNacimiento: formatDate(row.birthDate),
     edad: dynamicAge(row.birthDate) || (row.ageAtSignup != null ? String(row.ageAtSignup) : ""),
     categoria: dynamicCategory(row.birthDate, row.category),
-    dni: safeDecrypt(row.dniEnc),
+    dni: dniByEnrollmentId.get(row.enrollmentId) ?? "",
     club: row.clubOther || row.clubName || "",
     tieneHandicap: yesNo(row.hasHandicap),
     matricula: row.matricula ?? "",
     juegaPrejuveniles: yesNo(row.playsPrejuvenilesAlso),
+    esPrincipiante: yesNo(row.isPrincipiante),
     responsable: row.responsibleName ?? "",
     responsableTelefono: safeDecrypt(row.responsiblePhoneEnc),
     responsableEmail: safeDecrypt(row.responsibleEmailEnc),
