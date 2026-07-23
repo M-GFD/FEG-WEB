@@ -13,6 +13,7 @@
     "bootstrap-admin": "node scripts/bootstrap-admin.cjs",
     "import-feg-players": "node scripts/import-feg-players.cjs",
     "import-youth-padron": "node scripts/import-youth-padron-fgl.cjs",
+    "update-youth-birthdates": "node scripts/update-youth-birthdates-from-padron.cjs",
     "images:webp": "node scripts/convert-public-jpeg-to-webp.cjs",
     "security:audit": "npm audit --audit-level=moderate",
     "backfill-news-translations": "node scripts/backfill-news-translations.cjs",

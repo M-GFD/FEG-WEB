@@ -20,7 +20,7 @@ const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const KEY_RAW = (process.env.PLAYER_DATA_ENCRYPTION_KEY ?? "").trim();
 const PADRON_PATH =
   process.env.FEG_YOUTH_PADRON_MD ||
-  path.join(__dirname, "..", "docs", "empadronamiento-fgl-2026.md");
+  path.join(__dirname, "..", "docs", "empadronamiento-fgl-2026-migracion.md");
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error("[!] Faltan NEXT_PUBLIC_SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY.");
@@ -188,7 +188,17 @@ async function main() {
       const category = normalize(r.CATEGORÍA ?? r.CATEGORIA) || null;
       const clubName = normalize(r.CLUB);
       if (!dni || !lastName || !firstName || !clubName) return null;
-      const birthYear = birthYearFromCategory(category || "");
+      const birthDateRaw = String(
+        r["FECHA DE NACIMIENTO"] ?? r.FECHA_NACIMIENTO ?? ""
+      )
+        .trim()
+        .slice(0, 10);
+      const hasRealBirth =
+        /^\d{4}-\d{2}-\d{2}$/.test(birthDateRaw) &&
+        Number(birthDateRaw.slice(0, 4)) >= 1990;
+      const birthYear = hasRealBirth
+        ? Number(birthDateRaw.slice(0, 4))
+        : birthYearFromCategory(category || "");
       return {
         id: playerId(dni, lastName, firstName),
         dni,
@@ -198,7 +208,7 @@ async function main() {
         category: category === "—" || category === "-" ? null : category,
         clubName,
         birthYear,
-        birthDate: `${birthYear}-06-15`,
+        birthDate: hasRealBirth ? birthDateRaw : `${birthYear}-06-15`,
       };
     })
     .filter(Boolean);
