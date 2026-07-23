@@ -25,3 +25,6 @@ next-env.d.ts
 
 # cursor
 .cursor/
+
+# Padrón FGL (datos personales de menores)
+docs/empadronamiento-fgl-*.md
