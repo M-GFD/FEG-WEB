@@ -9,9 +9,11 @@ import Placeholder from "@tiptap/extension-placeholder";
 
 type Props = {
   onChange: (html: string) => void;
+  /** HTML inicial (edición de noticia publicada). */
+  initialContent?: string;
 };
 
-export function NewsRichEditor({ onChange }: Props) {
+export function NewsRichEditor({ onChange, initialContent }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
@@ -41,7 +43,7 @@ export function NewsRichEditor({ onChange }: Props) {
           "Escribí el cuerpo de la noticia: párrafos, títulos, listas e imágenes con el botón Imagen.",
       }),
     ],
-    content: "<p></p>",
+    content: initialContent?.trim() ? initialContent : "<p></p>",
     editorProps: {
       attributes: {
         class:

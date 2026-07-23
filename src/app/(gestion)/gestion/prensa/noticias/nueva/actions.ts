@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { canModeratePress } from "@/lib/rbac";
 import {
   publishNewsArticle,
+  updateNewsArticle,
   type PublishNewsArticleResult,
 } from "@/lib/publish-news";
 
@@ -44,6 +45,36 @@ export async function publishNewsFromGestion(
     });
   } catch (e) {
     console.error("[publishNewsFromGestion]", e);
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Error interno del servidor",
+      status: 500,
+    };
+  }
+}
+
+export async function updateNewsFromGestion(
+  newsId: string,
+  input: PublishNewsFormInput
+): Promise<PublishNewsArticleResult> {
+  try {
+    const session = await auth();
+    if (!session?.user || !canModeratePress(session.user.role)) {
+      return { ok: false, error: "No autorizado", status: 401 };
+    }
+
+    return await updateNewsArticle(newsId, {
+      title: input.title,
+      slug: input.slug,
+      excerpt: input.excerpt,
+      content: input.content,
+      imageUrl: input.imageUrl,
+      galleryUrls: input.galleryUrls,
+      audience: input.audience ?? "GENERAL",
+      notifyPush: Boolean(input.notifyPush),
+    });
+  } catch (e) {
+    console.error("[updateNewsFromGestion]", e);
     return {
       ok: false,
       error: e instanceof Error ? e.message : "Error interno del servidor",

@@ -182,3 +182,168 @@ export async function publishNewsArticle(
     };
   }
 }
+
+/**
+ * Actualiza una noticia ya publicada. Conserva `publishedAt` y `authorId`.
+ * Revalida el slug anterior y el nuevo si cambió.
+ */
+export async function updateNewsArticle(
+  newsId: string,
+  json: unknown
+): Promise<PublishNewsArticleResult> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return { ok: false, error: "Servidor sin conexión a la base de datos.", status: 503 };
+  }
+
+  const id = String(newsId ?? "").trim();
+  if (!id) {
+    return { ok: false, error: "Noticia inválida.", status: 400 };
+  }
+
+  const parsed = createBodySchema.safeParse(json);
+  if (!parsed.success) {
+    const msg = parsed.error.flatten().fieldErrors;
+    const first = Object.values(msg).flat()[0] ?? "Datos inválidos";
+    return { ok: false, error: first, status: 400 };
+  }
+
+  const {
+    title,
+    slug: slugInput,
+    excerpt,
+    content,
+    imageUrl,
+    galleryUrls,
+    audience,
+    notifyPush,
+  } = parsed.data;
+
+  if (isEffectivelyEmptyHtml(content)) {
+    return {
+      ok: false,
+      error: "El cuerpo de la noticia no puede estar vacío",
+      status: 400,
+    };
+  }
+
+  let sanitized: string;
+  try {
+    sanitized = sanitizeNewsContent(content);
+  } catch (e) {
+    console.error("[updateNewsArticle] sanitizeNewsContent", e);
+    return {
+      ok: false,
+      error: "No se pudo validar el HTML de la noticia.",
+      status: 400,
+    };
+  }
+
+  if (isEffectivelyEmptyHtml(sanitized)) {
+    return {
+      ok: false,
+      error: "El contenido no tiene texto permitido tras la validación.",
+      status: 400,
+    };
+  }
+
+  const { data: existing, error: selErr } = await supabase
+    .from("News")
+    .select("id,slug,published")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (selErr) {
+    console.error("[updateNewsArticle] select", selErr);
+    return { ok: false, error: PUBLIC_ERROR_GENERIC, status: 500 };
+  }
+  if (!existing || !existing.published) {
+    return { ok: false, error: "No se encontró la noticia publicada.", status: 404 };
+  }
+
+  const previousSlug = String(existing.slug ?? "");
+  const baseSlug = slugifyTitle(slugInput?.trim() || title);
+  let finalSlug: string;
+  try {
+    finalSlug = await resolveUniqueNewsSlug(baseSlug, id);
+  } catch (e) {
+    console.error("[updateNewsArticle] resolveUniqueNewsSlug", e);
+    return { ok: false, error: PUBLIC_ERROR_GENERIC, status: 500 };
+  }
+
+  const cover =
+    imageUrl && typeof imageUrl === "string" && imageUrl.trim() !== ""
+      ? imageUrl.trim()
+      : null;
+  const gallery = (galleryUrls ?? []).filter(Boolean);
+  const galleryJson = gallery.length > 0 ? gallery : null;
+  const now = new Date().toISOString();
+
+  try {
+    const { data: row, error } = await supabase
+      .from("News")
+      .update({
+        title: title.trim(),
+        slug: finalSlug,
+        content: sanitized,
+        excerpt: excerpt?.trim() ? excerpt.trim() : null,
+        imageUrl: cover,
+        galleryUrls: galleryJson,
+        audience: contentAudienceFromForm(audience),
+        updatedAt: now,
+      })
+      .eq("id", id)
+      .eq("published", true)
+      .select("id,slug")
+      .single();
+
+    if (error) {
+      console.error("[updateNewsArticle] update", error);
+      return { ok: false, error: PUBLIC_ERROR_GENERIC, status: 500 };
+    }
+
+    if (!row?.slug || !row?.id) {
+      console.error("[updateNewsArticle] sin slug/id en respuesta");
+      return { ok: false, error: PUBLIC_ERROR_GENERIC, status: 500 };
+    }
+
+    void generateAndStoreNewsTranslations(row.id, {
+      title: title.trim(),
+      excerpt: excerpt?.trim() ? excerpt.trim() : null,
+      content: sanitized,
+    }).catch((trErr) => {
+      console.error("[updateNewsArticle] news translations", trErr);
+    });
+
+    try {
+      revalidatePath("/");
+      revalidatePath("/noticias");
+      revalidatePath("/gestion/prensa");
+      revalidatePath(`/noticias/${row.slug}`);
+      if (previousSlug && previousSlug !== row.slug) {
+        revalidatePath(`/noticias/${previousSlug}`);
+      }
+    } catch (revErr) {
+      console.error("[updateNewsArticle] revalidatePath", revErr);
+    }
+
+    if (notifyPush) {
+      void broadcastNewsPublishedPush({
+        title: title.trim(),
+        slug: row.slug,
+        excerpt: excerpt?.trim() ? excerpt.trim() : null,
+      }).catch((pushErr) => {
+        console.error("[updateNewsArticle] push notify", pushErr);
+      });
+    }
+
+    return { ok: true, slug: row.slug };
+  } catch (e) {
+    console.error("[updateNewsArticle] unexpected", e);
+    return {
+      ok: false,
+      error: PUBLIC_ERROR_GENERIC,
+      status: 500,
+    };
+  }
+}

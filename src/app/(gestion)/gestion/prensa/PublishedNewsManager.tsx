@@ -88,7 +88,7 @@ export function PublishedNewsManager({ items }: { items: PublishedNewsRow[] }) {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-[var(--feg-green)]">
-          Marcá una o varias filas y eliminá del sitio (solo la base de datos, no los archivos en almacenamiento).
+          Editá una noticia o marcá filas para eliminarlas del sitio (solo la base de datos, no los archivos en almacenamiento).
         </p>
         <div className="flex flex-wrap items-center gap-2">
           {someSelected && (
@@ -133,7 +133,7 @@ export function PublishedNewsManager({ items }: { items: PublishedNewsRow[] }) {
                 Fecha
               </th>
               <th className="px-3 py-3 font-heading text-xs font-semibold uppercase tracking-wide text-[var(--feg-ink)]">
-                Sitio
+                Acciones
               </th>
             </tr>
           </thead>
@@ -161,14 +161,22 @@ export function PublishedNewsManager({ items }: { items: PublishedNewsRow[] }) {
                     {label}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3 align-top">
-                    <Link
-                      href={`/noticias/${row.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-semibold text-[var(--feg-green-2)] underline-offset-2 hover:underline"
-                    >
-                      Ver
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Link
+                        href={`/gestion/prensa/noticias/${row.id}/editar`}
+                        className="font-semibold text-[var(--feg-ink)] underline-offset-2 hover:underline"
+                      >
+                        Editar
+                      </Link>
+                      <Link
+                        href={`/noticias/${row.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-[var(--feg-green-2)] underline-offset-2 hover:underline"
+                      >
+                        Ver
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               );

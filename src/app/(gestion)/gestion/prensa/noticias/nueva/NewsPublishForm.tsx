@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { parseApiJson } from "@/lib/parse-api-response";
 import { slugifyTitle } from "@/lib/slugify";
-import { publishNewsFromGestion } from "./actions";
+import { publishNewsFromGestion, updateNewsFromGestion } from "./actions";
 import { NewsRichEditor } from "./NewsRichEditor";
 import { ContentAudienceField } from "@/components/forms/ContentAudienceField";
 import type { ContentAudience } from "@/lib/content-audience";
@@ -15,21 +15,40 @@ function stripHtmlToText(html: string): string {
   return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
 }
 
-export function NewsPublishForm() {
+export type NewsFormInitial = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  imageUrl: string | null;
+  galleryUrls: string[];
+  audience: ContentAudience;
+};
+
+export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
+  const isEdit = Boolean(initial?.id);
   const router = useRouter();
   const [formResetKey, setFormResetKey] = useState(0);
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
-  const [slugTouched, setSlugTouched] = useState(false);
-  const [excerpt, setExcerpt] = useState("");
-  const [contentHtml, setContentHtml] = useState("<p></p>");
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [slug, setSlug] = useState(initial?.slug ?? "");
+  const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
+  const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
+  const [contentHtml, setContentHtml] = useState(initial?.content ?? "<p></p>");
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [existingCoverUrl, setExistingCoverUrl] = useState<string | null>(
+    initial?.imageUrl ?? null
+  );
+  const [removeCover, setRemoveCover] = useState(false);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [existingGalleryUrls, setExistingGalleryUrls] = useState<string[]>(
+    initial?.galleryUrls ?? []
+  );
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [notifyPush, setNotifyPush] = useState(false);
-  const [audience, setAudience] = useState<ContentAudience>("GENERAL");
+  const [audience, setAudience] = useState<ContentAudience>(initial?.audience ?? "GENERAL");
 
   useEffect(() => {
     if (!slugTouched) {
@@ -69,30 +88,52 @@ export function NewsPublishForm() {
 
     setSubmitting(true);
     try {
-      let imageUrl: string | null = null;
+      let imageUrl = "";
       if (coverFile) {
         imageUrl = await uploadOne(coverFile);
+      } else if (!removeCover && existingCoverUrl) {
+        imageUrl = existingCoverUrl;
       }
 
-      const galleryUrls: string[] = [];
-      for (const f of galleryFiles) {
-        galleryUrls.push(await uploadOne(f));
+      let galleryUrls: string[] = existingGalleryUrls;
+      if (galleryFiles.length > 0) {
+        galleryUrls = [];
+        for (const f of galleryFiles) {
+          galleryUrls.push(await uploadOne(f));
+        }
       }
 
-      const data = await publishNewsFromGestion({
+      const payload = {
         title: title.trim(),
         slug: slug.trim() || undefined,
         excerpt: excerpt.trim() || null,
         content: contentHtml,
-        imageUrl: imageUrl ?? "",
+        imageUrl,
         galleryUrls,
         audience,
         notifyPush,
-      });
+      };
+
+      const data = isEdit
+        ? await updateNewsFromGestion(initial!.id, payload)
+        : await publishNewsFromGestion(payload);
 
       if (!data.ok) {
         const msg = [data.error, data.code ? `(${data.code})` : ""].filter(Boolean).join(" ");
-        setError(msg || "No se pudo publicar");
+        setError(msg || (isEdit ? "No se pudo guardar" : "No se pudo publicar"));
+        return;
+      }
+
+      if (isEdit) {
+        setSuccess("Cambios guardados. La noticia ya refleja la edición en el sitio.");
+        setCoverFile(null);
+        setGalleryFiles([]);
+        setRemoveCover(false);
+        if (imageUrl) setExistingCoverUrl(imageUrl);
+        else setExistingCoverUrl(null);
+        setExistingGalleryUrls(galleryUrls);
+        setFormResetKey((k) => k + 1);
+        router.refresh();
         return;
       }
 
@@ -102,7 +143,10 @@ export function NewsPublishForm() {
       setExcerpt("");
       setContentHtml("<p></p>");
       setCoverFile(null);
+      setExistingCoverUrl(null);
+      setRemoveCover(false);
       setGalleryFiles([]);
+      setExistingGalleryUrls([]);
       setAudience("GENERAL");
       setFormResetKey((k) => k + 1);
       setSuccess("Noticia publicada. El formulario quedó listo para otra.");
@@ -121,11 +165,12 @@ export function NewsPublishForm() {
     >
       <div>
         <h1 className="font-heading text-2xl font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
-          Publicar noticia
+          {isEdit ? "Editar noticia" : "Publicar noticia"}
         </h1>
         <p className="mt-1 text-sm text-[var(--feg-green)]">
-          La noticia quedará visible en Noticias al guardar. Podés insertar imágenes en el
-          texto o sumar una galería al pie con varias fotos.
+          {isEdit
+            ? "Los cambios se verán en Noticias al guardar. La fecha de publicación original se mantiene."
+            : "La noticia quedará visible en Noticias al guardar. Podés insertar imágenes en el texto o sumar una galería al pie con varias fotos."}
         </p>
       </div>
 
@@ -178,20 +223,52 @@ export function NewsPublishForm() {
 
       <div className="space-y-2">
         <span className="text-sm font-medium text-[var(--feg-green)]">Portada (opcional)</span>
+        {isEdit && existingCoverUrl && !removeCover && !coverFile && (
+          <div className="flex flex-wrap items-start gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={existingCoverUrl}
+              alt=""
+              className="h-28 w-auto max-w-full rounded-lg border border-[var(--feg-green)]/15 object-cover"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setRemoveCover(true);
+                setExistingCoverUrl(null);
+              }}
+              className="text-sm font-medium text-red-700 underline-offset-2 hover:underline"
+            >
+              Quitar portada
+            </button>
+          </div>
+        )}
         <input
           key={`cover-${formResetKey}`}
           type="file"
           accept="image/png,image/jpeg,image/webp"
-          onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
+          onChange={(e) => {
+            setCoverFile(e.target.files?.[0] ?? null);
+            if (e.target.files?.[0]) setRemoveCover(false);
+          }}
           className="block w-full text-sm text-[var(--feg-green)] file:mr-3 file:rounded-xl file:border-0 file:bg-[var(--feg-green-2)] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:brightness-95"
         />
-        <p className="text-xs text-[var(--feg-green)]/80">PNG, JPG o WebP, máx. 5 MB.</p>
+        <p className="text-xs text-[var(--feg-green)]/80">
+          PNG, JPG o WebP, máx. 5 MB.
+          {isEdit ? " Si elegís un archivo nuevo, reemplaza la portada actual." : ""}
+        </p>
       </div>
 
       <div className="space-y-2">
         <span className="text-sm font-medium text-[var(--feg-green)]">
           Galería al pie (opcional)
         </span>
+        {isEdit && existingGalleryUrls.length > 0 && galleryFiles.length === 0 && (
+          <p className="text-xs text-[var(--feg-green)]">
+            Galería actual: {existingGalleryUrls.length} imagen(es). Subí archivos nuevos solo
+            si querés reemplazarla por completo.
+          </p>
+        )}
         <input
           key={`gallery-${formResetKey}`}
           type="file"
@@ -221,7 +298,8 @@ export function NewsPublishForm() {
         </p>
         {galleryFiles.length > 0 && (
           <p className="text-xs text-[var(--feg-green)]">
-            {galleryFiles.length} archivo(s) seleccionado(s).
+            {galleryFiles.length} archivo(s) seleccionado(s)
+            {isEdit ? " (reemplazarán la galería actual)." : "."}
           </p>
         )}
       </div>
@@ -230,7 +308,11 @@ export function NewsPublishForm() {
 
       <div className="space-y-2">
         <span className="text-sm font-medium text-[var(--feg-green)]">Cuerpo de la noticia</span>
-        <NewsRichEditor key={`editor-${formResetKey}`} onChange={setContentHtml} />
+        <NewsRichEditor
+          key={`editor-${formResetKey}-${initial?.id ?? "new"}`}
+          initialContent={contentHtml}
+          onChange={setContentHtml}
+        />
       </div>
 
       {success && (
@@ -258,7 +340,9 @@ export function NewsPublishForm() {
           />
           <span>
             <span className="font-medium text-[var(--feg-green)]">
-              Enviar notificación push al publicar
+              {isEdit
+                ? "Enviar notificación push al guardar"
+                : "Enviar notificación push al publicar"}
             </span>
             <span className="mt-0.5 block text-[var(--feg-green)]/85">
               Si está marcado, los dispositivos con la PWA instalada y notificaciones permitidas recibirán un aviso con el
@@ -273,8 +357,23 @@ export function NewsPublishForm() {
             disabled={submitting}
             className="rounded-full bg-[var(--feg-yellow)] px-6 py-2.5 font-heading text-sm font-semibold text-[var(--feg-ink)] transition hover:brightness-95 disabled:opacity-50"
           >
-            {submitting ? "Publicando…" : "Publicar noticia"}
+            {submitting
+              ? isEdit
+                ? "Guardando…"
+                : "Publicando…"
+              : isEdit
+                ? "Guardar cambios"
+                : "Publicar noticia"}
           </button>
+          {isEdit && (
+            <button
+              type="button"
+              onClick={() => router.push("/gestion/prensa")}
+              className="rounded-full border border-[var(--feg-green)]/25 bg-white px-6 py-2.5 font-heading text-sm font-semibold text-[var(--feg-green)] transition hover:bg-[var(--feg-bg)]"
+            >
+              Volver al listado
+            </button>
+          )}
         </div>
       </div>
     </form>

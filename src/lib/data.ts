@@ -12,9 +12,12 @@ import {
 } from "@/lib/news-translations";
 import { getSupabaseAdmin } from "./supabase";
 import {
+  contentAudienceFromForm,
   matchesAudienceFilter,
   type AudienceSegment,
+  type ContentAudience,
 } from "./content-audience";
+import { parseNewsGalleryUrls } from "./news-gallery";
 import {
   formatHandicapRankingCell,
   handicapSortValue,
@@ -405,6 +408,54 @@ export async function getPublishedNewsForGestion(limit = 500) {
     publishedAt: string | null;
     createdAt: string;
   }>;
+}
+
+export type PublishedNewsForEdit = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  content: string;
+  imageUrl: string | null;
+  galleryUrls: string[];
+  audience: ContentAudience;
+  publishedAt: string | null;
+};
+
+/** Noticia publicada para el formulario de edición en gestión (prensa/admin). */
+export async function getPublishedNewsByIdForGestion(
+  id: string
+): Promise<PublishedNewsForEdit | null> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+
+  const newsId = id.trim();
+  if (!newsId) return null;
+
+  const { data, error } = await supabase
+    .from("News")
+    .select("id,title,slug,excerpt,content,imageUrl,galleryUrls,audience,publishedAt")
+    .eq("id", newsId)
+    .eq("published", true)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[getPublishedNewsByIdForGestion]", error.message);
+    return null;
+  }
+  if (!data) return null;
+
+  return {
+    id: data.id as string,
+    title: data.title as string,
+    slug: data.slug as string,
+    excerpt: (data.excerpt as string | null) ?? null,
+    content: (data.content as string) || "<p></p>",
+    imageUrl: (data.imageUrl as string | null) ?? null,
+    galleryUrls: parseNewsGalleryUrls(data.galleryUrls),
+    audience: contentAudienceFromForm(String(data.audience ?? "GENERAL")),
+    publishedAt: (data.publishedAt as string | null) ?? null,
+  };
 }
 
 export async function getNewsBySlug(slug: string, locale: AppLocale = "es") {
