@@ -67,7 +67,7 @@
     "@types/sanitize-html": "^2.16.1",
     "@types/web-push": "^3.6.4",
     "dotenv": "^17.4.2",
-    "eslint": "^9.39.4",
+    "eslint": "^9.39.5",
     "eslint-config-next": "15.5.12",
     "postcss": "^8.5.14",
     "prisma": "^5.22.0",
