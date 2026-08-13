@@ -54,7 +54,7 @@ const STATIC_PAGES: StaticPage[] = [
   {
     titleKey: "regulationsMinors",
     href: "/menores/reglamento",
-    keywords: ["reglamento", "menores", "prejuveniles", "juveniles", "junior", "2026"],
+    keywords: ["reglamento", "menores", "prejuveniles", "juveniles", "junior", "escuelas", "2026"],
   },
   {
     titleKey: "regulationsPreJuveniles",
@@ -65,6 +65,11 @@ const STATIC_PAGES: StaticPage[] = [
     titleKey: "regulationsJunior",
     href: "/institucional/reglamentos/junior",
     keywords: ["reglamento", "junior", "menores", "2026"],
+  },
+  {
+    titleKey: "regulationsEscuelasJunior",
+    href: "/menores/reglamento/escuelas-junior",
+    keywords: ["reglamento", "escuelas", "junior", "menores", "aportes", "fgl", "aag"],
   },
   {
     titleKey: "regulationsMayores",

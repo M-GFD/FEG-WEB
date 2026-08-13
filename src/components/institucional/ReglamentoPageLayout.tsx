@@ -41,13 +41,15 @@ export async function ReglamentoPageLayout({ reglamento, badge, backHref, backLa
           >
             {backLabel}
           </Link>
-          <a
-            href={reglamento.pdfPath}
-            download={reglamento.downloadFileName}
-            className="inline-flex items-center justify-center rounded-full border border-[var(--feg-green)]/25 bg-white px-6 py-2.5 text-sm font-semibold text-[var(--feg-ink)] shadow-sm transition hover:bg-[var(--feg-bg)]"
-          >
-            {tCommon("downloadPdfArrow")}
-          </a>
+          {reglamento.pdfPath ? (
+            <a
+              href={reglamento.pdfPath}
+              download={reglamento.downloadFileName}
+              className="inline-flex items-center justify-center rounded-full border border-[var(--feg-green)]/25 bg-white px-6 py-2.5 text-sm font-semibold text-[var(--feg-ink)] shadow-sm transition hover:bg-[var(--feg-bg)]"
+            >
+              {tCommon("downloadPdfArrow")}
+            </a>
+          ) : null}
         </div>
       </header>
 

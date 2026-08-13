@@ -287,6 +287,7 @@
       "regulationsMinors": "Junior regulations",
       "regulationsPreJuveniles": "Pre-Youth and Youth Regulations 2026",
       "regulationsJunior": "Junior Regulations 2026",
+      "regulationsEscuelasJunior": "Junior Schools Development Program",
       "regulationsMayores": "Senior Regulations 2026",
       "rankingRules": "Youth and pre-youth ranking regulations",
       "regulationVideos": "Explainer videos for regulations",
@@ -374,6 +375,11 @@
       "title": "Junior Regulations 2026",
       "description": "Entre Ríos Golf Federation regulations for the Junior category in the 2026 season.",
       "navLabel": "Junior Regulations"
+    },
+    "escuelasJunior": {
+      "title": "Junior Schools Development Program",
+      "description": "Litoral Golf Federation guidelines for support, commitments and contributions to junior schools at affiliated clubs.",
+      "navLabel": "Junior Schools"
     },
     "mayores": {
       "title": "Senior Regulations 2026",
@@ -471,7 +477,7 @@
   "minorsRegulations": {
     "badge": "Juniors",
     "title": "Junior Regulations",
-    "subtitle": "Current Entre Ríos Golf Federation regulations for Pre-youth, Youth and Junior in the {year} season.",
+    "subtitle": "Current Entre Ríos Golf Federation regulations for Pre-youth, Youth, Junior and Junior Schools in the {year} season.",
     "backToMinors": "Back to Juniors →",
     "badgeDetail": "Juniors",
     "backToHub": "Junior Regulations →"

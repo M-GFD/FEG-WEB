@@ -1,11 +1,12 @@
-export type ReglamentoSlug = "pre-juveniles" | "junior" | "mayores";
+export type ReglamentoSlug = "pre-juveniles" | "junior" | "escuelas-junior" | "mayores";
 
 export type ReglamentoDefinition = {
   slug: ReglamentoSlug;
   titleKey: string;
   descriptionKey: string;
-  pdfPath: string;
-  downloadFileName: string;
+  /** Si falta, el hub y el detalle no muestran descarga. */
+  pdfPath?: string;
+  downloadFileName?: string;
   /** Etiqueta para menús desplegables (sin siglas). */
   navLabelKey: string;
   menores: boolean;
@@ -30,6 +31,14 @@ export const REGLAMENTOS: ReglamentoDefinition[] = [
     pdfPath: "/reglamentos/junior-2026.pdf",
     downloadFileName: "Reglamento-Junior-FEG-2026.pdf",
     navLabelKey: "junior.navLabel",
+    menores: true,
+    mayores: false,
+  },
+  {
+    slug: "escuelas-junior",
+    titleKey: "escuelasJunior.title",
+    descriptionKey: "escuelasJunior.description",
+    navLabelKey: "escuelasJunior.navLabel",
     menores: true,
     mayores: false,
   },

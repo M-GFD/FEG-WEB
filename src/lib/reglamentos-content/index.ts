@@ -3,6 +3,9 @@ import type { ReglamentoContentSection, ReglamentoSlug } from "./types";
 import juniorEs from "./junior-2026.json";
 import juniorEn from "./junior-2026.en.json";
 import juniorPt from "./junior-2026.pt.json";
+import escuelasJuniorEs from "./escuelas-junior.json";
+import escuelasJuniorEn from "./escuelas-junior.en.json";
+import escuelasJuniorPt from "./escuelas-junior.pt.json";
 import mayoresEs from "./mayores-2026.json";
 import mayoresEn from "./mayores-2026.en.json";
 import mayoresPt from "./mayores-2026.pt.json";
@@ -15,6 +18,11 @@ const BY_SLUG_LOCALE: Record<
   Partial<Record<AppLocale, ReglamentoContentSection[]>> & { es: ReglamentoContentSection[] }
 > = {
   junior: { es: juniorEs as ReglamentoContentSection[], en: juniorEn as ReglamentoContentSection[], pt: juniorPt as ReglamentoContentSection[] },
+  "escuelas-junior": {
+    es: escuelasJuniorEs as ReglamentoContentSection[],
+    en: escuelasJuniorEn as ReglamentoContentSection[],
+    pt: escuelasJuniorPt as ReglamentoContentSection[],
+  },
   mayores: { es: mayoresEs as ReglamentoContentSection[], en: mayoresEn as ReglamentoContentSection[], pt: mayoresPt as ReglamentoContentSection[] },
   "pre-juveniles": {
     es: preJuvenilesEs as ReglamentoContentSection[],

@@ -1,0 +1,135 @@
+[
+  {
+    "id": "escuelas-junior-s1",
+    "title": "Junior Golf Development",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Dear Presidents, Boards of Directors, Schools and Coaches:"
+      },
+      {
+        "type": "paragraph",
+        "text": "One of the main goals of the Litoral Golf Federation is to drive the sustained growth of junior golf across the region, supporting clubs in developing new players and strengthening youth schools."
+      },
+      {
+        "type": "paragraph",
+        "text": "Junior Schools belong to each club; the Federation’s role is to provide support, tools and guidance so they can develop in line with the standards set by the Argentine Golf Association (AAG)."
+      },
+      {
+        "type": "paragraph",
+        "text": "We firmly believe that every club should have an active, organized school able to introduce golf to children and young people, promoting not only sporting skills but also the values that define our sport: respect, honesty, discipline, camaraderie and personal growth."
+      },
+      {
+        "type": "paragraph",
+        "text": "To that end, the Federation will continue to run an annual competition calendar for all junior categories, in line with the AAG, so players can earn a ranking that determines who will represent our Federation at the National Junior Championship."
+      },
+      {
+        "type": "paragraph",
+        "text": "Meeting these goals requires a joint commitment between the Federation and the clubs. The Federation will provide technical, sporting and financial support, while schools must meet a set of responsibilities that ensure the program runs properly."
+      }
+    ]
+  },
+  {
+    "id": "escuelas-junior-s2",
+    "title": "Federation Contributions",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "The Litoral Golf Federation will support Junior School development through:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "A monthly financial contribution for the school’s operations.",
+          "Teaching and training materials, according to each club’s needs.",
+          "Travel allowances for coaches who accompany their players to Federative Junior Tournaments.",
+          "Ongoing training for coaches and assistants.",
+          "Prizes for in-club tournaments organized by the clubs.",
+          "Technical assistance for developing sporting programs."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "These resources should strengthen each school’s growth, improve teaching quality and encourage players to take part in official competitions."
+      }
+    ]
+  },
+  {
+    "id": "escuelas-junior-s3",
+    "title": "Commitments of Schools and Clubs",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "To join the support program, each club must take on the following commitments:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Sign the Commitment Letter with the Federation.",
+          "Provide ongoing training for coaches and assistants.",
+          "Submit the corresponding expense reports for funds received.",
+          "Organize in-club tournaments that encourage student participation.",
+          "Prepare players to compete while respecting the sporting and conduct rules of the Argentine Golf Association.",
+          "Take an active part in Federative Junior Tournaments.",
+          "Acquire and maintain the materials needed to run classes."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Report periodically on:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "number of classes held;",
+          "number of participating students;",
+          "the school’s progress and growth;",
+          "activities and initiatives implemented to bring in new players and strengthen the program."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "escuelas-junior-s4",
+    "title": "Changes to the Contribution System",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "To make better use of resources and ensure support reaches schools that do sustained work, the Federation has decided to implement a new contribution allocation system."
+      },
+      {
+        "type": "paragraph",
+        "text": "This decision responds to the need to improve compliance with the responsibilities taken on by some clubs and schools, strengthening transparency, participation and commitment to junior golf development."
+      },
+      {
+        "type": "paragraph",
+        "text": "From this season onward, the program will include:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "A monthly financial contribution of $300,000.",
+          "Delivery of sporting materials, according to each school’s needs and requests.",
+          "Travel allowances for coaches, based on their actual participation in Federative Junior Tournaments.",
+          "Prizes for in-club tournaments, encouraging each club to invite neighboring schools and clubs, promoting regional integration and junior golf growth."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Continued benefits will depend on meeting the commitments taken on, submitting the required documentation and taking an active part in the Federation’s sporting program."
+      },
+      {
+        "type": "paragraph",
+        "text": "We are convinced that junior golf can grow only through joint work between clubs and the Federation. Investing in our children and young people is investing in the future of our sport."
+      },
+      {
+        "type": "paragraph",
+        "text": "We thank every club for its commitment and collaboration in building a stronger, more inclusive and more competitive golf community across the region."
+      },
+      {
+        "type": "paragraph",
+        "text": "Litoral Golf Federation"
+      }
+    ]
+  }
+]

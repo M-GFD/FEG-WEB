@@ -33,13 +33,15 @@ export async function ReglamentosHub({ reglamentos, detailBasePath }: Props) {
               >
                 {tHub("viewRegulation")}
               </Link>
-              <a
-                href={reglamento.pdfPath}
-                download={reglamento.downloadFileName}
-                className="inline-flex items-center justify-center rounded-full border border-[var(--feg-green)]/25 bg-white px-5 py-2.5 text-sm font-semibold text-[var(--feg-ink)] transition hover:bg-[var(--feg-bg)]"
-              >
-                {tHub("downloadPdf")}
-              </a>
+              {reglamento.pdfPath ? (
+                <a
+                  href={reglamento.pdfPath}
+                  download={reglamento.downloadFileName}
+                  className="inline-flex items-center justify-center rounded-full border border-[var(--feg-green)]/25 bg-white px-5 py-2.5 text-sm font-semibold text-[var(--feg-ink)] transition hover:bg-[var(--feg-bg)]"
+                >
+                  {tHub("downloadPdf")}
+                </a>
+              ) : null}
             </div>
           </article>
         );

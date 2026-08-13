@@ -1,0 +1,135 @@
+[
+  {
+    "id": "escuelas-junior-s1",
+    "title": "Desenvolvimento do Golfe Junior",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Prezados Presidentes, Comissões Diretivas, Escolas e Professores:"
+      },
+      {
+        "type": "paragraph",
+        "text": "Um dos principais objetivos da Federação de Golfe do Litoral é impulsionar o crescimento sustentado do golfe junior em toda a região, acompanhando os clubes na formação de novos jogadores e fortalecendo as escolas de menores."
+      },
+      {
+        "type": "paragraph",
+        "text": "As Escolas Junior pertencem a cada clube; o papel da Federação é oferecer apoio, ferramentas e acompanhamento para que possam se desenvolver de acordo com as diretrizes da Associação Argentina de Golfe (AAG)."
+      },
+      {
+        "type": "paragraph",
+        "text": "Acreditamos firmemente que cada clube deve contar com uma escola ativa e organizada, capaz de aproximar o golfe de crianças e jovens, promovendo não apenas o aprendizado esportivo, mas também os valores que caracterizam o nosso esporte: respeito, honestidade, disciplina, companheirismo e superação pessoal."
+      },
+      {
+        "type": "paragraph",
+        "text": "Com esse propósito, a Federação continuará desenvolvendo um calendário anual de competições para todas as categorias junior, em concordância com a AAG, permitindo que os jogadores obtenham um ranking que determine quem representará a nossa Federação no Campeonato Nacional Junior."
+      },
+      {
+        "type": "paragraph",
+        "text": "Para alcançar esses objetivos é indispensável o compromisso conjunto entre a Federação e os clubes. A Federação oferecerá apoio técnico, esportivo e econômico, enquanto as escolas deverão cumprir uma série de responsabilidades que garantam o correto funcionamento do programa."
+      }
+    ]
+  },
+  {
+    "id": "escuelas-junior-s2",
+    "title": "Aportes da Federação",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "A Federação de Golfe do Litoral apoiará o desenvolvimento das Escolas Junior mediante:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Um aporte econômico mensal destinado ao funcionamento da escola.",
+          "Fornecimento de materiais de ensino e treino, de acordo com as necessidades de cada instituição.",
+          "Ajuda de custo para os professores que acompanhem seus jogadores nos Torneios Federativos Junior.",
+          "Capacitação permanente para professores e auxiliares.",
+          "Prêmios para os torneios internos organizados pelos clubes.",
+          "Assistência técnica para o desenvolvimento dos programas esportivos."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Esses recursos deverão estar orientados a fortalecer o crescimento de cada escola, melhorar a qualidade do ensino e favorecer a participação dos jogadores nas competições oficiais."
+      }
+    ]
+  },
+  {
+    "id": "escuelas-junior-s3",
+    "title": "Compromissos das Escolas e dos Clubes",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Para acessar o programa de apoio, cada clube deverá assumir os seguintes compromissos:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Assinar a Carta Compromisso com a Federação.",
+          "Capacitar de maneira permanente professores e auxiliares.",
+          "Apresentar a correspondente prestação de contas dos fundos recebidos.",
+          "Organizar torneios internos que promovam a participação dos alunos.",
+          "Preparar os jogadores para competir respeitando as normas esportivas e de conduta estabelecidas pela Associação Argentina de Golfe.",
+          "Participar ativamente dos Torneios Federativos Junior.",
+          "Adquirir e manter o material necessário para o desenvolvimento das aulas."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "Informar periodicamente:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "quantidade de aulas realizadas;",
+          "número de alunos participantes;",
+          "evolução e crescimento da escola;",
+          "atividades e iniciativas implementadas para incorporar novos jogadores e fortalecer o programa."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "escuelas-junior-s4",
+    "title": "Modificação do Sistema de Aportes",
+    "blocks": [
+      {
+        "type": "paragraph",
+        "text": "Com o objetivo de otimizar o uso dos recursos e assegurar que o apoio chegue efetivamente às escolas que desenvolvem um trabalho sustentado, a Federação decidiu implementar um novo sistema de atribuição de aportes."
+      },
+      {
+        "type": "paragraph",
+        "text": "Essa decisão responde à necessidade de melhorar o cumprimento das responsabilidades assumidas por alguns clubes e escolas, fortalecendo a transparência, a participação e o compromisso com o desenvolvimento do golfe junior."
+      },
+      {
+        "type": "paragraph",
+        "text": "A partir da presente temporada, o programa compreenderá:"
+      },
+      {
+        "type": "bullets",
+        "items": [
+          "Aporte econômico mensal de $300.000.",
+          "Entrega de materiais esportivos, segundo as necessidades e requerimentos de cada escola.",
+          "Ajuda de custo para os professores, de acordo com sua participação efetiva nos Torneios Federativos Junior.",
+          "Prêmios para os torneios internos, incentivando que cada clube convide escolas e clubes vizinhos, promovendo a integração e o crescimento regional do golfe junior."
+        ]
+      },
+      {
+        "type": "paragraph",
+        "text": "A continuidade desses benefícios estará sujeita ao cumprimento dos compromissos assumidos, à apresentação da documentação requerida e à participação ativa no programa esportivo da Federação."
+      },
+      {
+        "type": "paragraph",
+        "text": "Estamos convencidos de que o crescimento do golfe junior só é possível mediante o trabalho conjunto entre os clubes e a Federação. Investir em nossas crianças e jovens é investir no futuro do nosso esporte."
+      },
+      {
+        "type": "paragraph",
+        "text": "Agradecemos o compromisso e a colaboração de cada instituição para continuar construindo um golfe cada vez mais forte, inclusivo e competitivo em toda a região."
+      },
+      {
+        "type": "paragraph",
+        "text": "Federação de Golfe do Litoral"
+      }
+    ]
+  }
+]

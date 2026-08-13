@@ -9,4 +9,4 @@ export type ReglamentoContentSection = {
   blocks: ReglamentoBlock[];
 };
 
-export type ReglamentoSlug = "pre-juveniles" | "junior" | "mayores";
+export type ReglamentoSlug = "pre-juveniles" | "junior" | "escuelas-junior" | "mayores";

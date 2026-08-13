@@ -287,6 +287,7 @@
       "regulationsMinors": "Regulamento menores",
       "regulationsPreJuveniles": "Regulamento Pré-Juvenis e Juvenis 2026",
       "regulationsJunior": "Regulamento Junior 2026",
+      "regulationsEscuelasJunior": "Programa de Desenvolvimento das Escolas Junior",
       "regulationsMayores": "Regulamento Maiores 2026",
       "rankingRules": "Regulamento ranking juvenis e pré-juvenis",
       "regulationVideos": "Vídeos explicativos do regulamento",
@@ -374,6 +375,11 @@
       "title": "Regulamento Junior 2026",
       "description": "Regulamento da Federação Entrerriana de Golfe para a categoria Junior na temporada 2026.",
       "navLabel": "Regulamento Menores"
+    },
+    "escuelasJunior": {
+      "title": "Programa de Desenvolvimento das Escolas Junior",
+      "description": "Diretrizes da Federação de Golfe do Litoral para o apoio, compromissos e aportes às escolas junior dos clubes filiados.",
+      "navLabel": "Escolas Junior"
     },
     "mayores": {
       "title": "Regulamento Maiores 2026",
@@ -471,7 +477,7 @@
   "minorsRegulations": {
     "badge": "Menores",
     "title": "Regulamento Menores",
-    "subtitle": "Regulamento atual da Federação Entrerriana de Golfe para Pré-juvenis, Juvenis e Junior na temporada {year}.",
+    "subtitle": "Regulamento atual da Federação Entrerriana de Golfe para Pré-juvenis, Juvenis, Junior e Escolas Junior na temporada {year}.",
     "backToMinors": "Voltar a Menores →",
     "badgeDetail": "Menores",
     "backToHub": "Regulamento Menores →"
