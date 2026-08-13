@@ -55,6 +55,8 @@ export default async function AdminInscripcionTorneosPage() {
         </h1>
         <p className="mt-2 text-[var(--feg-green)]">
           Configurá el encabezado del torneo con inscripciones abiertas (página pública y formulario).
+          La apertura y el cierre se hacen solos según el calendario: se abre 14 días antes del torneo
+          y se cierra 2 días antes. Usá estos controles para adelantar o forzar un cambio.
         </p>
       </div>
       <TorneoActivoForm initial={initial} />

@@ -5,10 +5,10 @@ import { auth } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { buildTournamentKey } from "@/lib/inscripcion-torneos-menores/tournament-key";
 import {
-  revalidateYouthSignupPaths,
-  syncYouthTournamentSignupFromCalendar,
-  type YouthSignupSyncResult,
-} from "@/lib/inscripcion-torneos-menores/sync";
+  revalidateTournamentSyncPaths,
+  syncTournamentsFromCalendar,
+  type TournamentCalendarSyncResult,
+} from "@/lib/tournament-calendar-sync";
 import { z } from "zod";
 
 const schema = z.object({
@@ -74,19 +74,19 @@ export async function saveActiveYouthTournamentConfig(input: z.infer<typeof sche
 }
 
 export async function syncYouthTournamentSignupNow(): Promise<
-  { ok: true; result: YouthSignupSyncResult } | { ok: false; error: string }
+  { ok: true; result: TournamentCalendarSyncResult } | { ok: false; error: string }
 > {
   const session = await auth();
   if (!session?.user || session.user.role !== "ADMIN") {
     return { ok: false, error: "No autorizado" };
   }
 
-  const result = await syncYouthTournamentSignupFromCalendar();
+  const result = await syncTournamentsFromCalendar();
   if (result.errors.length > 0) {
     return { ok: false, error: result.errors.join("; ") };
   }
 
-  revalidateYouthSignupPaths();
+  revalidateTournamentSyncPaths();
   return { ok: true, result };
 }
 
@@ -112,6 +112,6 @@ export async function closeActiveYouthTournamentSignup(): Promise<
     return { ok: false, error: error.message };
   }
 
-  revalidateYouthSignupPaths();
+  revalidateTournamentSyncPaths();
   return { ok: true };
 }

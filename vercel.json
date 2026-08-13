@@ -2,7 +2,7 @@
   "framework": "nextjs",
   "crons": [
     {
-      "path": "/api/cron/youth-tournament-signup",
+      "path": "/api/cron/tournament-calendar-sync",
       "schedule": "0 12 * * *"
     }
   ]

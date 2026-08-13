@@ -9,6 +9,11 @@ import {
   linkYouthSignupConfigToTournament,
   purgeTournamentCompletely,
 } from "@/lib/tournament-delete";
+import {
+  revalidateTournamentSyncPaths,
+  syncTournamentsFromCalendar,
+  type TournamentCalendarSyncResult,
+} from "@/lib/tournament-calendar-sync";
 import { z } from "zod";
 
 const createTournamentSchema = z.object({
@@ -90,6 +95,24 @@ export async function createTournament(formData: FormData) {
   await linkYouthSignupConfigToTournament(supabase, tournamentId, name.trim());
 
   return { ok: true };
+}
+
+/** Corre la sincronización con el calendario a demanda (misma lógica que el cron diario). */
+export async function syncTournamentsFromCalendarNow(): Promise<
+  { ok: true; result: TournamentCalendarSyncResult } | { ok: false; error: string }
+> {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return { ok: false, error: "No autorizado" };
+  }
+
+  const result = await syncTournamentsFromCalendar();
+  if (result.errors.length > 0) {
+    return { ok: false, error: result.errors.join("; ") };
+  }
+
+  revalidateTournamentSyncPaths();
+  return { ok: true, result };
 }
 
 export type AdminTournamentRow = {

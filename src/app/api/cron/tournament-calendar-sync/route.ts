@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import {
-  revalidateYouthSignupPaths,
-  syncYouthTournamentSignupFromCalendar,
-} from "@/lib/inscripcion-torneos-menores/sync";
+  revalidateTournamentSyncPaths,
+  syncTournamentsFromCalendar,
+} from "@/lib/tournament-calendar-sync";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -19,9 +19,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
   }
 
-  const result = await syncYouthTournamentSignupFromCalendar();
+  const result = await syncTournamentsFromCalendar();
   if (result.created.length > 0 || result.closed.length > 0 || result.active) {
-    revalidateYouthSignupPaths();
+    revalidateTournamentSyncPaths();
   }
 
   return NextResponse.json({ ok: true, ...result });

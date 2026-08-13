@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createTournament, getClubsForTournament } from "./actions";
+import {
+  createTournament,
+  getClubsForTournament,
+  syncTournamentsFromCalendarNow,
+} from "./actions";
 import { ContentAudienceField } from "@/components/forms/ContentAudienceField";
 import type { ContentAudience } from "@/lib/content-audience";
 
@@ -11,10 +15,36 @@ export default function AdminTorneosPage() {
   const [success, setSuccess] = useState(false);
   const [clubs, setClubs] = useState<{ id: string; name: string }[]>([]);
   const [audience, setAudience] = useState<ContentAudience>("GENERAL");
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
   useEffect(() => {
     getClubsForTournament().then(setClubs);
   }, []);
+
+  async function handleSync() {
+    setError(null);
+    setSyncMessage(null);
+    setSyncing(true);
+    try {
+      const res = await syncTournamentsFromCalendarNow();
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      const parts: string[] = [];
+      if (res.result.created.length > 0) parts.push(`Creados: ${res.result.created.join(", ")}`);
+      if (res.result.closed.length > 0)
+        parts.push(`Inscripción cerrada: ${res.result.closed.join(", ")}`);
+      if (res.result.skippedNoClub.length > 0)
+        parts.push(`Sin club coincidente: ${res.result.skippedNoClub.join(", ")}`);
+      setSyncMessage(parts.length > 0 ? parts.join(" · ") : "Sin cambios pendientes.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error");
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   async function handleSubmit(formData: FormData) {
     setError(null);
@@ -47,6 +77,30 @@ export default function AdminTorneosPage() {
           El torneo quedará asignado al club que elijas. El club lo verá en su
           panel de gestión y podrá cargar resultados y enviar fotos.
         </p>
+      </div>
+
+      <div className="rounded-2xl border border-[var(--feg-green)]/12 bg-white p-6 shadow-[0_14px_40px_rgba(0,36,3,0.06)]">
+        <h2 className="font-heading text-lg font-semibold uppercase tracking-tight text-[var(--feg-ink)]">
+          Sincronización automática
+        </h2>
+        <p className="mt-1 text-sm text-[var(--feg-green)]">
+          Todos los días se crean automáticamente los torneos de mayores y menores
+          del calendario que estén a 14 días o menos, y se cierra la inscripción de
+          los que faltan menos de 2 días. Podés adelantar la sincronización acá.
+        </p>
+        <button
+          type="button"
+          onClick={handleSync}
+          disabled={syncing}
+          className="mt-4 rounded-xl border border-[var(--feg-green)]/25 bg-white px-4 py-2.5 text-sm font-semibold text-[var(--feg-green-2)] transition hover:bg-[var(--feg-bg)] disabled:opacity-50"
+        >
+          {syncing ? "Sincronizando…" : "Sincronizar con el calendario"}
+        </button>
+        {syncMessage && (
+          <p className="mt-3 rounded-xl bg-[var(--feg-green-2)]/10 p-3 text-sm text-[var(--feg-green-2)]">
+            {syncMessage}
+          </p>
+        )}
       </div>
 
       <div className="rounded-2xl border border-[var(--feg-green)]/12 bg-white p-6 shadow-[0_14px_40px_rgba(0,36,3,0.06)]">
