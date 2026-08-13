@@ -55,6 +55,12 @@ function parseRawDate(raw: CalendarEntryRaw): Date {
   return new Date(Date.UTC(year, raw.month, raw.day, 12, 0, 0));
 }
 
+/** Última jornada: en rangos como "25 y 26 de junio" el torneo termina el 26. */
+function parseRawEndDate(raw: CalendarEntryRaw): Date {
+  const year = raw.year ?? new Date().getFullYear();
+  return new Date(Date.UTC(year, raw.month, raw.dayEnd ?? raw.day, 12, 0, 0));
+}
+
 function daysUntil(date: Date, now: Date): number {
   const msPerDay = 24 * 60 * 60 * 1000;
   return Math.ceil((date.getTime() - now.getTime()) / msPerDay);
@@ -85,6 +91,49 @@ function buildCalendarSlots(now: Date): CalendarSlot[] {
   }
 
   return slots.sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+/** Torneo del calendario identificado por su clave de inscripción. */
+export type CalendarTournamentInfo = {
+  segment: AudienceSegment;
+  tournamentKey: string;
+  name: string;
+  fecha: string;
+  sede: string;
+  modalidad: string;
+  /** Primera jornada. */
+  date: Date;
+  /** Última jornada (igual a `date` si el torneo dura un solo día). */
+  endDate: Date;
+};
+
+export function getCalendarTournaments(): CalendarTournamentInfo[] {
+  const list: CalendarTournamentInfo[] = [];
+
+  for (const segment of SEGMENTS) {
+    for (const raw of getCalendarEntriesRawForAudience(segment)) {
+      const entry = calendarEntryToSpanish(raw);
+      list.push({
+        segment,
+        tournamentKey: buildTournamentKey(entry.fecha, entry.sede, entry.modalidad),
+        name: tournamentNameFor(entry),
+        fecha: entry.fecha,
+        sede: entry.sede,
+        modalidad: entry.modalidad,
+        date: parseRawDate(raw),
+        endDate: parseRawEndDate(raw),
+      });
+    }
+  }
+
+  return list.sort((a, b) => a.date.getTime() - b.date.getTime());
+}
+
+export function getCalendarTournamentByKey(
+  tournamentKey: string
+): CalendarTournamentInfo | null {
+  const key = tournamentKey.trim().toUpperCase();
+  return getCalendarTournaments().find((t) => t.tournamentKey === key) ?? null;
 }
 
 async function resolveUniqueTournamentSlug(
@@ -247,6 +296,7 @@ export function revalidateTournamentSyncPaths() {
   revalidatePath("/gestion/club");
   revalidatePath("/gestion/club/torneos");
   revalidatePath("/gestion/club/inscriptos");
+  revalidatePath("/gestion/admin/inscriptos");
   revalidatePath("/gestion/admin/torneos/eliminar");
   revalidatePath("/gestion/admin/inscripcion-torneos-menores");
 }

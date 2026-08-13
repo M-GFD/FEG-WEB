@@ -39,20 +39,17 @@ export function InscriptosTable({ rows }: Props) {
   }
 
   return (
-    <div className="space-y-4">
+    <div>
       {error ? (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p className="border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           {error}
         </p>
       ) : null}
 
-      <div className="overflow-x-auto rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-sm">
-        <table className="w-full min-w-[920px] text-left text-sm">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[820px] text-left text-sm">
           <thead className="bg-[var(--feg-green-soft)] text-white">
             <tr>
-              <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
-                Torneo
-              </th>
               <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
                 Jugador
               </th>
@@ -84,9 +81,6 @@ export function InscriptosTable({ rows }: Props) {
                   key={r.recordId}
                   className="border-t border-[var(--feg-green)]/10 hover:bg-[var(--feg-bg)]/60"
                 >
-                  <td className="px-4 py-3 text-xs text-[var(--feg-green)]">
-                    {r.torneo}
-                  </td>
                   <td className="px-4 py-3 font-medium text-[var(--feg-ink)]">
                     {r.apellido}, {r.nombre}
                     <span className="ml-1 text-xs text-[var(--feg-green)]">
@@ -136,9 +130,6 @@ export function InscriptosTable({ rows }: Props) {
             })}
           </tbody>
         </table>
-        <p className="border-t border-[var(--feg-green)]/10 px-4 py-3 text-xs text-[var(--feg-green)]">
-          Total: {rows.length} inscripto{rows.length === 1 ? "" : "s"}
-        </p>
       </div>
 
       {editing ? (

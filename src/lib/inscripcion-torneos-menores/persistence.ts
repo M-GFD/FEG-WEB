@@ -120,6 +120,7 @@ export async function submitYouthTournamentRegistration(
 
 export type TournamentRegistrationListItem = {
   id: string;
+  tournamentKey: string;
   lastName: string;
   firstName: string;
   gender: string;
@@ -135,8 +136,9 @@ export type TournamentRegistrationListItem = {
   createdAt: string;
 };
 
+/** Sin `tournamentKey` devuelve las inscripciones de todos los torneos. */
 export async function listYouthTournamentRegistrations(options: {
-  tournamentKey: string;
+  tournamentKey?: string;
   clubId?: string | null;
   isAdmin?: boolean;
 }): Promise<TournamentRegistrationListItem[]> {
@@ -146,10 +148,13 @@ export async function listYouthTournamentRegistrations(options: {
   let query = supabase
     .from("YouthTournamentRegistration")
     .select(
-      "id,lastName,firstName,gender,category,birthDate,clubName,clubOther,hasHandicap,matricula,playsPrejuvenilesAlso,isPrincipiante,dietaryRestriction,createdAt,clubId"
+      "id,tournamentKey,lastName,firstName,gender,category,birthDate,clubName,clubOther,hasHandicap,matricula,playsPrejuvenilesAlso,isPrincipiante,dietaryRestriction,createdAt,clubId"
     )
-    .eq("tournamentKey", options.tournamentKey)
     .order("lastName", { ascending: true });
+
+  if (options.tournamentKey) {
+    query = query.eq("tournamentKey", options.tournamentKey);
+  }
 
   if (!options.isAdmin && options.clubId) {
     query = query.eq("clubId", options.clubId);
@@ -165,6 +170,7 @@ export async function listYouthTournamentRegistrations(options: {
     const bd = parseBirthDateInput(String(row.birthDate ?? "").slice(0, 10));
     return {
       id: row.id,
+      tournamentKey: row.tournamentKey,
       lastName: row.lastName,
       firstName: row.firstName,
       gender: row.gender,

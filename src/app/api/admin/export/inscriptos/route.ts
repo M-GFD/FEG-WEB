@@ -4,6 +4,7 @@ import {
   buildXlsxBuffer,
   fetchInscriptosRows,
 } from "@/lib/admin-exports";
+import { slugifyTitle } from "@/lib/slugify";
 
 export const runtime = "nodejs";
 
@@ -19,8 +20,9 @@ export async function GET(request: Request) {
   const rows = await fetchInscriptosRows(tournamentKey);
   const buffer = await buildXlsxBuffer("Inscriptos", INSCRIPTOS_COLUMNS, rows);
 
+  // La clave de torneo trae "|" y espacios, inválidos como nombre de archivo.
   const filename = tournamentKey
-    ? `inscriptos-${tournamentKey}.xlsx`
+    ? `inscriptos-${slugifyTitle(tournamentKey) || "torneo"}.xlsx`
     : "inscriptos-torneos.xlsx";
   return new Response(buffer, {
     status: 200,
