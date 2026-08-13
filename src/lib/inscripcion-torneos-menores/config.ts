@@ -2,11 +2,12 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import {
   calendarEntryToSpanish,
   formatFechaTitle,
-  getSpanishCalendarLabels,
-  getUpcomingFegDatesForAudience,
   type CalendarEntryRaw,
 } from "@/lib/calendario-feg";
-import { buildTournamentKey } from "./tournament-key";
+import {
+  getMenoresSignupWindowEntry,
+  tournamentKeyFromCalendarEntry,
+} from "./signup-window";
 
 export type YouthTournamentSignupConfigPublic = {
   id: string;
@@ -20,11 +21,12 @@ export type YouthTournamentSignupConfigPublic = {
   modalidad: string;
 };
 
-function configFromCalendarEntry(raw: CalendarEntryRaw): Omit<YouthTournamentSignupConfigPublic, "id"> {
+function configFromCalendarEntry(
+  raw: CalendarEntryRaw
+): Omit<YouthTournamentSignupConfigPublic, "id"> {
   const entry = calendarEntryToSpanish(raw);
-  const tournamentKey = buildTournamentKey(entry.fecha, entry.sede, entry.modalidad);
   return {
-    tournamentKey,
+    tournamentKey: tournamentKeyFromCalendarEntry(raw),
     title: entry.modalidad,
     dateLabel: formatFechaTitle(entry.fecha),
     extraLine: null,
@@ -35,8 +37,7 @@ function configFromCalendarEntry(raw: CalendarEntryRaw): Omit<YouthTournamentSig
   };
 }
 
-/** Claves de los torneos con inscripción abierta (sin caer al calendario). */
-export async function getOpenSignupTournamentKeys(): Promise<string[]> {
+async function getActiveConfigKeysFromDb(): Promise<string[]> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return [];
 
@@ -46,14 +47,27 @@ export async function getOpenSignupTournamentKeys(): Promise<string[]> {
     .eq("isActive", true);
 
   if (error) {
-    console.error("[getOpenSignupTournamentKeys]", error.message);
+    console.error("[getActiveConfigKeysFromDb]", error.message);
     return [];
   }
 
   return (data ?? []).map((row) => row.tournamentKey as string);
 }
 
-/** Torneo activo para inscripciones; si no hay fila activa, usa el próximo del calendario menores. */
+/**
+ * Claves de los torneos con inscripción abierta. Si la sincronización todavía no
+ * corrió, cae al calendario pero solo dentro de la ventana de inscripción, para no
+ * mostrar como abierto un torneo que ya cerró o que todavía falta mucho.
+ */
+export async function getOpenSignupTournamentKeys(): Promise<string[]> {
+  const fromDb = await getActiveConfigKeysFromDb();
+  if (fromDb.length > 0) return fromDb;
+
+  const windowEntry = getMenoresSignupWindowEntry();
+  return windowEntry ? [tournamentKeyFromCalendarEntry(windowEntry)] : [];
+}
+
+/** Torneo con inscripciones abiertas; null si no hay ninguno en ventana. */
 export async function getActiveYouthTournamentConfig(): Promise<YouthTournamentSignupConfigPublic | null> {
   const supabase = getSupabaseAdmin();
   if (supabase) {
@@ -70,8 +84,7 @@ export async function getActiveYouthTournamentConfig(): Promise<YouthTournamentS
     }
   }
 
-  const next = getUpcomingFegDatesForAudience("menores", 1, "es", getSpanishCalendarLabels())[0];
-  if (!next) return null;
-  const base = configFromCalendarEntry(next._raw);
-  return { id: "calendar-fallback", ...base };
+  const windowEntry = getMenoresSignupWindowEntry();
+  if (!windowEntry) return null;
+  return { id: "calendar-fallback", ...configFromCalendarEntry(windowEntry) };
 }

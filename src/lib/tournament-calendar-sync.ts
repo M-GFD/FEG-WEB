@@ -15,9 +15,13 @@ import {
   type ClubCodeOption,
 } from "@/lib/empadronamiento-menores/persistence";
 import { buildTournamentKey } from "@/lib/inscripcion-torneos-menores/tournament-key";
-
-export const SIGNUP_OPEN_DAYS_BEFORE = 14;
-export const SIGNUP_CLOSE_DAYS_BEFORE = 2;
+import {
+  SIGNUP_CLOSE_DAYS_BEFORE,
+  SIGNUP_OPEN_DAYS_BEFORE,
+  daysUntil,
+  tournamentEndDate,
+  tournamentStartDate,
+} from "@/lib/inscripcion-torneos-menores/signup-window";
 
 const SEGMENTS: AudienceSegment[] = ["mayores", "menores"];
 
@@ -50,22 +54,6 @@ type CalendarSlot = {
   tournamentKey: string;
 };
 
-function parseRawDate(raw: CalendarEntryRaw): Date {
-  const year = raw.year ?? new Date().getFullYear();
-  return new Date(Date.UTC(year, raw.month, raw.day, 12, 0, 0));
-}
-
-/** Última jornada: en rangos como "25 y 26 de junio" el torneo termina el 26. */
-function parseRawEndDate(raw: CalendarEntryRaw): Date {
-  const year = raw.year ?? new Date().getFullYear();
-  return new Date(Date.UTC(year, raw.month, raw.dayEnd ?? raw.day, 12, 0, 0));
-}
-
-function daysUntil(date: Date, now: Date): number {
-  const msPerDay = 24 * 60 * 60 * 1000;
-  return Math.ceil((date.getTime() - now.getTime()) / msPerDay);
-}
-
 function tournamentNameFor(entry: CalendarEntry): string {
   return `${entry.modalidad} — ${entry.sede}`;
 }
@@ -77,7 +65,7 @@ function buildCalendarSlots(now: Date): CalendarSlot[] {
   for (const segment of SEGMENTS) {
     for (const raw of getCalendarEntriesRawForAudience(segment)) {
       const entry = calendarEntryToSpanish(raw);
-      const date = parseRawDate(raw);
+      const date = tournamentStartDate(raw);
       slots.push({
         segment,
         raw,
@@ -120,8 +108,8 @@ export function getCalendarTournaments(): CalendarTournamentInfo[] {
         fecha: entry.fecha,
         sede: entry.sede,
         modalidad: entry.modalidad,
-        date: parseRawDate(raw),
-        endDate: parseRawEndDate(raw),
+        date: tournamentStartDate(raw),
+        endDate: tournamentEndDate(raw),
       });
     }
   }
