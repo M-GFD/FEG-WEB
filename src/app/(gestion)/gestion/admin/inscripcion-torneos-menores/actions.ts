@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { buildTournamentKey } from "@/lib/inscripcion-torneos-menores/tournament-key";
+import {
+  revalidateYouthSignupPaths,
+  syncYouthTournamentSignupFromCalendar,
+  type YouthSignupSyncResult,
+} from "@/lib/inscripcion-torneos-menores/sync";
 import { z } from "zod";
 
 const schema = z.object({
@@ -66,4 +71,47 @@ export async function saveActiveYouthTournamentConfig(input: z.infer<typeof sche
   revalidatePath("/gestion/club");
   revalidatePath("/gestion/club/inscriptos");
   return { ok: true as const };
+}
+
+export async function syncYouthTournamentSignupNow(): Promise<
+  { ok: true; result: YouthSignupSyncResult } | { ok: false; error: string }
+> {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return { ok: false, error: "No autorizado" };
+  }
+
+  const result = await syncYouthTournamentSignupFromCalendar();
+  if (result.errors.length > 0) {
+    return { ok: false, error: result.errors.join("; ") };
+  }
+
+  revalidateYouthSignupPaths();
+  return { ok: true, result };
+}
+
+export async function closeActiveYouthTournamentSignup(): Promise<
+  { ok: true } | { ok: false; error: string }
+> {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return { ok: false, error: "No autorizado" };
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return { ok: false, error: "Base de datos no disponible" };
+  }
+
+  const { error } = await supabase
+    .from("YouthTournamentSignupConfig")
+    .update({ isActive: false, updatedAt: new Date().toISOString() })
+    .eq("isActive", true);
+
+  if (error) {
+    return { ok: false, error: error.message };
+  }
+
+  revalidateYouthSignupPaths();
+  return { ok: true };
 }

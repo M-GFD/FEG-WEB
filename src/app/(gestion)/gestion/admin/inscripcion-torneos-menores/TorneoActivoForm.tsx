@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { saveActiveYouthTournamentConfig } from "./actions";
+import {
+  closeActiveYouthTournamentSignup,
+  saveActiveYouthTournamentConfig,
+  syncYouthTournamentSignupNow,
+} from "./actions";
 import {
   FieldLabel,
   inputClassName,
@@ -30,6 +34,50 @@ export function TorneoActivoForm({ initial }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [closing, setClosing] = useState(false);
+
+  async function handleSync() {
+    setError(null);
+    setSuccess(null);
+    setSyncing(true);
+    try {
+      const res = await syncYouthTournamentSignupNow();
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      const parts: string[] = [];
+      if (res.result.created.length > 0) parts.push(`Creados: ${res.result.created.join(", ")}`);
+      if (res.result.closed.length > 0) parts.push(`Cerrados: ${res.result.closed.length}`);
+      if (res.result.skippedNoClub.length > 0)
+        parts.push(`Sin club: ${res.result.skippedNoClub.join(", ")}`);
+      if (parts.length === 0) parts.push("Sin cambios");
+      setSuccess(`Sincronización: ${parts.join(" · ")}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function handleClose() {
+    setError(null);
+    setSuccess(null);
+    setClosing(true);
+    try {
+      const res = await closeActiveYouthTournamentSignup();
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      setSuccess("Inscripción cerrada.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error");
+    } finally {
+      setClosing(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -92,13 +140,31 @@ export function TorneoActivoForm({ initial }: Props) {
       </div>
       {success ? <p className="text-sm text-emerald-800">{success}</p> : null}
       {error ? <p className="text-sm text-red-800">{error}</p> : null}
-      <button
-        type="submit"
-        disabled={submitting}
-        className="rounded-full bg-[var(--feg-green-2)] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
-      >
-        {submitting ? "Guardando…" : "Publicar como torneo activo"}
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="submit"
+          disabled={submitting || syncing || closing}
+          className="rounded-full bg-[var(--feg-green-2)] px-6 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {submitting ? "Guardando…" : "Publicar como torneo activo"}
+        </button>
+        <button
+          type="button"
+          onClick={handleSync}
+          disabled={submitting || syncing || closing}
+          className="rounded-full border border-[var(--feg-green)]/25 bg-white px-5 py-2.5 text-sm font-semibold text-[var(--feg-green-2)] disabled:opacity-50"
+        >
+          {syncing ? "Sincronizando…" : "Sincronizar con calendario"}
+        </button>
+        <button
+          type="button"
+          onClick={handleClose}
+          disabled={submitting || syncing || closing}
+          className="rounded-full border border-red-200 bg-white px-5 py-2.5 text-sm font-semibold text-red-700 disabled:opacity-50"
+        >
+          {closing ? "Cerrando…" : "Cerrar inscripción"}
+        </button>
+      </div>
     </form>
   );
 }
