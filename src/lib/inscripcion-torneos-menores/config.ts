@@ -35,6 +35,24 @@ function configFromCalendarEntry(raw: CalendarEntryRaw): Omit<YouthTournamentSig
   };
 }
 
+/** Claves de los torneos con inscripción abierta (sin caer al calendario). */
+export async function getOpenSignupTournamentKeys(): Promise<string[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("YouthTournamentSignupConfig")
+    .select("tournamentKey")
+    .eq("isActive", true);
+
+  if (error) {
+    console.error("[getOpenSignupTournamentKeys]", error.message);
+    return [];
+  }
+
+  return (data ?? []).map((row) => row.tournamentKey as string);
+}
+
 /** Torneo activo para inscripciones; si no hay fila activa, usa el próximo del calendario menores. */
 export async function getActiveYouthTournamentConfig(): Promise<YouthTournamentSignupConfigPublic | null> {
   const supabase = getSupabaseAdmin();

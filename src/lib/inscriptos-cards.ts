@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { formatFechaTitle } from "@/lib/calendario-feg";
+import { getOpenSignupTournamentKeys } from "@/lib/inscripcion-torneos-menores/config";
 import { getCalendarTournamentByKey } from "@/lib/tournament-calendar-sync";
 
 /** Días que la card de un torneo sigue visible después de jugarse. */
@@ -149,24 +150,6 @@ export async function resolveInscriptosTournamentMeta(
   }
 
   return result;
-}
-
-/** Claves de los torneos con inscripción abierta (sin caer al calendario). */
-export async function getOpenSignupTournamentKeys(): Promise<string[]> {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) return [];
-
-  const { data, error } = await supabase
-    .from("YouthTournamentSignupConfig")
-    .select("tournamentKey")
-    .eq("isActive", true);
-
-  if (error) {
-    console.error("[getOpenSignupTournamentKeys]", error.message);
-    return [];
-  }
-
-  return (data ?? []).map((row) => row.tournamentKey as string);
 }
 
 /**

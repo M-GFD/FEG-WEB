@@ -1,8 +1,16 @@
+import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { parseAudienceSegment } from "@/lib/content-audience";
-import { createCalendarLabels, getCalendarTableForAudience } from "@/lib/calendario-feg";
+import {
+  calendarEntryToSpanish,
+  createCalendarLabels,
+  getCalendarTableForAudience,
+  getCalendarTableRawForAudience,
+} from "@/lib/calendario-feg";
+import { buildTournamentKey } from "@/lib/inscripcion-torneos-menores/tournament-key";
+import { getOpenSignupTournamentKeys } from "@/lib/inscripcion-torneos-menores/config";
 import type { AppLocale } from "@/i18n/routing";
 
 type Props = {
@@ -18,6 +26,22 @@ export default async function CalendarioPage({ searchParams }: Props) {
   const rows = getCalendarTableForAudience(segment, locale, labels);
   const tAudience = await getTranslations("audience");
   const segmentLabel = tAudience(segment);
+
+  // Solo menores tiene formulario de inscripción online.
+  const isMenores = segment === "menores";
+  const rawRows = getCalendarTableRawForAudience(segment);
+  const openSignupKeys = isMenores
+    ? new Set(await getOpenSignupTournamentKeys())
+    : new Set<string>();
+
+  function hasOpenSignup(index: number): boolean {
+    const raw = rawRows[index];
+    if (!raw) return false;
+    const entry = calendarEntryToSpanish(raw);
+    return openSignupKeys.has(
+      buildTournamentKey(entry.fecha, entry.sede, entry.modalidad)
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
@@ -52,6 +76,11 @@ export default async function CalendarioPage({ searchParams }: Props) {
                 <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
                   {t("colModality")}
                 </th>
+                {isMenores ? (
+                  <th className="px-4 py-3.5 font-heading text-xs font-semibold uppercase tracking-wider">
+                    {t("colSignup")}
+                  </th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -82,6 +111,20 @@ export default async function CalendarioPage({ searchParams }: Props) {
                         {row.modalidad}
                       </span>
                     </td>
+                    {isMenores ? (
+                      <td className="px-4 py-3">
+                        {hasOpenSignup(i) ? (
+                          <Link
+                            href="/inscripcion-torneos-menores"
+                            className="inline-flex rounded-full bg-[var(--feg-yellow)] px-4 py-1.5 text-xs font-semibold text-[var(--feg-ink)] transition hover:brightness-95"
+                          >
+                            {t("signupOpen")}
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-[var(--feg-green)]/60">—</span>
+                        )}
+                      </td>
+                    ) : null}
                   </tr>
                 );
               })}
