@@ -8,11 +8,6 @@ const baseRemotePatterns: NonNullable<
 > = [
   {
     protocol: "https",
-    hostname: "images.unsplash.com",
-    pathname: "/**",
-  },
-  {
-    protocol: "https",
     hostname: "zodragndwywpzztmdypm.supabase.co",
     pathname: "/**",
   },
