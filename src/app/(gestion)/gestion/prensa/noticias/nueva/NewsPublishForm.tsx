@@ -2,10 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import type { Area } from "react-easy-crop";
 import { parseApiJson } from "@/lib/parse-api-response";
 import { slugifyTitle } from "@/lib/slugify";
 import { publishNewsFromGestion, updateNewsFromGestion } from "./actions";
 import { NewsRichEditor } from "./NewsRichEditor";
+import { NewsCoverCropper } from "./NewsCoverCropper";
+import { cropCoverImage } from "./cropCoverImage";
 import { ContentAudienceField } from "@/components/forms/ContentAudienceField";
 import type { ContentAudience } from "@/lib/content-audience";
 
@@ -36,6 +39,9 @@ export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
   const [contentHtml, setContentHtml] = useState(initial?.content ?? "<p></p>");
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [coverCropDirty, setCoverCropDirty] = useState(false);
   const [existingCoverUrl, setExistingCoverUrl] = useState<string | null>(
     initial?.imageUrl ?? null
   );
@@ -55,6 +61,18 @@ export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
       setSlug(slugifyTitle(title));
     }
   }, [title, slugTouched]);
+
+  useEffect(() => {
+    if (!coverFile) {
+      setCoverPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(coverFile);
+    setCoverPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [coverFile]);
+
+  const coverCropSrc = coverPreviewUrl || (!removeCover ? existingCoverUrl : null);
 
   async function uploadOne(file: File): Promise<string> {
     const fd = new FormData();
@@ -89,8 +107,14 @@ export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
     setSubmitting(true);
     try {
       let imageUrl = "";
-      if (coverFile) {
-        imageUrl = await uploadOne(coverFile);
+      if (coverFile || coverCropDirty) {
+        if (!coverCropSrc || !croppedAreaPixels) {
+          setError("Esperá a que cargue el recorte de la portada e intentá de nuevo.");
+          return;
+        }
+        const blob = await cropCoverImage(coverCropSrc, croppedAreaPixels);
+        const cropped = new File([blob], "portada.jpg", { type: "image/jpeg" });
+        imageUrl = await uploadOne(cropped);
       } else if (!removeCover && existingCoverUrl) {
         imageUrl = existingCoverUrl;
       }
@@ -127,6 +151,9 @@ export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
       if (isEdit) {
         setSuccess("Cambios guardados. La noticia ya refleja la edición en el sitio.");
         setCoverFile(null);
+        setCoverPreviewUrl(null);
+        setCroppedAreaPixels(null);
+        setCoverCropDirty(false);
         setGalleryFiles([]);
         setRemoveCover(false);
         if (imageUrl) setExistingCoverUrl(imageUrl);
@@ -143,6 +170,9 @@ export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
       setExcerpt("");
       setContentHtml("<p></p>");
       setCoverFile(null);
+      setCoverPreviewUrl(null);
+      setCroppedAreaPixels(null);
+      setCoverCropDirty(false);
       setExistingCoverUrl(null);
       setRemoveCover(false);
       setGalleryFiles([]);
@@ -223,38 +253,43 @@ export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
 
       <div className="space-y-2">
         <span className="text-sm font-medium text-[var(--feg-green)]">Portada (opcional)</span>
+        {coverCropSrc ? (
+          <NewsCoverCropper
+            key={coverCropSrc}
+            imageSrc={coverCropSrc}
+            onAreaChange={setCroppedAreaPixels}
+            onInteract={() => setCoverCropDirty(true)}
+          />
+        ) : null}
         {isEdit && existingCoverUrl && !removeCover && !coverFile && (
-          <div className="flex flex-wrap items-start gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={existingCoverUrl}
-              alt=""
-              className="h-28 w-auto max-w-full rounded-lg border border-[var(--feg-green)]/15 object-cover"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setRemoveCover(true);
-                setExistingCoverUrl(null);
-              }}
-              className="text-sm font-medium text-red-700 underline-offset-2 hover:underline"
-            >
-              Quitar portada
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setRemoveCover(true);
+              setExistingCoverUrl(null);
+              setCroppedAreaPixels(null);
+              setCoverCropDirty(false);
+            }}
+            className="text-sm font-medium text-red-700 underline-offset-2 hover:underline"
+          >
+            Quitar portada
+          </button>
         )}
         <input
           key={`cover-${formResetKey}`}
           type="file"
           accept="image/png,image/jpeg,image/webp"
           onChange={(e) => {
-            setCoverFile(e.target.files?.[0] ?? null);
-            if (e.target.files?.[0]) setRemoveCover(false);
+            const file = e.target.files?.[0] ?? null;
+            setCoverFile(file);
+            setCroppedAreaPixels(null);
+            setCoverCropDirty(Boolean(file));
+            if (file) setRemoveCover(false);
           }}
           className="block w-full text-sm text-[var(--feg-green)] file:mr-3 file:rounded-xl file:border-0 file:bg-[var(--feg-green-2)] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:brightness-95"
         />
         <p className="text-xs text-[var(--feg-green)]/80">
-          PNG, JPG o WebP, máx. 5 MB.
+          PNG, JPG o WebP, máx. 5 MB. Podés mover y hacer zoom para recortar la portada.
           {isEdit ? " Si elegís un archivo nuevo, reemplaza la portada actual." : ""}
         </p>
       </div>
