@@ -22,18 +22,20 @@ export default async function HomePage() {
       <HomeScrollHash />
       {/* Hero: min-h asegura área visible; object-cover usa el menor zoom que cubre (recorte mínimo matemático) */}
       <div className="relative flex min-h-[100svh] flex-col" data-header-theme="dark">
-        {/* Imagen solo hasta arriba de la franja inferior del hero (no detrás del banner) */}
+        {/* Video solo hasta arriba de la franja inferior del hero (no detrás del banner) */}
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="absolute inset-0 overflow-hidden bg-[var(--feg-bg)]">
-            <Image
-              src="/hero%20gif.gif"
-              alt={t("heroAlt")}
-              fill
-              priority
-              className="object-cover object-[50%_38%] max-md:object-[40%_50%]"
-              sizes="100vw"
-              unoptimized
-            />
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-label={t("heroAlt")}
+              className="absolute inset-0 h-full w-full object-cover object-[50%_38%] max-md:object-[40%_50%]"
+            >
+              <source src="/hero%20vid.webm" type="video/webm" />
+            </video>
             <div className="absolute inset-0 bg-black/35" />
           </div>
 
