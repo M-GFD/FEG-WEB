@@ -28,8 +28,10 @@ export function NewsCoverCropper({ imageSrc, onAreaChange, onInteract }: Props) 
           image={imageSrc}
           crop={crop}
           zoom={zoom}
+          minZoom={1}
+          maxZoom={4}
           aspect={NEWS_COVER_ASPECT}
-          objectFit="horizontal-cover"
+          objectFit="contain"
           mediaProps={{ crossOrigin: "anonymous" }}
           onCropChange={setCrop}
           onZoomChange={setZoom}
@@ -42,7 +44,7 @@ export function NewsCoverCropper({ imageSrc, onAreaChange, onInteract }: Props) 
         <input
           type="range"
           min={1}
-          max={3}
+          max={4}
           step={0.01}
           value={zoom}
           onChange={(e) => {
@@ -53,8 +55,8 @@ export function NewsCoverCropper({ imageSrc, onAreaChange, onInteract }: Props) 
         />
       </label>
       <p className="text-xs text-[var(--feg-green)]/80">
-        Arrastrá la imagen para elegir el recorte. El recuadro es 16:9, igual que la portada en
-        la noticia.
+        Arrastrá la imagen para elegir el recorte y usá el zoom si querés acercarla. El recuadro
+        es 16:9, igual que la portada en la noticia.
       </p>
     </div>
   );

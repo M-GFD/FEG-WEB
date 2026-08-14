@@ -27,21 +27,19 @@ export async function cropCoverImage(imageSrc: string, pixelCrop: Area): Promise
     throw new Error("No se pudo recortar la imagen");
   }
 
-  const scale = pixelCrop.width > MAX_OUTPUT_WIDTH ? MAX_OUTPUT_WIDTH / pixelCrop.width : 1;
-  canvas.width = Math.round(pixelCrop.width * scale);
-  canvas.height = Math.round(pixelCrop.height * scale);
+  const srcX = Math.max(0, Math.round(pixelCrop.x));
+  const srcY = Math.max(0, Math.round(pixelCrop.y));
+  const srcW = Math.min(Math.round(pixelCrop.width), image.naturalWidth - srcX);
+  const srcH = Math.min(Math.round(pixelCrop.height), image.naturalHeight - srcY);
+  if (srcW <= 0 || srcH <= 0) {
+    throw new Error("El recorte de la portada no es válido");
+  }
 
-  ctx.drawImage(
-    image,
-    pixelCrop.x,
-    pixelCrop.y,
-    pixelCrop.width,
-    pixelCrop.height,
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  );
+  const scale = srcW > MAX_OUTPUT_WIDTH ? MAX_OUTPUT_WIDTH / srcW : 1;
+  canvas.width = Math.round(srcW * scale);
+  canvas.height = Math.round(srcH * scale);
+
+  ctx.drawImage(image, srcX, srcY, srcW, srcH, 0, 0, canvas.width, canvas.height);
 
   const blob = await new Promise<Blob | null>((resolve) => {
     canvas.toBlob(resolve, "image/jpeg", 0.9);
