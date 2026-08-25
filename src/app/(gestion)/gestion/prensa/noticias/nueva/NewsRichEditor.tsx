@@ -6,6 +6,8 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import ImageExtension from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
+import { NewsVideo } from "./NewsVideoExtension";
+import { uploadNewsVideoFile } from "./uploadNewsVideo";
 
 type Props = {
   onChange: (html: string) => void;
@@ -15,6 +17,7 @@ type Props = {
 
 export function NewsRichEditor({ onChange, initialContent }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLInputElement>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
@@ -38,9 +41,10 @@ export function NewsRichEditor({ onChange, initialContent }: Props) {
           class: "my-4 max-h-[480px] w-auto max-w-full rounded-lg object-contain",
         },
       }),
+      NewsVideo,
       Placeholder.configure({
         placeholder:
-          "Escribí el cuerpo de la noticia: párrafos, títulos, listas e imágenes con el botón Imagen.",
+          "Escribí el cuerpo de la noticia: párrafos, títulos, listas, imágenes y videos.",
       }),
     ],
     content: initialContent?.trim() ? initialContent : "<p></p>",
@@ -57,6 +61,10 @@ export function NewsRichEditor({ onChange, initialContent }: Props) {
 
   const pickImage = useCallback(() => {
     fileRef.current?.click();
+  }, []);
+
+  const pickVideo = useCallback(() => {
+    videoRef.current?.click();
   }, []);
 
   const onFile = useCallback(
@@ -80,6 +88,25 @@ export function NewsRichEditor({ onChange, initialContent }: Props) {
         }
       } catch (err) {
         window.alert(err instanceof Error ? err.message : "No se pudo subir la imagen");
+      }
+    },
+    [editor]
+  );
+
+  const onVideoFile = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      e.target.value = "";
+      if (!file || !editor) return;
+      try {
+        const url = await uploadNewsVideoFile(file);
+        editor
+          .chain()
+          .focus()
+          .setNewsVideo({ src: url, type: file.type })
+          .run();
+      } catch (err) {
+        window.alert(err instanceof Error ? err.message : "No se pudo subir el video");
       }
     },
     [editor]
@@ -112,6 +139,13 @@ export function NewsRichEditor({ onChange, initialContent }: Props) {
         accept="image/png,image/jpeg,image/webp"
         className="hidden"
         onChange={onFile}
+      />
+      <input
+        ref={videoRef}
+        type="file"
+        accept="video/mp4,video/webm,.mp4,.webm"
+        className="hidden"
+        onChange={onVideoFile}
       />
       <div className="flex flex-wrap gap-1 border-b border-[var(--feg-green)]/12 bg-[var(--feg-bg)] p-2">
         <ToolbarBtn
@@ -171,6 +205,9 @@ export function NewsRichEditor({ onChange, initialContent }: Props) {
         </ToolbarBtn>
         <ToolbarBtn label="Insertar imagen" onClick={pickImage}>
           Imagen
+        </ToolbarBtn>
+        <ToolbarBtn label="Insertar video MP4 o WebM" onClick={pickVideo}>
+          Video
         </ToolbarBtn>
       </div>
       <EditorContent editor={editor} />

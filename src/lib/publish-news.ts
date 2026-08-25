@@ -22,6 +22,7 @@ const createBodySchema = z.object({
 });
 
 function isEffectivelyEmptyHtml(html: string): boolean {
+  if (/<(video|img|source)[\s>]/i.test(html)) return false;
   const text = html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
   return text.length === 0;
 }

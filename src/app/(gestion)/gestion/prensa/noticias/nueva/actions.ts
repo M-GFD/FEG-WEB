@@ -7,6 +7,8 @@ import {
   updateNewsArticle,
   type PublishNewsArticleResult,
 } from "@/lib/publish-news";
+import { createNewsVideoSignedUpload } from "@/lib/news-storage";
+import { z } from "zod";
 
 export type PublishNewsFormInput = {
   title: string;
@@ -81,4 +83,37 @@ export async function updateNewsFromGestion(
       status: 500,
     };
   }
+}
+
+const prepareVideoSchema = z.object({
+  mimeType: z.enum(["video/mp4", "video/webm"]),
+  fileSize: z.number().int().positive(),
+});
+
+/** Credenciales para subir MP4/WebM directo a Storage, sin pasar por Vercel. */
+export async function prepareNewsVideoUpload(input: {
+  mimeType: string;
+  fileSize: number;
+}) {
+  const session = await auth();
+  if (!session?.user || !canModeratePress(session.user.role)) {
+    return { ok: false as const, error: "No autorizado" };
+  }
+  if (!session.user.id) {
+    return { ok: false as const, error: "Sesión inválida" };
+  }
+
+  const parsed = prepareVideoSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false as const,
+      error: parsed.error.errors[0]?.message ?? "Datos del archivo inválidos",
+    };
+  }
+
+  return createNewsVideoSignedUpload(
+    session.user.id,
+    parsed.data.mimeType,
+    parsed.data.fileSize
+  );
 }

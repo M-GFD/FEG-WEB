@@ -6,6 +6,7 @@ import type { Area } from "react-easy-crop";
 import { parseApiJson } from "@/lib/parse-api-response";
 import { slugifyTitle } from "@/lib/slugify";
 import { publishNewsFromGestion, updateNewsFromGestion } from "./actions";
+import { isNewsImageFile, isNewsVideoFile, uploadNewsVideoFile } from "./uploadNewsVideo";
 import { NewsRichEditor } from "./NewsRichEditor";
 import { NewsCoverCropper } from "./NewsCoverCropper";
 import { cropCoverImage } from "./cropCoverImage";
@@ -16,6 +17,10 @@ const MAX_GALLERY = 15;
 
 function stripHtmlToText(html: string): string {
   return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+}
+
+function htmlHasMedia(html: string): boolean {
+  return /<(video|img|source)[\s>/]/i.test(html);
 }
 
 export type NewsFormInitial = {
@@ -99,8 +104,8 @@ export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
       setError("Completá el título.");
       return;
     }
-    if (bodyText.length < 3) {
-      setError("Escribí el cuerpo de la noticia (al menos un párrafo).");
+    if (bodyText.length < 3 && !htmlHasMedia(contentHtml)) {
+      setError("Escribí el cuerpo de la noticia o insertá una imagen o un video.");
       return;
     }
 
@@ -123,7 +128,9 @@ export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
       if (galleryFiles.length > 0) {
         galleryUrls = [];
         for (const f of galleryFiles) {
-          galleryUrls.push(await uploadOne(f));
+          galleryUrls.push(
+            isNewsVideoFile(f) ? await uploadNewsVideoFile(f) : await uploadOne(f)
+          );
         }
       }
 
@@ -200,7 +207,7 @@ export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
         <p className="mt-1 text-sm text-[var(--feg-green)]">
           {isEdit
             ? "Los cambios se verán en Noticias al guardar. La fecha de publicación original se mantiene."
-            : "La noticia quedará visible en Noticias al guardar. Podés insertar imágenes en el texto o sumar una galería al pie con varias fotos."}
+            : "La noticia quedará visible en Noticias al guardar. Podés insertar imágenes y videos (MP4 o WebM) en el texto, o sumar una galería al pie."}
         </p>
       </div>
 
@@ -300,14 +307,14 @@ export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
         </span>
         {isEdit && existingGalleryUrls.length > 0 && galleryFiles.length === 0 && (
           <p className="text-xs text-[var(--feg-green)]">
-            Galería actual: {existingGalleryUrls.length} imagen(es). Subí archivos nuevos solo
+            Galería actual: {existingGalleryUrls.length} archivo(s). Subí archivos nuevos solo
             si querés reemplazarla por completo.
           </p>
         )}
         <input
           key={`gallery-${formResetKey}`}
           type="file"
-          accept="image/png,image/jpeg,image/webp"
+          accept="image/png,image/jpeg,image/webp,video/mp4,video/webm,.mp4,.webm"
           multiple
           onChange={(e) => {
             const list = e.target.files;
@@ -317,7 +324,14 @@ export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
             }
             const arr = [...list];
             if (arr.length > MAX_GALLERY) {
-              setError(`Máximo ${MAX_GALLERY} imágenes en la galería.`);
+              setError(`Máximo ${MAX_GALLERY} archivos en la galería.`);
+              e.target.value = "";
+              setGalleryFiles([]);
+              return;
+            }
+            const invalid = arr.find((f) => !isNewsImageFile(f) && !isNewsVideoFile(f));
+            if (invalid) {
+              setError("La galería admite PNG, JPG, WebP, MP4 o WebM.");
               e.target.value = "";
               setGalleryFiles([]);
               return;
@@ -328,8 +342,9 @@ export function NewsPublishForm({ initial }: { initial?: NewsFormInitial }) {
           className="block w-full text-sm text-[var(--feg-green)] file:mr-3 file:rounded-xl file:border-0 file:bg-[var(--feg-green-2)] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:brightness-95"
         />
         <p className="text-xs text-[var(--feg-green)]/80">
-          Si subís más de una imagen, en la noticia se mostrarán como galería debajo del
-          texto. Hasta {MAX_GALLERY} archivos.
+          Fotos (PNG, JPG o WebP, máx. 5 MB) y videos (MP4 o WebM, máx. 80 MB). Si subís más
+          de un archivo, se muestran como galería debajo del texto. Hasta {MAX_GALLERY}{" "}
+          archivos.
         </p>
         {galleryFiles.length > 0 && (
           <p className="text-xs text-[var(--feg-green)]">

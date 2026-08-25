@@ -65,7 +65,7 @@ export default async function NoticiaPage({
             <p className="mt-4 text-lg leading-relaxed text-[var(--feg-green)]">{news.excerpt}</p>
           )}
           <div
-            className="prose prose-lg mt-8 max-w-none text-[var(--feg-green)] prose-headings:font-heading prose-headings:text-[var(--feg-ink)] prose-a:text-[var(--feg-green-2)] prose-strong:text-[var(--feg-ink)] prose-blockquote:border-[var(--feg-yellow)]"
+            className="prose prose-lg mt-8 max-w-none text-[var(--feg-green)] prose-headings:font-heading prose-headings:text-[var(--feg-ink)] prose-a:text-[var(--feg-green-2)] prose-strong:text-[var(--feg-ink)] prose-blockquote:border-[var(--feg-yellow)] [&_video]:my-4 [&_video]:w-full [&_video]:max-w-full [&_video]:rounded-2xl [&_video]:bg-black"
             dangerouslySetInnerHTML={{ __html: news.content }}
           />
 

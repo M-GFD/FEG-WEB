@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { isNewsVideoUrl, newsVideoMimeFromUrl } from "@/lib/news-gallery";
 
 type Props = {
   images: string[];
@@ -50,6 +51,8 @@ export function NewsGallery({ images, title }: Props) {
   if (images.length === 0) return null;
 
   const multi = images.length > 1;
+  const currentUrl = images[index];
+  const currentIsVideo = isNewsVideoUrl(currentUrl);
 
   return (
     <>
@@ -59,17 +62,29 @@ export function NewsGallery({ images, title }: Props) {
             {t("gallery")}
           </h2>
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {images.map((url, i) => (
-              <GalleryThumb
-                key={`${url}-${i}`}
-                url={url}
-                alt={t("imageAltNumbered", { title, number: i + 1 })}
-                openLabel={t("openImage")}
-                onOpen={() => openAt(i)}
-              />
-            ))}
+            {images.map((url, i) =>
+              isNewsVideoUrl(url) ? (
+                <GalleryVideo
+                  key={`${url}-${i}`}
+                  url={url}
+                  title={t("videoAltNumbered", { title, number: i + 1 })}
+                />
+              ) : (
+                <GalleryThumb
+                  key={`${url}-${i}`}
+                  url={url}
+                  alt={t("imageAltNumbered", { title, number: i + 1 })}
+                  openLabel={t("openImage")}
+                  onOpen={() => openAt(i)}
+                />
+              )
+            )}
           </div>
         </section>
+      ) : isNewsVideoUrl(images[0]) ? (
+        <div className="mt-10">
+          <GalleryVideo url={images[0]} title={t("videoAlt", { title })} />
+        </div>
       ) : (
         <div className="mt-10">
           <GalleryThumb
@@ -123,18 +138,31 @@ export function NewsGallery({ images, title }: Props) {
             className="absolute inset-0 flex items-center justify-center px-14 py-16 sm:px-20"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* URL original de Supabase (resolución completa); tamaño vía viewport, no del thumbnail */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={images[index]}
-              alt={
-                multi
-                  ? t("imageAltNumbered", { title, number: index + 1 })
-                  : t("imageAlt", { title })
-              }
-              className="max-h-[calc(100dvh-8rem)] max-w-[min(calc(100vw-7rem),72rem)] object-contain"
-              decoding="async"
-            />
+            {currentIsVideo ? (
+              <video
+                key={currentUrl}
+                controls
+                playsInline
+                autoPlay
+                preload="metadata"
+                className="max-h-[calc(100dvh-8rem)] max-w-[min(calc(100vw-7rem),72rem)] rounded-lg bg-black"
+              >
+                <source src={currentUrl} type={newsVideoMimeFromUrl(currentUrl)} />
+              </video>
+            ) : (
+              /* URL original de Supabase (resolución completa); tamaño vía viewport, no del thumbnail */
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={currentUrl}
+                alt={
+                  multi
+                    ? t("imageAltNumbered", { title, number: index + 1 })
+                    : t("imageAlt", { title })
+                }
+                className="max-h-[calc(100dvh-8rem)] max-w-[min(calc(100vw-7rem),72rem)] object-contain"
+                decoding="async"
+              />
+            )}
           </div>
 
           {multi && (
@@ -153,6 +181,22 @@ export function NewsGallery({ images, title }: Props) {
         </div>
       )}
     </>
+  );
+}
+
+function GalleryVideo({ url, title }: { url: string; title: string }) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-[var(--feg-green)]/10 bg-black shadow-sm">
+      <video
+        controls
+        playsInline
+        preload="metadata"
+        className="aspect-video w-full bg-black"
+        aria-label={title}
+      >
+        <source src={url} type={newsVideoMimeFromUrl(url)} />
+      </video>
+    </div>
   );
 }
 
