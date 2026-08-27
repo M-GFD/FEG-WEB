@@ -19,6 +19,10 @@ import {
 } from "./content-audience";
 import { parseNewsGalleryUrls } from "./news-gallery";
 import {
+  PUBLIC_CLUB_DIRECTORY,
+  pickDbClubForDirectoryEntry,
+} from "./public-clubs";
+import {
   formatHandicapRankingCell,
   handicapSortValue,
   resolveMayoresRankingTier,
@@ -269,26 +273,24 @@ export async function getClubs() {
   return data ?? [];
 }
 
-/** Lista de clubes con cantidad de jugadores afiliados. */
+type PublicClubRow = {
+  id: string;
+  code: string | null;
+  name: string;
+  slug: string;
+  address: string | null;
+  phone: string | null;
+};
+
+/** Lista pública de clubes afiliados (sin duplicados del padrón juvenil). */
 export async function getClubsWithCounts(): Promise<
-  Array<{
-    id: string;
-    code: string | null;
-    name: string;
-    slug: string;
-    address: string | null;
-    phone: string | null;
-    playersCount: number;
-  }>
+  Array<PublicClubRow & { playersCount: number }>
 > {
   const supabase = getSupabaseAdmin();
   if (!supabase) return [];
 
   const [{ data: clubs }, { data: players }] = await Promise.all([
-    supabase
-      .from("Club")
-      .select("id,code,name,slug,address,phone")
-      .order("code", { ascending: true, nullsFirst: false }),
+    supabase.from("Club").select("id,code,name,slug,address,phone"),
     supabase.from("Player").select("clubId"),
   ]);
 
@@ -297,37 +299,45 @@ export async function getClubsWithCounts(): Promise<
     counts[p.clubId] = (counts[p.clubId] ?? 0) + 1;
   }
 
-  return ((clubs ?? []) as Array<{
-    id: string;
-    code: string | null;
-    name: string;
-    slug: string;
-    address: string | null;
-    phone: string | null;
-  }>).map((c) => ({
-    ...c,
-    playersCount: counts[c.id] ?? 0,
-  }));
+  const rows = (clubs ?? []) as PublicClubRow[];
+  const listed: Array<PublicClubRow & { playersCount: number }> = [];
+
+  for (const entry of PUBLIC_CLUB_DIRECTORY) {
+    const dbClub = pickDbClubForDirectoryEntry(entry, rows);
+    if (!dbClub) continue;
+    listed.push({
+      ...dbClub,
+      name: entry.name,
+      slug: entry.slug,
+      address: entry.city,
+      playersCount: counts[dbClub.id] ?? 0,
+    });
+  }
+
+  return listed;
 }
 
 export async function getClubBySlug(slug: string) {
   const supabase = getSupabaseAdmin();
   if (!supabase) return null;
 
-  const { data } = await supabase
-    .from("Club")
-    .select("id,code,name,slug,address,phone")
-    .eq("slug", slug)
-    .maybeSingle();
+  const entry = PUBLIC_CLUB_DIRECTORY.find((e) => e.slug === slug);
+  if (!entry) return null;
 
-  return data as {
-    id: string;
-    code: string | null;
-    name: string;
-    slug: string;
-    address: string | null;
-    phone: string | null;
-  } | null;
+  const query = supabase.from("Club").select("id,code,name,slug,address,phone");
+  const { data } = entry.code
+    ? await query.eq("code", entry.code).maybeSingle()
+    : await query.eq("slug", entry.slug).maybeSingle();
+
+  if (!data) return null;
+  const dbClub = data as PublicClubRow;
+
+  return {
+    ...dbClub,
+    name: entry.name,
+    slug: entry.slug,
+    address: entry.city,
+  };
 }
 
 /** Jugadores de un club para vista pública (sin datos sensibles). */

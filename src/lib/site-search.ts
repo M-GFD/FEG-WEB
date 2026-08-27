@@ -1,6 +1,10 @@
 import type { AppLocale } from "@/i18n/routing";
 import { prisma } from "@/lib/db";
 import { isNewsTranslationLocale } from "@/lib/news-translate";
+import {
+  findPublicClubEntry,
+  isCanonicalPublicClub,
+} from "@/lib/public-clubs";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export type SearchResultType =
@@ -350,14 +354,23 @@ async function searchViaSupabase(
 
   const clubRows = clubRes.data ?? [];
   for (const row of clubRows) {
-    const r = row as { name: string; address: string | null; phone: string | null; code: string | null };
+    const r = row as {
+      name: string;
+      slug: string;
+      address: string | null;
+      phone: string | null;
+      code: string | null;
+    };
+    if (!isCanonicalPublicClub(r)) continue;
+    const entry = findPublicClubEntry(r);
     hits.push({
       type: "club",
-      title: r.name,
-      href: "/clubes",
-      description: [r.code ? labels.clubCode(r.code) : null, r.address, r.phone]
-        .filter(Boolean)
-        .join(" · ") || labels.clubListFallback,
+      title: entry?.name ?? r.name,
+      href: `/clubes/${entry?.slug ?? r.slug}`,
+      description:
+        [r.code ? labels.clubCode(r.code) : null, entry?.city ?? r.address, r.phone]
+          .filter(Boolean)
+          .join(" · ") || labels.clubListFallback,
     });
   }
 
@@ -510,7 +523,7 @@ async function searchViaPrisma(
             { code: { contains: q, mode: "insensitive" } },
           ],
         },
-        select: { name: true, code: true, address: true, phone: true },
+        select: { name: true, slug: true, code: true, address: true, phone: true },
         orderBy: { name: "asc" },
         take: PER_TYPE,
       })
@@ -564,11 +577,13 @@ async function searchViaPrisma(
     });
   }
   for (const c of clubs) {
+    if (!isCanonicalPublicClub(c)) continue;
+    const entry = findPublicClubEntry(c);
     hits.push({
       type: "club",
-      title: c.name,
-      href: "/clubes",
-      description: [c.code ? labels.clubCode(c.code) : null, c.address, c.phone]
+      title: entry?.name ?? c.name,
+      href: `/clubes/${entry?.slug ?? c.slug}`,
+      description: [c.code ? labels.clubCode(c.code) : null, entry?.city ?? c.address, c.phone]
         .filter(Boolean)
         .join(" · ") || labels.clubListFallback,
     });

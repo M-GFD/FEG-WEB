@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
 import { PublicPlayerCard } from "@/components/players/PublicPlayerCard";
 import { getClubBySlug, getPublicPlayersByClubId } from "@/lib/data";
 import { formatHandicapRankingCell } from "@/lib/handicap-ranking";
+import { publicClubRedirectSlug } from "@/lib/public-clubs";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -13,6 +14,9 @@ type Props = {
 
 export default async function ClubDetailPage({ params }: Props) {
   const { slug } = await params;
+  const aliasTarget = publicClubRedirectSlug(slug);
+  if (aliasTarget) redirect(`/clubes/${aliasTarget}`);
+
   const club = await getClubBySlug(slug);
   if (!club) notFound();
 
