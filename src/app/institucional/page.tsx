@@ -104,15 +104,15 @@ export default async function InstitucionalPage() {
 
               <div className="mt-6 flex flex-col gap-4 border-t border-[var(--feg-green)]/10 pt-6 sm:flex-row sm:gap-8">
                 <div>
-                  <div className="font-heading text-3xl font-semibold leading-none text-[var(--feg-green-2)]">8+</div>
+                  <div className="font-heading text-3xl font-semibold leading-none text-[var(--feg-green-2)]">13</div>
                   <div className="mt-1 text-xs font-medium text-[var(--feg-green)]/70">{t("statClubs")}</div>
                 </div>
                 <div>
-                  <div className="font-heading text-3xl font-semibold leading-none text-[var(--feg-green-2)]">12</div>
+                  <div className="font-heading text-3xl font-semibold leading-none text-[var(--feg-green-2)]">23</div>
                   <div className="mt-1 text-xs font-medium text-[var(--feg-green)]/70">{t("statTournaments")}</div>
                 </div>
                 <div>
-                  <div className="font-heading text-3xl font-semibold leading-none text-[var(--feg-green-2)]">300+</div>
+                  <div className="font-heading text-3xl font-semibold leading-none text-[var(--feg-green-2)]">+1000</div>
                   <div className="mt-1 text-xs font-medium text-[var(--feg-green)]/70">{t("statPlayers")}</div>
                 </div>
               </div>
