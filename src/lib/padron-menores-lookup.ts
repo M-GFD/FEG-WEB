@@ -30,7 +30,7 @@ function normalizeCategory(raw: string | null | undefined): string {
     .replace(/\p{M}/gu, "");
 }
 
-/** Jugador del padrón menores (tabla Player / planilla FGL). */
+/** Jugador del padrón FEG (menores / empadronados en Player). */
 function isPadronMenorFromPlayer(category: string | null, birthYear: number): boolean {
   if (isYouthPlayerCategory(category)) return true;
   const k = normalizeCategory(category);

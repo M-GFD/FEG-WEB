@@ -1,9 +1,11 @@
 /**
- * Importa el padrón histórico FGL 2026 (planilla markdown) a Player.
- * Uso puntual / actualización de planilla; NO hace falta para quien se empadrona por la web
- * (el formulario guarda en YouthEnrollment y sincroniza Player automáticamente).
+ * OBSOLETO: la planilla FGL ya no es fuente de verdad.
+ * El padrón vigente es Player (FEG). Los empadronados FGL ya viven ahí;
+ * un reimport pisaría datos. Usá merge-fgl-into-feg-padron si hace falta unificar.
  *
- * Uso: npm run import-youth-padron
+ * Solo corre con --force (no recomendado).
+ *
+ * Uso histórico: npm run import-youth-padron -- --force
  * Requiere: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, PLAYER_DATA_ENCRYPTION_KEY
  */
 
@@ -28,6 +30,13 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 if (!KEY_RAW || KEY_RAW.length !== 64) {
   console.error("[!] PLAYER_DATA_ENCRYPTION_KEY inválida o ausente.");
+  process.exit(1);
+}
+if (!process.argv.includes("--force")) {
+  console.error(
+    "[!] Este import FGL está obsoleto. El padrón vigente es Player (FEG).\n" +
+      "    No lo ejecutes: reescribiría empadronados. Si hace falta sí o sí: --force"
+  );
   process.exit(1);
 }
 
@@ -232,17 +241,21 @@ async function main() {
     seen.add(dedupeKey);
     const club = await ensureClub(p.clubName, clubs);
 
-    const { data: existing } = await supabase
+    const { data: existingByName } = await supabase
       .from("Player")
-      .select("id")
+      .select("id,matricula")
       .eq("firstName", p.firstName)
       .eq("lastName", p.lastName)
       .eq("clubId", club.id)
       .maybeSingle();
+    const { data: existingById } = existingByName
+      ? { data: existingByName }
+      : await supabase.from("Player").select("id,matricula").eq("id", p.id).maybeSingle();
+    const existing = existingByName ?? existingById;
 
     rowsToUpsert.push({
       id: existing?.id ?? p.id,
-      matricula: null,
+      matricula: existing?.matricula ?? null,
       firstName: p.firstName,
       lastName: p.lastName,
       handicap: 0,

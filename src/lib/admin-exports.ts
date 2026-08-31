@@ -2,7 +2,7 @@ import "server-only";
 import ExcelJS from "exceljs";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { decryptSensitive } from "@/lib/sensitive-crypto";
-import { hashDniForLookup } from "@/lib/empadronamiento-menores/dni";
+import { hashDniForLookup, canonicalDniForLookup } from "@/lib/empadronamiento-menores/dni";
 import {
   currentAgeOnReferenceDate,
   currentCategoryFromBirthDate,
@@ -48,6 +48,127 @@ function yesNo(value: boolean | null | undefined): string {
   if (value === true) return "Sí";
   if (value === false) return "No";
   return "";
+}
+
+function normalizePersonName(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function personNameKey(firstName: string, lastName: string): string {
+  return `${normalizePersonName(lastName)}|${normalizePersonName(firstName)}`;
+}
+
+function nameTokensKey(firstName: string, lastName: string): string {
+  const tokens = `${normalizePersonName(firstName)} ${normalizePersonName(lastName)}`
+    .split(/[\s\-']+/)
+    .filter((t) => t.length >= 2)
+    .sort();
+  return tokens.length >= 2 ? tokens.join("|") : "";
+}
+
+function matriculaFromPlayerId(id: string | null | undefined): string {
+  const m = /^player_(\d+)$/.exec(String(id ?? ""));
+  return m?.[1] ?? "";
+}
+
+type FegNameHit = { matricula: string; birthYear: number | null };
+
+type FegMatriculaLookups = {
+  byDni: Map<string, string>;
+  byUniqueName: Map<string, FegNameHit>;
+  byUniqueTokens: Map<string, string>;
+};
+
+function usableBirthYear(value: unknown): number | null {
+  const year = typeof value === "number" ? value : Number(value);
+  if (!Number.isInteger(year) || year <= 1900 || year > new Date().getFullYear()) return null;
+  return year;
+}
+
+function yearFromBirthDate(birthDate: unknown): number | null {
+  if (birthDate instanceof Date && !Number.isNaN(birthDate.getTime())) {
+    return usableBirthYear(birthDate.getUTCFullYear());
+  }
+  if (typeof birthDate === "string" && birthDate.length >= 4) {
+    return usableBirthYear(Number(birthDate.slice(0, 4)));
+  }
+  return null;
+}
+
+async function loadFegMatriculaLookups(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdmin>>
+): Promise<FegMatriculaLookups> {
+  const byDni = new Map<string, string>();
+  const byUniqueName = new Map<string, FegNameHit>();
+  const byUniqueTokens = new Map<string, string>();
+  const nameCount = new Map<string, number>();
+  const tokenCount = new Map<string, number>();
+
+  const { data } = await supabase
+    .from("Player")
+    .select("id,firstName,lastName,matricula,dniEnc,birthYear")
+    .not("id", "like", "player_youth_%");
+
+  for (const p of data ?? []) {
+    const fromField = typeof p.matricula === "string" ? p.matricula.trim() : "";
+    const mat = fromField || matriculaFromPlayerId(p.id);
+    if (!mat) continue;
+    const dni = canonicalDniForLookup(safeDecrypt(p.dniEnc as string | null));
+    if (dni) byDni.set(dni, mat);
+    const key = personNameKey(String(p.firstName ?? ""), String(p.lastName ?? ""));
+    if (key.includes("|") && !key.startsWith("|") && !key.endsWith("|")) {
+      nameCount.set(key, (nameCount.get(key) ?? 0) + 1);
+      byUniqueName.set(key, { matricula: mat, birthYear: usableBirthYear(p.birthYear) });
+    }
+    const tokens = nameTokensKey(String(p.firstName ?? ""), String(p.lastName ?? ""));
+    if (tokens) {
+      tokenCount.set(tokens, (tokenCount.get(tokens) ?? 0) + 1);
+      byUniqueTokens.set(tokens, mat);
+    }
+  }
+  for (const [key, count] of nameCount) {
+    if (count !== 1) byUniqueName.delete(key);
+  }
+  for (const [key, count] of tokenCount) {
+    if (count !== 1) byUniqueTokens.delete(key);
+  }
+  return { byDni, byUniqueName, byUniqueTokens };
+}
+
+function resolveMatricula(
+  existing: string,
+  dniPlain: string,
+  firstName: string,
+  lastName: string,
+  lookups: FegMatriculaLookups,
+  fromYouthPlayer?: string,
+  birthYear?: number | null,
+  playerId?: string
+): string {
+  const fromRow = existing.trim();
+  if (fromRow) return fromRow;
+  const fromId = matriculaFromPlayerId(playerId);
+  if (fromId) return fromId;
+  const extra = fromYouthPlayer?.trim() ?? "";
+  if (extra) return extra;
+  const dni = canonicalDniForLookup(dniPlain);
+  if (dni) {
+    const fromDni = lookups.byDni.get(dni);
+    if (fromDni) return fromDni;
+  }
+  const nameHit = lookups.byUniqueName.get(personNameKey(firstName, lastName));
+  if (nameHit) {
+    const year = usableBirthYear(birthYear);
+    if (year == null || nameHit.birthYear == null || year === nameHit.birthYear) {
+      return nameHit.matricula;
+    }
+  }
+  return lookups.byUniqueTokens.get(nameTokensKey(firstName, lastName)) ?? "";
 }
 
 /** Normaliza el género de Player (M/F) al texto del padrón (Varón/Mujer). */
@@ -209,11 +330,14 @@ export async function fetchEmpadronadosRows(
   // Handicaps y matrículas viven en Player; se usan para enriquecer filas de YouthEnrollment.
   const handicapByDniHash = new Map<string, string>();
   const matriculaByDniHash = new Map<string, string>();
-  const { data: youthPlayersForHcp } = await supabase
-    .from("Player")
-    .select("dniHash,handicap,handicapIndex,matricula")
-    .like("id", "player_youth_%");
-  for (const p of youthPlayersForHcp ?? []) {
+  const [{ data: playersForHcp }, fegLookups] = await Promise.all([
+    supabase
+      .from("Player")
+      .select("dniHash,handicap,handicapIndex,matricula")
+      .not("dniHash", "is", null),
+    loadFegMatriculaLookups(supabase),
+  ]);
+  for (const p of playersForHcp ?? []) {
     const hash = p.dniHash as string | null;
     if (!hash) continue;
     handicapByDniHash.set(
@@ -238,6 +362,8 @@ export async function fetchEmpadronadosRows(
   for (const row of enrollments ?? []) {
     if (row.dniHash) seenDniHash.add(row.dniHash);
     const health = row.healthData as EmpadronamientoHealthData | null;
+    const dni = safeDecrypt(row.dniEnc);
+    const enrollmentYear = yearFromBirthDate(row.birthDate);
     rows.push({
       recordId: row.id,
       source: "enrollment",
@@ -247,7 +373,7 @@ export async function fetchEmpadronadosRows(
       fechaNacimiento: formatDate(row.birthDate),
       edadDic31: dynamicAge(row.birthDate) || (row.ageDec31 != null ? String(row.ageDec31) : ""),
       categoria: dynamicCategory(row.birthDate, row.category),
-      dni: safeDecrypt(row.dniEnc),
+      dni,
       club: row.clubName ?? "",
       responsable: row.responsibleName ?? "",
       responsableTelefono: safeDecrypt(row.responsiblePhoneEnc),
@@ -259,9 +385,15 @@ export async function fetchEmpadronadosRows(
       escuela: row.school ?? "",
       tieneHandicap: yesNo(row.hasHandicap),
       handicap: row.dniHash ? handicapByDniHash.get(row.dniHash) ?? "" : "",
-      matricula:
-        (typeof row.matricula === "string" ? row.matricula.trim() : "") ||
-        (row.dniHash ? matriculaByDniHash.get(row.dniHash) ?? "" : ""),
+      matricula: resolveMatricula(
+        typeof row.matricula === "string" ? row.matricula : "",
+        dni,
+        String(row.firstName ?? ""),
+        String(row.lastName ?? ""),
+        fegLookups,
+        row.dniHash ? matriculaByDniHash.get(row.dniHash) : "",
+        enrollmentYear
+      ),
       profesores: professorsSummary(row.professors, row.professorOther),
       tutor1Nombre: row.tutor1Name ?? "",
       tutor1Dni: safeDecrypt(row.tutor1DniEnc),
@@ -278,20 +410,34 @@ export async function fetchEmpadronadosRows(
     });
   }
 
-  // 2) Padrón ya cargado en la tabla Player (importado / sincronizado).
-  const { data: players, error: playerError } = await supabase
-    .from("Player")
-    .select(
-      "id,firstName,lastName,gender,birthDate,birthYear,category,matricula,handicap,handicapIndex,dniEnc,dniHash,createdAt,club:Club(name)"
-    )
-    .like("id", "player_youth_%")
-    .order("lastName", { ascending: true });
+  // 2) Padrón FEG (Player): empadronados menores — dniHash de empadronamiento
+  //    o id legado player_youth_* (ya no se usa FGL como fuente).
+  const playerSelect =
+    "id,firstName,lastName,gender,birthDate,birthYear,category,matricula,handicap,handicapIndex,dniEnc,dniHash,createdAt,club:Club(name)";
+  const [{ data: playersByHash, error: hashError }, { data: playersByPrefix, error: prefixError }] =
+    await Promise.all([
+      supabase.from("Player").select(playerSelect).not("dniHash", "is", null),
+      supabase.from("Player").select(playerSelect).like("id", "player_youth_%"),
+    ]);
 
-  if (playerError) {
-    console.error("[fetchEmpadronadosRows] Player", playerError.message);
+  if (hashError) {
+    console.error("[fetchEmpadronadosRows] Player dniHash", hashError.message);
+  }
+  if (prefixError) {
+    console.error("[fetchEmpadronadosRows] Player youth", prefixError.message);
   }
 
-  for (const row of players ?? []) {
+  const playersById = new Map<string, NonNullable<typeof playersByHash>[number]>();
+  for (const row of [...(playersByHash ?? []), ...(playersByPrefix ?? [])]) {
+    playersById.set(row.id, row);
+  }
+  const players = [...playersById.values()].sort((a, b) =>
+    `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`, "es", {
+      sensitivity: "base",
+    })
+  );
+
+  for (const row of players) {
     const dni = safeDecrypt(row.dniEnc);
     const dniHash =
       (row.dniHash as string | null) || (dni ? hashDniForLookup(dni) : "");
@@ -306,6 +452,16 @@ export async function fetchEmpadronadosRows(
       dynamicAge(row.birthDate) ||
       (birthYear ? String(new Date().getFullYear() - birthYear) : "");
     const handicapStr = formatHandicapValue(row.handicap, row.handicapIndex);
+    const matricula = resolveMatricula(
+      typeof row.matricula === "string" ? row.matricula : "",
+      dni,
+      String(row.firstName ?? ""),
+      String(row.lastName ?? ""),
+      fegLookups,
+      undefined,
+      usableBirthYear(row.birthYear) ?? yearFromBirthDate(row.birthDate),
+      row.id
+    );
 
     rows.push({
       recordId: row.id,
@@ -326,9 +482,9 @@ export async function fetchEmpadronadosRows(
       departamento: "",
       localidad: "",
       escuela: "",
-      tieneHandicap: handicapStr || row.matricula ? "Sí" : "No",
+      tieneHandicap: handicapStr || matricula ? "Sí" : "No",
       handicap: handicapStr,
-      matricula: row.matricula ?? "",
+      matricula,
       profesores: "",
       tutor1Nombre: "",
       tutor1Dni: "",
