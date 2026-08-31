@@ -7,6 +7,7 @@
  */
 import type { AppLocale } from "@/i18n/routing";
 import type { AudienceSegment } from "@/lib/content-audience";
+import { slugifyTitle } from "@/lib/slugify";
 
 export const FEG_TIME_ZONE = "America/Argentina/Buenos_Aires";
 
@@ -56,7 +57,50 @@ export type CalendarLabels = {
   venue: (raw: CalendarEntryRaw) => string;
 };
 
-const SEASON_YEAR = 2026;
+export const SEASON_YEAR = 2026;
+
+export type CalendarDateStatus = "SCHEDULED" | "RESCHEDULED" | "SUSPENDED" | "CANCELLED";
+
+/** Card del Home / hero: ya localizada en el servidor (incluye overrides). */
+export type HomeCalendarCardDto = {
+  fecha: string;
+  sede: string;
+  modalidad: string;
+  isMenores: boolean;
+  status: CalendarDateStatus;
+  originalFecha: string | null;
+  originalSede: string | null;
+  note: string | null;
+};
+
+export function isActiveCalendarStatus(status: CalendarDateStatus): boolean {
+  return status === "SCHEDULED" || status === "RESCHEDULED";
+}
+
+/** Id estable a partir del raw original (no de la fecha mostrada tras reprogramar). */
+export function calendarSlotId(segment: AudienceSegment, raw: CalendarEntryRaw): string {
+  const year = raw.year ?? SEASON_YEAR;
+  const dayEnd = raw.dayEnd ?? "";
+  return `${segment}:${year}:${raw.month}:${raw.day}:${dayEnd}:${raw.modalityKey}:${slugifyTitle(raw.sede)}`;
+}
+
+export function calendarRawToIsoDate(raw: CalendarEntryRaw, which: "start" | "end" = "start"): string {
+  const y = raw.year ?? SEASON_YEAR;
+  const d = which === "end" ? (raw.dayEnd ?? raw.day) : raw.day;
+  return `${y}-${String(raw.month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+
+export function isoDateToCalendarParts(
+  iso: string
+): { year: number; month: number; day: number } | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim());
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  if (!Number.isInteger(year) || month < 0 || month > 11 || day < 1 || day > 31) return null;
+  return { year, month, day };
+}
 
 const LOCALE_TAG: Record<AppLocale, string> = {
   es: "es-AR",
@@ -310,6 +354,28 @@ export function getCalendarEntriesForAudience(
   );
 }
 
+/** Próximas fechas a partir de un listado ya resuelto (p. ej. con overrides). */
+export function pickUpcomingRaws(
+  raws: CalendarEntryRaw[],
+  count: number,
+  now: Date = new Date()
+): CalendarEntryRaw[] {
+  const today = getTodayYmdInFeG(now);
+  const todayCmp = ymdToComparable(today.y, today.m, today.d);
+  const sorted = [...raws].sort((a, b) => {
+    const ya = parseRawYmd(a);
+    const yb = parseRawYmd(b);
+    return ymdToComparable(ya.y, ya.m, ya.d) - ymdToComparable(yb.y, yb.m, yb.d);
+  });
+  const upcoming = sorted.filter((raw) => {
+    const { y, m, d } = parseRawYmd(raw);
+    return ymdToComparable(y, m, d) >= todayCmp;
+  });
+  if (upcoming.length >= count) return upcoming.slice(0, count);
+  if (upcoming.length > 0) return upcoming;
+  return sorted.slice(0, count);
+}
+
 /** Próximas fechas mezclando mayores + menores, ordenadas cronológicamente (Home). */
 export function getUpcomingFegDates(
   count: number,
@@ -317,33 +383,11 @@ export function getUpcomingFegDates(
   labels: CalendarLabels,
   now: Date = new Date()
 ): CalendarEntryWithDate[] {
-  const all = withParsedDates(
-    [...CALENDARIO_RAW_MAYORES, ...CALENDARIO_RAW_MENORES],
+  return withParsedDates(
+    pickUpcomingRaws([...CALENDARIO_RAW_MAYORES, ...CALENDARIO_RAW_MENORES], count, now),
     locale,
     labels
   );
-  const today = getTodayYmdInFeG(now);
-  const todayCmp = ymdToComparable(today.y, today.m, today.d);
-  const upcoming = all
-    .filter((e) => {
-      const { y, m, d } = parseRawYmd(e._raw);
-      return ymdToComparable(y, m, d) >= todayCmp;
-    })
-    .sort((a, b) => {
-      const ya = parseRawYmd(a._raw);
-      const yb = parseRawYmd(b._raw);
-      return ymdToComparable(ya.y, ya.m, ya.d) - ymdToComparable(yb.y, yb.m, yb.d);
-    })
-    .slice(0, count);
-  if (upcoming.length >= count) return upcoming;
-  if (upcoming.length > 0) return upcoming;
-  return all
-    .sort((a, b) => {
-      const ya = parseRawYmd(a._raw);
-      const yb = parseRawYmd(b._raw);
-      return ymdToComparable(ya.y, ya.m, ya.d) - ymdToComparable(yb.y, yb.m, yb.d);
-    })
-    .slice(0, count);
 }
 
 export function getUpcomingFegDatesForAudience(
@@ -353,18 +397,11 @@ export function getUpcomingFegDatesForAudience(
   labels: CalendarLabels,
   now: Date = new Date()
 ): CalendarEntryWithDate[] {
-  const all = withParsedDates(getCalendarEntriesRawForAudience(segment), locale, labels);
-  const today = getTodayYmdInFeG(now);
-  const todayCmp = ymdToComparable(today.y, today.m, today.d);
-  const upcoming = all
-    .filter((e) => {
-      const { y, m, d } = parseRawYmd(e._raw);
-      return ymdToComparable(y, m, d) >= todayCmp;
-    })
-    .slice(0, count);
-  if (upcoming.length >= count) return upcoming;
-  if (upcoming.length > 0) return upcoming;
-  return all.slice(0, count);
+  return withParsedDates(
+    pickUpcomingRaws(getCalendarEntriesRawForAudience(segment), count, now),
+    locale,
+    labels
+  );
 }
 
 export function getNextFegDate(

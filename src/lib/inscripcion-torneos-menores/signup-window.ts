@@ -1,8 +1,9 @@
 import {
   calendarEntryToSpanish,
-  getCalendarEntriesRawForAudience,
+  isActiveCalendarStatus,
   type CalendarEntryRaw,
 } from "@/lib/calendario-feg";
+import { getResolvedCalendarEntries, type ResolvedCalendarEntry } from "@/lib/calendario-overrides";
 import { buildTournamentKey } from "./tournament-key";
 
 /** La inscripción se habilita 14 días antes del torneo. */
@@ -38,17 +39,23 @@ export function tournamentKeyFromCalendarEntry(raw: CalendarEntryRaw): string {
 }
 
 /**
- * Fecha de menores que hoy debería tener la inscripción abierta según el calendario.
- * Se usa como respaldo cuando la sincronización todavía no creó la config en la base.
+ * Fecha de menores que hoy debería tener la inscripción abierta según el calendario
+ * (incluye reprogramaciones; omite canceladas y suspendidas).
  */
-export function getMenoresSignupWindowEntry(
+export async function getMenoresSignupWindowEntry(
   now: Date = new Date()
-): CalendarEntryRaw | null {
+): Promise<ResolvedCalendarEntry | null> {
+  const resolved = await getResolvedCalendarEntries("menores");
   return (
-    getCalendarEntriesRawForAudience("menores")
-      .filter((raw) => isWithinSignupWindow(raw, now))
+    resolved
+      .filter((entry) => isActiveCalendarStatus(entry.status) && isWithinSignupWindow(entry.display, now))
       .sort(
-        (a, b) => tournamentStartDate(a).getTime() - tournamentStartDate(b).getTime()
+        (a, b) =>
+          tournamentStartDate(a.display).getTime() - tournamentStartDate(b.display).getTime()
       )[0] ?? null
   );
+}
+
+export function tournamentKeyFromResolved(entry: ResolvedCalendarEntry): string {
+  return tournamentKeyFromCalendarEntry(entry.original);
 }

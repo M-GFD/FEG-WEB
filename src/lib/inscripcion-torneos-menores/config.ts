@@ -1,13 +1,7 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
-import {
-  calendarEntryToSpanish,
-  formatFechaTitle,
-  type CalendarEntryRaw,
-} from "@/lib/calendario-feg";
-import {
-  getMenoresSignupWindowEntry,
-  tournamentKeyFromCalendarEntry,
-} from "./signup-window";
+import { calendarEntryToSpanish, formatFechaTitle } from "@/lib/calendario-feg";
+import type { ResolvedCalendarEntry } from "@/lib/calendario-overrides";
+import { getMenoresSignupWindowEntry, tournamentKeyFromResolved } from "./signup-window";
 
 export type YouthTournamentSignupConfigPublic = {
   id: string;
@@ -21,19 +15,19 @@ export type YouthTournamentSignupConfigPublic = {
   modalidad: string;
 };
 
-function configFromCalendarEntry(
-  raw: CalendarEntryRaw
+function configFromResolved(
+  entry: ResolvedCalendarEntry
 ): Omit<YouthTournamentSignupConfigPublic, "id"> {
-  const entry = calendarEntryToSpanish(raw);
+  const display = calendarEntryToSpanish(entry.display);
   return {
-    tournamentKey: tournamentKeyFromCalendarEntry(raw),
-    title: entry.modalidad,
-    dateLabel: formatFechaTitle(entry.fecha),
+    tournamentKey: tournamentKeyFromResolved(entry),
+    title: display.modalidad,
+    dateLabel: formatFechaTitle(display.fecha),
     extraLine: null,
-    venue: entry.sede,
-    fecha: entry.fecha,
-    sede: entry.sede,
-    modalidad: entry.modalidad,
+    venue: display.sede,
+    fecha: display.fecha,
+    sede: display.sede,
+    modalidad: display.modalidad,
   };
 }
 
@@ -63,8 +57,8 @@ export async function getOpenSignupTournamentKeys(): Promise<string[]> {
   const fromDb = await getActiveConfigKeysFromDb();
   if (fromDb.length > 0) return fromDb;
 
-  const windowEntry = getMenoresSignupWindowEntry();
-  return windowEntry ? [tournamentKeyFromCalendarEntry(windowEntry)] : [];
+  const windowEntry = await getMenoresSignupWindowEntry();
+  return windowEntry ? [tournamentKeyFromResolved(windowEntry)] : [];
 }
 
 /** Torneo con inscripciones abiertas; null si no hay ninguno en ventana. */
@@ -84,7 +78,7 @@ export async function getActiveYouthTournamentConfig(): Promise<YouthTournamentS
     }
   }
 
-  const windowEntry = getMenoresSignupWindowEntry();
+  const windowEntry = await getMenoresSignupWindowEntry();
   if (!windowEntry) return null;
-  return { id: "calendar-fallback", ...configFromCalendarEntry(windowEntry) };
+  return { id: "calendar-fallback", ...configFromResolved(windowEntry) };
 }

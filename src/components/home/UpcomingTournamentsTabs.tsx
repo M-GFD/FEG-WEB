@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
-import { formatCalendarDate, getUpcomingFegDates, type CalendarEntryWithDate } from "@/lib/calendario-feg";
-import { useCalendarI18n } from "@/lib/calendario-client";
+import { CalendarDateChangeNotice } from "@/components/calendar/CalendarDateChangeNotice";
 import { HOME_GLASS_CARD_CLASS } from "@/components/home/homeGlassCard";
+import type { HomeCalendarCardDto } from "@/lib/calendario-feg";
 
 const PLACEHOLDER_IMAGES = [
   "/feg%20image%20(1).webp",
@@ -19,7 +19,7 @@ const PLACEHOLDER_IMAGES = [
 ];
 
 type TournamentCardProps = {
-  entry: CalendarEntryWithDate;
+  entry: HomeCalendarCardDto;
   index: number;
   revealIndex: number;
   isActive: boolean;
@@ -32,11 +32,10 @@ function UpcomingTournamentCard({
   revealIndex,
   isActive,
   onActivate,
-  locale,
-}: TournamentCardProps & { locale: string }) {
+}: TournamentCardProps) {
+  const tCal = useTranslations("calendar");
   return (
     <div className="min-w-0">
-      {/* Glass fuera de RevealOnScroll: el transform del reveal aísla backdrop-filter si envuelve la card. */}
       <div
         onMouseEnter={() => onActivate(index)}
         onClick={() => onActivate(index)}
@@ -45,19 +44,29 @@ function UpcomingTournamentCard({
         }`}
       >
         <RevealOnScroll revealIndex={revealIndex} yOffset={20} className="block">
-          <div
-            className="p-5"
-            tabIndex={0}
-            onFocus={() => onActivate(index)}
-          >
+          <div className="p-5" tabIndex={0} onFocus={() => onActivate(index)}>
             <p className="min-w-0 text-xl font-semibold leading-snug">
               <span className="text-white">{entry.sede}</span>
               <span className="text-white/75"> – </span>
-              <span className="font-bold text-[var(--feg-yellow)]">
-                {formatCalendarDate(entry._raw, locale as "es" | "en" | "pt")}
-              </span>
+              <span className="font-bold text-[var(--feg-yellow)]">{entry.fecha}</span>
             </p>
-
+            <CalendarDateChangeNotice
+              status={entry.status}
+              originalDateLabel={
+                entry.originalFecha ? tCal("originalDate", { original: entry.originalFecha }) : null
+              }
+              originalVenueLabel={
+                entry.originalSede ? tCal("originalVenue", { venue: entry.originalSede }) : null
+              }
+              note={entry.note}
+              copy={{
+                cancelled: tCal("statusCancelled"),
+                suspended: tCal("statusSuspended"),
+                rescheduled: tCal("statusRescheduled"),
+                changeNotice: tCal("changeNotice"),
+              }}
+              compact
+            />
             <div className="mt-3 inline-flex w-fit rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white">
               {entry.modalidad}
             </div>
@@ -68,18 +77,9 @@ function UpcomingTournamentCard({
   );
 }
 
-export function UpcomingTournamentsTabs() {
+export function UpcomingTournamentsTabs({ dates }: { dates: HomeCalendarCardDto[] }) {
   const t = useTranslations("tournaments");
-  const [now, setNow] = useState<Date>(() => new Date());
   const [activeImageIdx, setActiveImageIdx] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000 * 60 * 60);
-    return () => clearInterval(id);
-  }, []);
-
-  const { locale, labels } = useCalendarI18n();
-  const dates = useMemo(() => getUpcomingFegDates(4, locale, labels, now), [locale, labels, now]);
 
   if (dates.length === 0) {
     return (
@@ -134,13 +134,12 @@ export function UpcomingTournamentsTabs() {
         <div className="mt-8 grid gap-5 sm:grid-cols-2">
           {dates.map((entry, i) => (
             <UpcomingTournamentCard
-              key={`${entry._raw.month}-${entry._raw.day}-${entry.sede}-${entry.modalidad}`}
+              key={`${entry.fecha}-${entry.sede}-${entry.modalidad}-${i}`}
               entry={entry}
               index={i}
               revealIndex={i + 1}
               isActive={activeImageIdx === i}
               onActivate={setActiveImageIdx}
-              locale={locale}
             />
           ))}
         </div>

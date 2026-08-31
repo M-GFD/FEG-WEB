@@ -515,3 +515,26 @@ model YouthTournamentRegistration {
   @@index([tournamentKey])
   @@index([clubId])
 }
+
+enum CalendarDateStatus {
+  SCHEDULED
+  RESCHEDULED
+  SUSPENDED
+  CANCELLED
+}
+
+/// Ajustes de una fecha del calendario anual estático (cancelar / suspender / reprogramar).
+/// El id es el slotId estable derivado del raw original, no de la fecha mostrada.
+model CalendarDateOverride {
+  id         String             @id
+  status     CalendarDateStatus
+  month      Int?
+  day        Int?
+  dayEnd     Int?
+  rangeStyle String?
+  year       Int?
+  sede       String?
+  note       String?
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+}

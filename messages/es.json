@@ -186,7 +186,13 @@
     },
     "venues": {
       "interfederativo": "Interfederativo (cancha a des.)"
-    }
+    },
+    "statusCancelled": "Cancelada",
+    "statusSuspended": "Suspendida",
+    "statusRescheduled": "Reprogramada",
+    "originalDate": "Fecha original: {original}",
+    "originalVenue": "Sede original: {venue}",
+    "changeNotice": "Se realizaron cambios en esta fecha."
   },
   "ranking": {
     "badge": "Competencia · {segment}",

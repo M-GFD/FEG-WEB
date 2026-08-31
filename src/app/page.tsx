@@ -10,12 +10,18 @@ import { HeroNextTournamentCard } from "@/components/home/HeroNextTournamentCard
 import { RevealOnScroll } from "@/components/ui/RevealOnScroll";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { AppLocale } from "@/i18n/routing";
+import { createCalendarLabels } from "@/lib/calendario-feg";
+import { getHomeUpcomingCards } from "@/lib/calendario-overrides";
 
 export default async function HomePage() {
   const t = await getTranslations("home");
   const tCommon = await getTranslations("common");
+  const tCal = await getTranslations("calendar");
   const locale = (await getLocale()) as AppLocale;
   const news = await getNews({ locale });
+  const calendarLabels = createCalendarLabels((key) => tCal(key));
+  const upcoming = await getHomeUpcomingCards(locale, calendarLabels, 4);
+  const nextTournament = upcoming[0] ?? null;
 
   return (
     <div className="min-h-screen bg-[var(--feg-bg)] text-[var(--feg-ink)]">
@@ -73,7 +79,7 @@ export default async function HomePage() {
             </div>
 
             <div className="mx-auto w-full max-w-7xl shrink-0 px-4 pb-12 pt-4 sm:px-6 lg:px-8">
-              <HeroNextTournamentCard />
+              <HeroNextTournamentCard next={nextTournament} />
             </div>
           </div>
         </div>
@@ -192,7 +198,7 @@ export default async function HomePage() {
       </section>
 
       {/* Próximos torneos */}
-      <UpcomingTournamentsTabs />
+      <UpcomingTournamentsTabs dates={upcoming} />
 
       {/* Institucional (resumen) */}
       <section

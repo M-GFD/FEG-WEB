@@ -3,10 +3,10 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import {
   calendarEntryToSpanish,
   formatFechaTitle,
-  getCalendarEntriesRawForAudience,
+  isActiveCalendarStatus,
   type CalendarEntry,
-  type CalendarEntryRaw,
 } from "@/lib/calendario-feg";
+import { getResolvedCalendarEntries } from "@/lib/calendario-overrides";
 import type { AudienceSegment } from "@/lib/content-audience";
 import { slugifyTitle } from "@/lib/slugify";
 import { matchEnrollmentClub } from "@/lib/empadronamiento-menores/club-match";
@@ -46,8 +46,8 @@ export type TournamentCalendarSyncResult = {
 
 type CalendarSlot = {
   segment: AudienceSegment;
-  raw: CalendarEntryRaw;
   entry: CalendarEntry;
+  originalName: string;
   date: Date;
   daysUntil: number;
   name: string;
@@ -59,21 +59,28 @@ function tournamentNameFor(entry: CalendarEntry): string {
 }
 
 /** Fechas del calendario de ambas audiencias, ordenadas cronológicamente. */
-function buildCalendarSlots(now: Date): CalendarSlot[] {
+async function buildCalendarSlots(now: Date): Promise<CalendarSlot[]> {
   const slots: CalendarSlot[] = [];
 
   for (const segment of SEGMENTS) {
-    for (const raw of getCalendarEntriesRawForAudience(segment)) {
-      const entry = calendarEntryToSpanish(raw);
-      const date = tournamentStartDate(raw);
+    const resolved = await getResolvedCalendarEntries(segment);
+    for (const item of resolved) {
+      if (!isActiveCalendarStatus(item.status)) continue;
+      const originalEntry = calendarEntryToSpanish(item.original);
+      const displayEntry = calendarEntryToSpanish(item.display);
+      const date = tournamentStartDate(item.display);
       slots.push({
         segment,
-        raw,
-        entry,
+        entry: displayEntry,
+        originalName: tournamentNameFor(originalEntry),
         date,
         daysUntil: daysUntil(date, now),
-        name: tournamentNameFor(entry),
-        tournamentKey: buildTournamentKey(entry.fecha, entry.sede, entry.modalidad),
+        name: tournamentNameFor(displayEntry),
+        tournamentKey: buildTournamentKey(
+          originalEntry.fecha,
+          originalEntry.sede,
+          originalEntry.modalidad
+        ),
       });
     }
   }
@@ -95,21 +102,27 @@ export type CalendarTournamentInfo = {
   endDate: Date;
 };
 
-export function getCalendarTournaments(): CalendarTournamentInfo[] {
+export async function getCalendarTournaments(): Promise<CalendarTournamentInfo[]> {
   const list: CalendarTournamentInfo[] = [];
 
   for (const segment of SEGMENTS) {
-    for (const raw of getCalendarEntriesRawForAudience(segment)) {
-      const entry = calendarEntryToSpanish(raw);
+    const resolved = await getResolvedCalendarEntries(segment);
+    for (const item of resolved) {
+      const originalEntry = calendarEntryToSpanish(item.original);
+      const displayEntry = calendarEntryToSpanish(item.display);
       list.push({
         segment,
-        tournamentKey: buildTournamentKey(entry.fecha, entry.sede, entry.modalidad),
-        name: tournamentNameFor(entry),
-        fecha: entry.fecha,
-        sede: entry.sede,
-        modalidad: entry.modalidad,
-        date: tournamentStartDate(raw),
-        endDate: tournamentEndDate(raw),
+        tournamentKey: buildTournamentKey(
+          originalEntry.fecha,
+          originalEntry.sede,
+          originalEntry.modalidad
+        ),
+        name: tournamentNameFor(displayEntry),
+        fecha: displayEntry.fecha,
+        sede: displayEntry.sede,
+        modalidad: displayEntry.modalidad,
+        date: tournamentStartDate(item.display),
+        endDate: tournamentEndDate(item.display),
       });
     }
   }
@@ -117,11 +130,12 @@ export function getCalendarTournaments(): CalendarTournamentInfo[] {
   return list.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
-export function getCalendarTournamentByKey(
+export async function getCalendarTournamentByKey(
   tournamentKey: string
-): CalendarTournamentInfo | null {
+): Promise<CalendarTournamentInfo | null> {
   const key = tournamentKey.trim().toUpperCase();
-  return getCalendarTournaments().find((t) => t.tournamentKey === key) ?? null;
+  const list = await getCalendarTournaments();
+  return list.find((t) => t.tournamentKey === key) ?? null;
 }
 
 async function resolveUniqueTournamentSlug(
@@ -148,14 +162,18 @@ async function findExistingTournament(
   slot: CalendarSlot,
   clubId: string | null
 ): Promise<{ id: string; status: string } | null> {
-  const { data: byName, error: nameErr } = await supabase
-    .from("Tournament")
-    .select("id, status")
-    .ilike("name", slot.name.trim())
-    .limit(1)
-    .maybeSingle();
-  if (nameErr) throw new Error(nameErr.message);
-  if (byName) return byName as { id: string; status: string };
+  for (const name of [slot.originalName, slot.name]) {
+    const trimmed = name.trim();
+    if (!trimmed) continue;
+    const { data: byName, error: nameErr } = await supabase
+      .from("Tournament")
+      .select("id, status")
+      .ilike("name", trimmed)
+      .limit(1)
+      .maybeSingle();
+    if (nameErr) throw new Error(nameErr.message);
+    if (byName) return byName as { id: string; status: string };
+  }
 
   if (!clubId) return null;
 
@@ -317,7 +335,7 @@ export async function syncTournamentsFromCalendar(
   }
 
   const clubs = await getEnrollmentClubCodes();
-  const slots = buildCalendarSlots(now);
+  const slots = await buildCalendarSlots(now);
 
   const { data: activeConfigs, error: activeErr } = await supabase
     .from("YouthTournamentSignupConfig")

@@ -50,18 +50,18 @@ export function isTournamentCardVisible(
   return now.getTime() <= cardCutoff(meta.endDate).getTime();
 }
 
-function metaFromCalendar(tournamentKey: string): InscriptosTournamentMeta | null {
-  const calendar = getCalendarTournamentByKey(tournamentKey);
-  if (!calendar) return null;
-
-  return {
-    tournamentKey,
-    title: calendar.name,
-    dateLabel: formatFechaTitle(calendar.fecha),
-    venue: calendar.sede,
-    endDate: calendar.endDate,
-    isSignupOpen: false,
-  };
+function metaFromCalendar(tournamentKey: string): Promise<InscriptosTournamentMeta | null> {
+  return getCalendarTournamentByKey(tournamentKey).then((calendar) => {
+    if (!calendar) return null;
+    return {
+      tournamentKey,
+      title: calendar.name,
+      dateLabel: formatFechaTitle(calendar.fecha),
+      venue: calendar.sede,
+      endDate: calendar.endDate,
+      isSignupOpen: false,
+    };
+  });
 }
 
 /**
@@ -114,7 +114,7 @@ export async function resolveInscriptosTournamentMeta(
   const configByKey = new Map(configs.map((c) => [c.tournamentKey, c]));
 
   for (const key of keys) {
-    const fromCalendar = metaFromCalendar(key);
+    const fromCalendar = await metaFromCalendar(key);
     const config = configByKey.get(key);
 
     if (!config) {

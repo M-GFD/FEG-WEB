@@ -2,13 +2,17 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Header } from "@/components/layout/Header";
 import { BackToHome } from "@/components/layout/BackToHome";
+import { CalendarDateChangeNotice } from "@/components/calendar/CalendarDateChangeNotice";
 import { parseAudienceSegment } from "@/lib/content-audience";
 import {
   calendarEntryToSpanish,
   createCalendarLabels,
-  getCalendarTableForAudience,
-  getCalendarTableRawForAudience,
+  formatCalendarDate,
+  isActiveCalendarStatus,
+  localizeCalendarEntry,
+  type CalendarDateStatus,
 } from "@/lib/calendario-feg";
+import { getResolvedCalendarTable } from "@/lib/calendario-overrides";
 import { buildTournamentKey } from "@/lib/inscripcion-torneos-menores/tournament-key";
 import { getOpenSignupTournamentKeys } from "@/lib/inscripcion-torneos-menores/config";
 import type { AppLocale } from "@/i18n/routing";
@@ -23,24 +27,29 @@ export default async function CalendarioPage({ searchParams }: Props) {
   const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("calendar");
   const labels = createCalendarLabels((key) => t(key));
-  const rows = getCalendarTableForAudience(segment, locale, labels);
+  const resolvedRows = await getResolvedCalendarTable(segment);
   const tAudience = await getTranslations("audience");
   const segmentLabel = tAudience(segment);
 
-  // Solo menores tiene formulario de inscripción online.
   const isMenores = segment === "menores";
-  const rawRows = getCalendarTableRawForAudience(segment);
   const openSignupKeys = isMenores
     ? new Set(await getOpenSignupTournamentKeys())
     : new Set<string>();
 
-  function hasOpenSignup(index: number): boolean {
-    const raw = rawRows[index];
-    if (!raw) return false;
-    const entry = calendarEntryToSpanish(raw);
-    return openSignupKeys.has(
-      buildTournamentKey(entry.fecha, entry.sede, entry.modalidad)
-    );
+  const changeCopy = {
+    cancelled: t("statusCancelled"),
+    suspended: t("statusSuspended"),
+    rescheduled: t("statusRescheduled"),
+    changeNotice: t("changeNotice"),
+  };
+
+  function hasOpenSignup(
+    status: CalendarDateStatus,
+    originalRaw: (typeof resolvedRows)[number]["original"]
+  ): boolean {
+    if (!isActiveCalendarStatus(status)) return false;
+    const entry = calendarEntryToSpanish(originalRaw);
+    return openSignupKeys.has(buildTournamentKey(entry.fecha, entry.sede, entry.modalidad));
   }
 
   return (
@@ -84,22 +93,42 @@ export default async function CalendarioPage({ searchParams }: Props) {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, i) => {
+              {resolvedRows.map((row) => {
+                const display = localizeCalendarEntry(row.display, locale, labels);
+                const original = localizeCalendarEntry(row.original, locale, labels);
                 const isSpecial = row.num === "—";
+                const cancelled = row.status === "CANCELLED";
+                const datesChanged = formatCalendarDate(row.original, locale) !== display.fecha;
+                const sedeChanged = original.sede !== display.sede;
                 return (
                   <tr
-                    key={`${row.num}-${row.fecha}-${row.sede}-${i}`}
+                    key={row.slotId}
                     className={`border-t border-[var(--feg-green)]/10 transition hover:bg-[var(--feg-bg)]/80 ${
                       isSpecial ? "bg-[var(--feg-yellow)]/10" : ""
-                    }`}
+                    } ${cancelled ? "opacity-70" : ""}`}
                   >
                     <td className="px-4 py-3 font-heading font-semibold text-[var(--feg-green-2)]">
                       {row.num}
                     </td>
                     <td className="px-4 py-3 font-medium text-[var(--feg-ink)]">
-                      {row.fecha}
+                      <span className={cancelled ? "line-through" : undefined}>{display.fecha}</span>
+                      <CalendarDateChangeNotice
+                        status={row.status}
+                        originalDateLabel={
+                          datesChanged ? t("originalDate", { original: original.fecha }) : null
+                        }
+                        note={row.note}
+                        copy={changeCopy}
+                      />
                     </td>
-                    <td className="px-4 py-3 text-[var(--feg-ink)]">{row.sede}</td>
+                    <td className="px-4 py-3 text-[var(--feg-ink)]">
+                      <span className={cancelled ? "line-through" : undefined}>{display.sede}</span>
+                      {sedeChanged ? (
+                        <p className="mt-1 text-xs text-[var(--feg-green)]">
+                          {t("originalVenue", { venue: original.sede })}
+                        </p>
+                      ) : null}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
@@ -108,12 +137,12 @@ export default async function CalendarioPage({ searchParams }: Props) {
                             : "bg-[var(--feg-green-2)]/10 text-[var(--feg-green-2)]"
                         }`}
                       >
-                        {row.modalidad}
+                        {display.modalidad}
                       </span>
                     </td>
                     {isMenores ? (
                       <td className="px-4 py-3">
-                        {hasOpenSignup(i) ? (
+                        {hasOpenSignup(row.status, row.original) ? (
                           <Link
                             href="/inscripcion-torneos-menores"
                             className="inline-flex rounded-full bg-[var(--feg-yellow)] px-4 py-1.5 text-xs font-semibold text-[var(--feg-ink)] transition hover:brightness-95"
