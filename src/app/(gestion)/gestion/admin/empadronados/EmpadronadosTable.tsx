@@ -65,8 +65,10 @@ export function EmpadronadosTable({ rows }: Props) {
         if (handicap === "No" && h !== "No") return false;
       }
       if (q) {
-        const fullName = normalize(`${r.apellido} ${r.nombre} ${r.nombre} ${r.apellido}`);
-        if (!fullName.includes(q)) return false;
+        const haystack = normalize(
+          `${r.apellido} ${r.nombre} ${r.matricula} ${r.dni}`
+        );
+        if (!haystack.includes(q)) return false;
       }
       return true;
     });
@@ -92,7 +94,7 @@ export function EmpadronadosTable({ rows }: Props) {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nombre o apellido…"
+          placeholder="Buscar por nombre, apellido o matrícula…"
           className={`sm:col-span-2 xl:col-span-2 ${selectClass}`}
         />
         <select
@@ -162,11 +164,14 @@ export function EmpadronadosTable({ rows }: Props) {
         </p>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-[var(--feg-green)]/12 bg-white shadow-sm">
-          <table className="w-full min-w-[980px] text-left text-sm">
+          <table className="w-full min-w-[1080px] text-left text-sm">
             <thead className="bg-[var(--feg-green-soft)] text-white">
               <tr>
                 <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
                   Jugador
+                </th>
+                <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
+                  Matrícula
                 </th>
                 <th className="px-4 py-3 font-heading text-xs font-semibold uppercase">
                   Categoría
@@ -206,6 +211,9 @@ export function EmpadronadosTable({ rows }: Props) {
                       ({r.sexo})
                     </span>
                   </td>
+                  <td className="px-4 py-3 tabular-nums text-[var(--feg-ink)]">
+                    {r.matricula.trim() || "—"}
+                  </td>
                   <td className="px-4 py-3 text-[var(--feg-ink)]">{r.categoria}</td>
                   <td className="px-4 py-3 tabular-nums text-[var(--feg-ink)]">
                     {r.fechaNacimiento || "—"}
@@ -215,11 +223,6 @@ export function EmpadronadosTable({ rows }: Props) {
                     {r.tieneHandicap === "Sí" && r.handicap ? (
                       <span className="ml-1 text-xs text-[var(--feg-green)]">
                         ({r.handicap})
-                      </span>
-                    ) : null}
-                    {r.tieneHandicap === "Sí" && r.matricula ? (
-                      <span className="ml-1 text-xs text-[var(--feg-green)]">
-                        mat. {r.matricula}
                       </span>
                     ) : null}
                   </td>

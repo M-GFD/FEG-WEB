@@ -206,11 +206,12 @@ export async function fetchEmpadronadosRows(
   const seenDniHash = new Set<string>();
   const rows: EmpadronadoExportRow[] = [];
 
-  // Handicaps viven en Player; se usan para enriquecer filas de YouthEnrollment.
+  // Handicaps y matrículas viven en Player; se usan para enriquecer filas de YouthEnrollment.
   const handicapByDniHash = new Map<string, string>();
+  const matriculaByDniHash = new Map<string, string>();
   const { data: youthPlayersForHcp } = await supabase
     .from("Player")
-    .select("dniHash,handicap,handicapIndex")
+    .select("dniHash,handicap,handicapIndex,matricula")
     .like("id", "player_youth_%");
   for (const p of youthPlayersForHcp ?? []) {
     const hash = p.dniHash as string | null;
@@ -219,6 +220,8 @@ export async function fetchEmpadronadosRows(
       hash,
       formatHandicapValue(p.handicap, p.handicapIndex)
     );
+    const mat = typeof p.matricula === "string" ? p.matricula.trim() : "";
+    if (mat) matriculaByDniHash.set(hash, mat);
   }
 
   // 1) Empadronamientos cargados por el formulario web (datos completos).
@@ -256,7 +259,9 @@ export async function fetchEmpadronadosRows(
       escuela: row.school ?? "",
       tieneHandicap: yesNo(row.hasHandicap),
       handicap: row.dniHash ? handicapByDniHash.get(row.dniHash) ?? "" : "",
-      matricula: row.matricula ?? "",
+      matricula:
+        (typeof row.matricula === "string" ? row.matricula.trim() : "") ||
+        (row.dniHash ? matriculaByDniHash.get(row.dniHash) ?? "" : ""),
       profesores: professorsSummary(row.professors, row.professorOther),
       tutor1Nombre: row.tutor1Name ?? "",
       tutor1Dni: safeDecrypt(row.tutor1DniEnc),
